@@ -1,0 +1,109 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f9;
+    color: #333;
+    margin: 0;
+    padding: 30px 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+h1 {
+    color: #1e293b;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 25px;
+}
+
+/* Formulario */
+form {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+form input {
+    flex: 1;
+    min-width: 160px;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+form button {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Tabla */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+}
+
+th {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+
+tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+/* Alertas */
+.alerta-6 {
+    background-color: #fef3c7;
+    color: #92400e;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+
+.alerta-12 {
+    background-color: #fee2e2;
+    color: #991b1b;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+
+.normal {
+    background-color: #dcfce7;
+    color: #166534;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+
+/* Botón devolver */
+.btn-devolver {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
