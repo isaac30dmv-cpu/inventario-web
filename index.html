@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventario y Préstamos 📦</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        form { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        
+        /* Estilos de las Alertas ⏰ */
+        .alerta-6 { background-color: #fff3cd; color: #856404; font-weight: bold; }
+        .alerta-12 { background-color: #f8d7da; color: #721c24; font-weight: bold; }
+        .normal { background-color: #d4edda; color: #155724; }
+        
+        /* Estilo del botón de devolución 🔄 */
+        .btn-devolver { background-color: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
+        .btn-devolver:hover { background-color: #bd2130; }
+    </style>
+</head>
+<body>
+    <h1>Gestión de Inventario y Préstamos 📦</h1>
+
+    <form id="formPrestamo">
+        <input type="text" id="producto" placeholder="Producto" required>
+        <input type="text" id="codigo" placeholder="Código / Etiqueta" required>
+        <input type="text" id="prestatario" placeholder="Prestatario" required>
+        <input type="date" id="fecha" required>
+        <button type="submit">Registrar Préstamo ➕</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Producto 📦</th>
+                <th>Código 🏷️</th>
+                <th>Prestatario 👤</th>
+                <th>Fecha Préstamo 📅</th>
+                <th>Estado / Alerta ⏰</th>
+                <th>Acción 🛠️</th>
+            </tr>
+        </thead>
+        <tbody id="tablaCuerpo"></tbody>
+    </table>
+
+    <script>
+        const form = document.getElementById('formPrestamo');
+        const tabla = document.getElementById('tablaCuerpo');
+        let prestamos = JSON.parse(localStorage.getItem('prestamos')) || [];
+
+        function calcularAlerta(fechaPrestamo) {
+            const hoy = new Date();
+            const inicio = new Date(fechaPrestamo);
+            
+            const mesesDiferencia = (hoy.getFullYear() - inicio.getFullYear()) * 12 + (hoy.getMonth() - inicio.getMonth());
+
+            if (mesesDiferencia >= 12) {
+                return { texto: '🚨 Atención Inmediata (12+ Meses)', clase: 'alerta-12' };
+            } else if (mesesDiferencia >= 6) {
+                return { texto: '⚠️ Préstamo de 6+ Meses', clase: 'alerta-6' };
+            } else {
+                return { texto: '✅ En regla (< 6 Meses)', clase: 'normal' };
+            }
+        }
+
+        function renderizarTabla() {
+            tabla.innerHTML = '';
+            prestamos.forEach((item, indice) => {
+                const alerta = calcularAlerta(item.fecha);
+                const fila = document.createElement('tr');
+                
+                fila.innerHTML = `
+                    <td>${item.producto}</td>
+                    <td>${item.codigo}</td>
+                    <td>${item.prestatario}</td>
+                    <td>${item.fecha}</td>
+                    <td class="${alerta.clase}">${alerta.texto}</td>
+                    <td>
+                        <button class="btn-devolver" onclick="devolverPrestamo(${indice})">Devolver 🔄</button>
+                    </td>
+                `;
+                tabla.appendChild(fila);
+            });
+        }
+
+        function devolverPrestamo(indice) {
+            // Eliminamos el elemento de la lista según su posición
+            prestamos.splice(indice, 1);
+            // Actualizamos el almacenamiento local
+            localStorage.setItem('prestamos', JSON.stringify(prestamos));
+            // Volvemos a dibujar la tabla actualizada
+            renderizarTabla();
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nuevoPrestamo = {
+                producto: document.getElementById('producto').value,
+                codigo: document.getElementById('codigo').value,
+                prestatario: document.getElementById('prestatario').value,
+                fecha: document.getElementById('fecha').value
+            };
+
+            prestamos.push(nuevoPrestamo);
+            localStorage.setItem('prestamos', JSON.stringify(prestamos));
+            form.reset();
+            renderizarTabla();
+        });
+
+        renderizarTabla();
+    </script>
+</body>
+</html>
