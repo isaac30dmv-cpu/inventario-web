@@ -2,37 +2,69 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventario y Préstamos 📦</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Gestión de Inventario y Préstamos 📦</h1>
+    <div class="container">
+        <h1>Gestión de Inventario y Préstamos 📦</h1>
 
-    <form id="formPrestamo">
-        <input type="text" id="producto" placeholder="Producto" required>
-        <input type="text" id="codigo" placeholder="Código / Etiqueta" required>
-        <input type="text" id="prestatario" placeholder="Prestatario" required>
-        <input type="date" id="fecha" required>
-        <button type="submit">Registrar Préstamo ➕</button>
-    </form>
+        <!-- Tarjeta 1: Formulario 📝 -->
+        <div class="card">
+            <h2>Añadir Nuevo Registro</h2>
+            <form id="formPrestamo">
+                <div class="input-group">
+                    <label for="producto">Producto</label>
+                    <input type="text" id="producto" placeholder="Nombre del Producto" required>
+                </div>
+                <div class="input-group">
+                    <label for="codigo">Código / Etiqueta</label>
+                    <input type="text" id="codigo" placeholder="Código Único">
+                </div>
+                <div class="input-group">
+                    <label for="prestatario">Prestatario</label>
+                    <input type="text" id="prestatario" placeholder="Nombre del Solicitante" required>
+                </div>
+                <div class="input-group">
+                    <label for="fecha">Fecha</label>
+                    <input type="date" id="fecha" required>
+                </div>
+                <button type="submit" class="btn-primary">Registrar Préstamo ➕</button>
+            </form>
+        </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Producto 📦</th>
-                <th>Código 🏷️</th>
-                <th>Prestatario 👤</th>
-                <th>Fecha Préstamo 📅</th>
-                <th>Estado / Alerta ⏰</th>
-                <th>Acción 🛠️</th>
-            </tr>
-        </thead>
-        <tbody id="tablaCuerpo"></tbody>
-    </table>
+        <!-- Tarjeta 2: Tabla e Inventario 📋 -->
+        <div class="card">
+            <h2>Inventario y Filtros</h2>
+            
+            <div class="search-container">
+                <input type="text" id="buscador" class="search-input" placeholder="🔍 Buscar por producto, prestatario, código...">
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto 📦</th>
+                            <th>Código 🏷️</th>
+                            <th>Prestatario 👤</th>
+                            <th>Fecha Préstamo 📅</th>
+                            <th>Estado / Alerta ⏰</th>
+                            <th>Acción 🛠️</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaCuerpo"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
     <script>
         const form = document.getElementById('formPrestamo');
         const tabla = document.getElementById('tablaCuerpo');
+        const buscador = document.getElementById('buscador');
+
         let prestamos = JSON.parse(localStorage.getItem('prestamos')) || [];
 
         function calcularAlerta(fechaPrestamo) {
@@ -42,28 +74,42 @@
             const mesesDiferencia = (hoy.getFullYear() - inicio.getFullYear()) * 12 + (hoy.getMonth() - inicio.getMonth());
 
             if (mesesDiferencia >= 12) {
-                return { texto: '🚨 Atención Inmediata (12+ Meses)', clase: 'alerta-12' };
+                return { texto: 'Atención Inmediata (12+ Meses) 🚨', clase: 'alerta-12' };
             } else if (mesesDiferencia >= 6) {
-                return { texto: '⚠️ Préstamo de 6+ Meses', clase: 'alerta-6' };
+                return { texto: 'Préstamo de 6+ Meses ⚠️', clase: 'alerta-6' };
             } else {
-                return { texto: '✅ En regla (< 6 Meses)', clase: 'normal' };
+                return { texto: 'En Regla ✅', clase: 'normal' };
             }
         }
 
-        function renderizarTabla() {
+        function renderizarTabla(filtro = '') {
             tabla.innerHTML = '';
-            prestamos.forEach((item, indice) => {
+
+            const prestamosFiltrados = prestamos.filter(item => {
+                const texto = filtro.toLowerCase();
+                return item.producto.toLowerCase().includes(texto) ||
+                       item.prestatario.toLowerCase().includes(texto) ||
+                       (item.codigo && item.codigo.toLowerCase().includes(texto));
+            });
+
+            if (prestamosFiltrados.length === 0) {
+                tabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color: #64748b; padding: 20px;">No se encontraron registros.</td></tr>`;
+                return;
+            }
+
+            prestamosFiltrados.forEach((item) => {
+                const indiceOriginal = prestamos.indexOf(item);
                 const alerta = calcularAlerta(item.fecha);
                 const fila = document.createElement('tr');
                 
                 fila.innerHTML = `
-                    <td>${item.producto}</td>
-                    <td>${item.codigo}</td>
+                    <td><strong>${item.producto}</strong></td>
+                    <td>${item.codigo || '-'}</td>
                     <td>${item.prestatario}</td>
                     <td>${item.fecha}</td>
-                    <td class="${alerta.clase}">${alerta.texto}</td>
-                    <td>
-                        <button class="btn-devolver" onclick="devolverPrestamo(${indice})">Devolver 🔄</button>
+                    <td><span class="badge ${alerta.clase}">${alerta.texto}</span></td>
+                    <td class="actions-cell">
+                        <button class="btn-icon" title="Devolver" onclick="devolverPrestamo(${indiceOriginal})">🔄</button>
                     </td>
                 `;
                 tabla.appendChild(fila);
@@ -71,12 +117,9 @@
         }
 
         function devolverPrestamo(indice) {
-            // Eliminamos el elemento de la lista según su posición
             prestamos.splice(indice, 1);
-            // Actualizamos el almacenamiento local
             localStorage.setItem('prestamos', JSON.stringify(prestamos));
-            // Volvemos a dibujar la tabla actualizada
-            renderizarTabla();
+            renderizarTabla(buscador.value);
         }
 
         form.addEventListener('submit', (e) => {
@@ -91,7 +134,11 @@
             prestamos.push(nuevoPrestamo);
             localStorage.setItem('prestamos', JSON.stringify(prestamos));
             form.reset();
-            renderizarTabla();
+            renderizarTabla(buscador.value);
+        });
+
+        buscador.addEventListener('input', (e) => {
+            renderizarTabla(e.target.value);
         });
 
         renderizarTabla();

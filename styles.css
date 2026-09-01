@@ -1,109 +1,189 @@
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f6f9;
-    color: #333;
-    margin: 0;
-    padding: 30px 20px;
+/* Estilos globales 🌐 */
+* {
+    box-sizing: border-box;
 }
 
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: #f1f5f9;
+    color: #1e293b;
+    margin: 0;
+    padding: 40px 20px;
+}
+
+/* Contenedor principal 🎯 */
 .container {
-    max-width: 900px;
+    max-width: 950px;
     margin: 0 auto;
 }
 
 h1 {
-    color: #1e293b;
+    color: #0f172a;
     text-align: center;
-    margin-bottom: 25px;
+    margin-bottom: 30px;
+    font-size: 2.2rem;
+    font-weight: 700;
 }
 
+/* Tarjetas con sombras suaves 🃏 */
 .card {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    margin-bottom: 25px;
+    background: #ffffff;
+    padding: 28px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    margin-bottom: 30px;
+    border: 1px solid #e2e8f0;
 }
 
-/* Formulario */
+.card h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.25rem;
+    color: #334155;
+    font-weight: 600;
+}
+
+/* Formulario con campos alineados 📝 */
 form {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    align-items: end;
 }
 
-form input {
-    flex: 1;
-    min-width: 160px;
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.input-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+input[type="text"],
+input[type="date"] {
+    width: 100%;
     padding: 10px 14px;
     border: 1px solid #cbd5e1;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 0.95rem;
+    outline: none;
+    background-color: #fafafa;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-form button {
+input[type="text"]:focus,
+input[type="date"]:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    background-color: #ffffff;
+}
+
+/* Botón principal ➕ */
+.btn-primary {
     background-color: #2563eb;
     color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
+    padding: 11px 20px;
+    border-radius: 10px;
     font-weight: 600;
+    font-size: 0.95rem;
     cursor: pointer;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+    transition: background-color 0.2s;
 }
 
-/* Tabla */
+.btn-primary:hover {
+    background-color: #1d4ed8;
+}
+
+/* Buscador redondeado 🔍 */
+.search-container {
+    margin-bottom: 20px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 20px;
+    border: 1px solid #cbd5e1;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    background-color: #ffffff;
+}
+
+/* Tabla elegante 📋 */
+.table-responsive {
+    overflow-x: auto;
+}
+
 table {
     width: 100%;
-    border-collapse: collapse;
-    border-radius: 8px;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 10px;
     overflow: hidden;
 }
 
 th, td {
-    padding: 12px 15px;
+    padding: 14px 16px;
     text-align: left;
+    font-size: 0.95rem;
 }
 
 th {
-    background-color: #f1f5f9;
+    background-color: #e2e8f0;
+    color: #334155;
+    font-weight: 600;
+    border-bottom: 2px solid #cbd5e1;
+}
+
+td {
+    border-bottom: 1px solid #f1f5f9;
     color: #475569;
 }
 
-tr:nth-child(even) {
+tr:hover td {
     background-color: #f8fafc;
 }
 
-/* Alertas */
-.alerta-6 {
-    background-color: #fef3c7;
-    color: #92400e;
+/* Etiquetas de estado (Badges) ⏰ */
+.badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
     font-weight: 600;
-    padding: 6px 10px;
-    border-radius: 6px;
-}
-
-.alerta-12 {
-    background-color: #fee2e2;
-    color: #991b1b;
-    font-weight: 600;
-    padding: 6px 10px;
-    border-radius: 6px;
 }
 
 .normal {
     background-color: #dcfce7;
-    color: #166534;
-    font-weight: 600;
-    padding: 6px 10px;
-    border-radius: 6px;
+    color: #15803d;
 }
 
-/* Botón devolver */
-.btn-devolver {
-    background-color: #ef4444;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
+.alerta-6 {
+    background-color: #fef3c7;
+    color: #b45309;
+}
+
+.alerta-12 {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Botón de acción iconográfico 🔄 */
+.btn-icon {
+    background: white;
+    border: 1px solid #cbd5e1;
+    padding: 6px 10px;
+    border-radius: 8px;
     cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+
+.btn-icon:hover {
+    background-color: #f1f5f9;
 }
