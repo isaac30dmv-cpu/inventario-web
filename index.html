@@ -8,7 +8,11 @@
 </head>
 <body>
     <div class="container">
-        <h1>Gestión de Inventario y Préstamos 📦</h1>
+        <!-- Cabecera principal con selector de tema 🌙/☀️ -->
+        <div class="header-container">
+            <h1>Gestión de Inventario y Préstamos 📦</h1>
+            <button id="themeToggle" class="btn-theme" title="Cambiar tema">🌙</button>
+        </div>
 
         <!-- Tarjeta 1: Formulario 📝 -->
         <div class="card">
@@ -44,6 +48,25 @@
 
             <!-- Pestaña 1: Préstamos Activos -->
             <div id="tab-activos" class="tab-content active">
+                
+                <!-- Filtros y Ordenación 🗂️ -->
+                <div class="filters-toolbar">
+                    <div class="filter-pills">
+                        <button class="pill-btn active" onclick="filtrarPorEstado('todos', this)">Todos</button>
+                        <button class="pill-btn" onclick="filtrarPorEstado('ok', this)">En Regla ✅</button>
+                        <button class="pill-btn" onclick="filtrarPorEstado('alerta', this)">En Alerta ⚠️</button>
+                    </div>
+                    <div class="sort-container">
+                        <label for="selectOrden">Ordenar por:</label>
+                        <select id="selectOrden" onchange="cambiarOrden(this.value)">
+                            <option value="fecha-desc">Fecha (Más reciente)</option>
+                            <option value="fecha-asc">Fecha (Más antigua)</option>
+                            <option value="nombre-asc">Producto (A-Z)</option>
+                            <option value="prestatario-asc">Prestatario (A-Z)</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="search-container">
                     <input type="text" id="buscador" class="search-input" placeholder="🔍 Buscar por producto, prestatario, código...">
                 </div>
@@ -69,7 +92,7 @@
             <div id="tab-historial" class="tab-content">
                 <div class="card-header-flex">
                     <p class="tab-info">Registro general de elementos devueltos</p>
-                    <button id="btnVaciar" class="btn-danger-outline" onclick="vaciarHistorial()">Vaciar Historial 🗑️</button>
+                    <button id="btnVaciar" class="btn-danger-outline" onclick="solicitarVaciarHistorial()">Vaciar Historial 🗑️</button>
                 </div>
 
                 <div class="table-responsive">
@@ -90,6 +113,18 @@
         </div>
     </div>
 
+    <!-- Modal elegante de confirmación 🔔 -->
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal-box">
+            <h3 id="modalTitulo">Confirmación</h3>
+            <p id="modalMensaje">¿Estás seguro de realizar esta acción?</p>
+            <div class="modal-actions">
+                <button id="btnModalCancelar" class="btn-secondary">Cancelar</button>
+                <button id="btnModalConfirmar" class="btn-danger">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const form = document.getElementById('formPrestamo');
         const tabla = document.getElementById('tablaCuerpo');
@@ -99,11 +134,58 @@
         const formTitulo = document.getElementById('formTitulo');
         const btnGuardar = document.getElementById('btnGuardar');
         const btnCancelar = document.getElementById('btnCancelar');
+        const themeToggle = document.getElementById('themeToggle');
 
         let prestamos = JSON.parse(localStorage.getItem('prestamos')) || [];
         let historial = JSON.parse(localStorage.getItem('historial')) || [];
         let indiceEdicion = null;
+        let estadoFiltroActual = 'todos';
+        let ordenActual = 'fecha-desc';
 
+        // --- MODO OSCURO / CLARO ---
+        function inicializarTema() {
+            const temaGuardado = localStorage.getItem('theme');
+            if (temaGuardado === 'dark') {
+                document.body.classList.add('dark-theme');
+                themeToggle.innerText = '☀️';
+            } else {
+                themeToggle.innerText = '🌙';
+            }
+        }
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-theme');
+            const esOscuro = document.body.classList.contains('dark-theme');
+            localStorage.setItem('theme', esOscuro ? 'dark' : 'light');
+            themeToggle.innerText = esOscuro ? '☀️' : '🌙';
+        });
+
+        // --- VENTANA MODAL PERSONALIZADA ---
+        function mostrarModal(titulo, mensaje) {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('modalOverlay');
+                const modalTitulo = document.getElementById('modalTitulo');
+                const modalMensaje = document.getElementById('modalMensaje');
+                const btnConfirmar = document.getElementById('btnModalConfirmar');
+                const btnCancelarModal = document.getElementById('btnModalCancelar');
+
+                modalTitulo.innerText = titulo;
+                modalMensaje.innerText = mensaje;
+                overlay.classList.add('active');
+
+                const cerrar = (resultado) => {
+                    overlay.classList.remove('active');
+                    btnConfirmar.onclick = null;
+                    btnCancelarModal.onclick = null;
+                    resolve(resultado);
+                };
+
+                btnConfirmar.onclick = () => cerrar(true);
+                btnCancelarModal.onclick = () => cerrar(false);
+            });
+        }
+
+        // --- NAVEGACIÓN Y FECHA ---
         function cambiarPestana(pestana) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -128,26 +210,57 @@
             const mesesDiferencia = (hoy.getFullYear() - inicio.getFullYear()) * 12 + (hoy.getMonth() - inicio.getMonth());
 
             if (mesesDiferencia >= 12) {
-                return { texto: 'Atención Inmediata (12+ Meses) 🚨', clase: 'alerta-12' };
+                return { texto: 'Atención Inmediata (12+ Meses) 🚨', clase: 'alerta-12', estado: 'alerta' };
             } else if (mesesDiferencia >= 6) {
-                return { texto: 'Préstamo de 6+ Meses ⚠️', clase: 'alerta-6' };
+                return { texto: 'Préstamo de 6+ Meses ⚠️', clase: 'alerta-6', estado: 'alerta' };
             } else {
-                return { texto: 'En Regla ✅', clase: 'normal' };
+                return { texto: 'En Regla ✅', clase: 'normal', estado: 'ok' };
             }
         }
 
-        function renderizarTabla(filtro = '') {
+        // --- FILTROS Y ORDENACIÓN ---
+        function filtrarPorEstado(estado, elemento) {
+            estadoFiltroActual = estado;
+            document.querySelectorAll('.pill-btn').forEach(btn => btn.classList.remove('active'));
+            elemento.classList.add('active');
+            renderizarTabla(buscador.value);
+        }
+
+        function cambiarOrden(criterio) {
+            ordenActual = criterio;
+            renderizarTabla(buscador.value);
+        }
+
+        function ordenarLista(lista) {
+            return lista.sort((a, b) => {
+                if (ordenActual === 'fecha-desc') return new Date(b.fecha) - new Date(a.fecha);
+                if (ordenActual === 'fecha-asc') return new Date(a.fecha) - new Date(b.fecha);
+                if (ordenActual === 'nombre-asc') return a.producto.localeCompare(b.producto);
+                if (ordenActual === 'prestatario-asc') return a.prestatario.localeCompare(b.prestatario);
+                return 0;
+            });
+        }
+
+        // --- RENDERIZADO DE TABLAS ---
+        function renderizarTabla(filtroTexto = '') {
             tabla.innerHTML = '';
 
-            const prestamosFiltrados = prestamos.filter(item => {
-                const texto = filtro.toLowerCase();
-                return item.producto.toLowerCase().includes(texto) ||
-                       item.prestatario.toLowerCase().includes(texto) ||
-                       (item.codigo && item.codigo.toLowerCase().includes(texto));
+            let prestamosFiltrados = prestamos.filter(item => {
+                const texto = filtroTexto.toLowerCase();
+                const coincideTexto = item.producto.toLowerCase().includes(texto) ||
+                                     item.prestatario.toLowerCase().includes(texto) ||
+                                     (item.codigo && item.codigo.toLowerCase().includes(texto));
+
+                const alerta = calcularAlerta(item.fecha);
+                const coincideEstado = (estadoFiltroActual === 'todos') || (alerta.estado === estadoFiltroActual);
+
+                return coincideTexto && coincideEstado;
             });
 
+            prestamosFiltrados = ordenarLista(prestamosFiltrados);
+
             if (prestamosFiltrados.length === 0) {
-                tabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color: #64748b; padding: 20px;">No se encontraron registros activos.</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 20px;">No se encontraron registros activos.</td></tr>`;
                 return;
             }
 
@@ -175,7 +288,7 @@
             tablaHistorial.innerHTML = '';
 
             if (historial.length === 0) {
-                tablaHistorial.innerHTML = `<tr><td colspan="5" style="text-align:center; color: #64748b; padding: 20px;">No hay devoluciones registradas.</td></tr>`;
+                tablaHistorial.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 20px;">No hay devoluciones registradas.</td></tr>`;
                 return;
             }
 
@@ -192,6 +305,7 @@
             });
         }
 
+        // --- ACCIONES Y LÓGICA ---
         function editarPrestamo(indice) {
             const item = prestamos[indice];
             document.getElementById('producto').value = item.producto;
@@ -232,9 +346,14 @@
             renderizarHistorial();
         }
 
-        function vaciarHistorial() {
+        async function solicitarVaciarHistorial() {
             if (historial.length === 0) return;
-            if (confirm('¿Estás seguro de que deseas borrar todo el historial de devoluciones?')) {
+            const confirmado = await mostrarModal(
+                'Vaciar Historial', 
+                '¿Estás seguro de que deseas eliminar permanentemente todos los registros del historial de devoluciones?'
+            );
+
+            if (confirmado) {
                 historial = [];
                 localStorage.removeItem('historial');
                 renderizarHistorial();
@@ -265,6 +384,8 @@
             renderizarTabla(e.target.value);
         });
 
+        // Inicialización
+        inicializarTema();
         establecerFechaHoy();
         renderizarTabla();
         renderizarHistorial();
