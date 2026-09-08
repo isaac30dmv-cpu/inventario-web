@@ -1,4 +1,230 @@
-/* Cabecera flexible para tarjetas 📐 */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: #f1f5f9;
+    color: #1e293b;
+    margin: 0;
+    padding: 40px 20px;
+}
+
+.container {
+    max-width: 950px;
+    margin: 0 auto;
+}
+
+h1 {
+    color: #0f172a;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.2rem;
+    font-weight: 700;
+}
+
+.card {
+    background: #ffffff;
+    padding: 28px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    margin-bottom: 30px;
+    border: 1px solid #e2e8f0;
+}
+
+.card h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.25rem;
+    color: #334155;
+    font-weight: 600;
+}
+
+form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    align-items: end;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.input-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+input[type="text"],
+input[type="date"] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    outline: none;
+    background-color: #fafafa;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    background-color: #ffffff;
+}
+
+.btn-primary {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 11px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+}
+
+.btn-secondary {
+    background-color: #64748b;
+    color: white;
+    border: none;
+    padding: 11px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+/* Estilos de Pestañas 📑 */
+.tabs-header {
+    display: flex;
+    gap: 12px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 10px 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+}
+
+.tab-btn:hover {
+    color: #2563eb;
+}
+
+.tab-btn.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab-info {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+/* Buscador 🔍 */
+.search-container {
+    margin-bottom: 20px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 20px;
+    border: 1px solid #cbd5e1;
+    border-radius: 50px;
+    font-size: 0.95rem;
+}
+
+/* Tabla 📋 */
+.table-responsive {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+th {
+    background-color: #e2e8f0;
+    color: #334155;
+    font-weight: 600;
+    border-bottom: 2px solid #cbd5e1;
+}
+
+td {
+    border-bottom: 1px solid #f1f5f9;
+    color: #475569;
+}
+
+tr:hover td {
+    background-color: #f8fafc;
+}
+
+/* Badges y botones de acción 🏷️ */
+.badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.normal { background-color: #dcfce7; color: #15803d; }
+.alerta-6 { background-color: #fef3c7; color: #b45309; }
+.alerta-12 { background-color: #fee2e2; color: #b91c1c; }
+.devuelto { background-color: #e2e8f0; color: #475569; }
+
+.actions-cell {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-icon {
+    background: white;
+    border: 1px solid #cbd5e1;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
 .card-header-flex {
     display: flex;
     justify-content: space-between;
@@ -6,17 +232,6 @@
     margin-bottom: 20px;
 }
 
-.card-header-flex h2 {
-    margin: 0;
-}
-
-/* Badge para elementos devueltos 🏷️ */
-.devuelto {
-    background-color: #e2e8f0;
-    color: #475569;
-}
-
-/* Botón de vaciar historial 🗑️ */
 .btn-danger-outline {
     background: transparent;
     border: 1px solid #f87171;
@@ -26,7 +241,6 @@
     font-size: 0.85rem;
     cursor: pointer;
     font-weight: 600;
-    transition: all 0.2s;
 }
 
 .btn-danger-outline:hover {

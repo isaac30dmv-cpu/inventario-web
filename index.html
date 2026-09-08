@@ -12,7 +12,7 @@
 
         <!-- Tarjeta 1: Formulario 📝 -->
         <div class="card">
-            <h2>Añadir Nuevo Registro</h2>
+            <h2 id="formTitulo">Añadir Nuevo Registro</h2>
             <form id="formPrestamo">
                 <div class="input-group">
                     <label for="producto">Producto</label>
@@ -30,55 +30,62 @@
                     <label for="fecha">Fecha</label>
                     <input type="date" id="fecha" required>
                 </div>
-                <button type="submit" class="btn-primary">Registrar Préstamo ➕</button>
+                <button type="submit" id="btnGuardar" class="btn-primary">Registrar Préstamo ➕</button>
+                <button type="button" id="btnCancelar" class="btn-secondary" style="display: none;" onclick="cancelarEdicion()">Cancelar ❌</button>
             </form>
         </div>
 
-        <!-- Tarjeta 2: Tabla e Inventario Activo 📋 -->
+        <!-- Tarjeta 2: Panel con Pestañas 📑 -->
         <div class="card">
-            <h2>Inventario Activo y Filtros</h2>
-            
-            <div class="search-container">
-                <input type="text" id="buscador" class="search-input" placeholder="🔍 Buscar por producto, prestatario, código...">
+            <div class="tabs-header">
+                <button id="btnTabActivos" class="tab-btn active" onclick="cambiarPestana('activos')">Préstamos Activos 📋</button>
+                <button id="btnTabHistorial" class="tab-btn" onclick="cambiarPestana('historial')">Historial de Devoluciones 📜</button>
             </div>
 
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Producto 📦</th>
-                            <th>Código 🏷️</th>
-                            <th>Prestatario 👤</th>
-                            <th>Fecha Préstamo 📅</th>
-                            <th>Estado / Alerta ⏰</th>
-                            <th>Acción 🛠️</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaCuerpo"></tbody>
-                </table>
-            </div>
-        </div>
+            <!-- Pestaña 1: Préstamos Activos -->
+            <div id="tab-activos" class="tab-content active">
+                <div class="search-container">
+                    <input type="text" id="buscador" class="search-input" placeholder="🔍 Buscar por producto, prestatario, código...">
+                </div>
 
-        <!-- Tarjeta 3: Historial de Devoluciones 📜 -->
-        <div class="card">
-            <div class="card-header-flex">
-                <h2>Historial de Devoluciones 📜</h2>
-                <button id="btnVaciar" class="btn-danger-outline" onclick="vaciarHistorial()">Vaciar Historial 🗑️</button>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto 📦</th>
+                                <th>Código 🏷️</th>
+                                <th>Prestatario 👤</th>
+                                <th>Fecha Préstamo 📅</th>
+                                <th>Estado / Alerta ⏰</th>
+                                <th>Acción 🛠️</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaCuerpo"></tbody>
+                    </table>
+                </div>
             </div>
 
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Producto 📦</th>
-                            <th>Código 🏷️</th>
-                            <th>Prestatario 👤</th>
-                            <th>Fecha Préstamo 📅</th>
-                            <th>Fecha Devolución 🔄</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaHistorial"></tbody>
-                </table>
+            <!-- Pestaña 2: Historial de Devoluciones -->
+            <div id="tab-historial" class="tab-content">
+                <div class="card-header-flex">
+                    <p class="tab-info">Registro general de elementos devueltos</p>
+                    <button id="btnVaciar" class="btn-danger-outline" onclick="vaciarHistorial()">Vaciar Historial 🗑️</button>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto 📦</th>
+                                <th>Código 🏷️</th>
+                                <th>Prestatario 👤</th>
+                                <th>Fecha Préstamo 📅</th>
+                                <th>Fecha Devolución 🔄</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaHistorial"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -88,14 +95,36 @@
         const tabla = document.getElementById('tablaCuerpo');
         const tablaHistorial = document.getElementById('tablaHistorial');
         const buscador = document.getElementById('buscador');
+        const fechaInput = document.getElementById('fecha');
+        const formTitulo = document.getElementById('formTitulo');
+        const btnGuardar = document.getElementById('btnGuardar');
+        const btnCancelar = document.getElementById('btnCancelar');
 
         let prestamos = JSON.parse(localStorage.getItem('prestamos')) || [];
         let historial = JSON.parse(localStorage.getItem('historial')) || [];
+        let indiceEdicion = null;
+
+        function cambiarPestana(pestana) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            if (pestana === 'activos') {
+                document.getElementById('btnTabActivos').classList.add('active');
+                document.getElementById('tab-activos').classList.add('active');
+            } else {
+                document.getElementById('btnTabHistorial').classList.add('active');
+                document.getElementById('tab-historial').classList.add('active');
+            }
+        }
+
+        function establecerFechaHoy() {
+            const hoy = new Date().toISOString().split('T')[0];
+            fechaInput.value = hoy;
+        }
 
         function calcularAlerta(fechaPrestamo) {
             const hoy = new Date();
             const inicio = new Date(fechaPrestamo);
-            
             const mesesDiferencia = (hoy.getFullYear() - inicio.getFullYear()) * 12 + (hoy.getMonth() - inicio.getMonth());
 
             if (mesesDiferencia >= 12) {
@@ -134,6 +163,7 @@
                     <td>${item.fecha}</td>
                     <td><span class="badge ${alerta.clase}">${alerta.texto}</span></td>
                     <td class="actions-cell">
+                        <button class="btn-icon" title="Editar" onclick="editarPrestamo(${indiceOriginal})">✏️</button>
                         <button class="btn-icon" title="Devolver" onclick="devolverPrestamo(${indiceOriginal})">🔄</button>
                     </td>
                 `;
@@ -151,7 +181,6 @@
 
             historial.forEach((item) => {
                 const fila = document.createElement('tr');
-                
                 fila.innerHTML = `
                     <td><strong>${item.producto}</strong></td>
                     <td>${item.codigo || '-'}</td>
@@ -163,23 +192,39 @@
             });
         }
 
+        function editarPrestamo(indice) {
+            const item = prestamos[indice];
+            document.getElementById('producto').value = item.producto;
+            document.getElementById('codigo').value = item.codigo || '';
+            document.getElementById('prestatario').value = item.prestatario;
+            document.getElementById('fecha').value = item.fecha;
+
+            indiceEdicion = indice;
+            formTitulo.innerText = "Editar Registro ✏️";
+            btnGuardar.innerText = "Guardar Cambios 💾";
+            btnCancelar.style.display = "inline-block";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelarEdicion() {
+            indiceEdicion = null;
+            form.reset();
+            establecerFechaHoy();
+            formTitulo.innerText = "Añadir Nuevo Registro";
+            btnGuardar.innerText = "Registrar Préstamo ➕";
+            btnCancelar.style.display = "none";
+        }
+
         function devolverPrestamo(indice) {
             const itemDevuelto = prestamos[indice];
-            
-            // Obtener fecha actual en formato legible (ej. DD/MM/AAAA)
             const hoy = new Date();
             const fechaDevolucion = hoy.toLocaleDateString('es-ES');
 
-            // Mover al historial
-            historial.unshift({
-                ...itemDevuelto,
-                fechaDevolucion: fechaDevolucion
-            });
-
-            // Eliminar de préstamos activos
+            historial.unshift({ ...itemDevuelto, fechaDevolucion });
             prestamos.splice(indice, 1);
 
-            // Actualizar localStorage
+            if (indiceEdicion === indice) cancelarEdicion();
+
             localStorage.setItem('prestamos', JSON.stringify(prestamos));
             localStorage.setItem('historial', JSON.stringify(historial));
 
@@ -198,16 +243,21 @@
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            const nuevoPrestamo = {
+            const datosGuardar = {
                 producto: document.getElementById('producto').value,
                 codigo: document.getElementById('codigo').value,
                 prestatario: document.getElementById('prestatario').value,
                 fecha: document.getElementById('fecha').value
             };
 
-            prestamos.push(nuevoPrestamo);
+            if (indiceEdicion !== null) {
+                prestamos[indiceEdicion] = datosGuardar;
+            } else {
+                prestamos.push(datosGuardar);
+            }
+
             localStorage.setItem('prestamos', JSON.stringify(prestamos));
-            form.reset();
+            cancelarEdicion();
             renderizarTabla(buscador.value);
         });
 
@@ -215,7 +265,7 @@
             renderizarTabla(e.target.value);
         });
 
-        // Cargar ambas tablas al iniciar
+        establecerFechaHoy();
         renderizarTabla();
         renderizarHistorial();
     </script>
