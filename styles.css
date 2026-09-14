@@ -66,21 +66,19 @@ body {
 .header-container {
     position: relative;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
 .header-container h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 700;
     color: var(--text-main);
-    text-align: center;
 }
 
 .header-actions {
-    position: absolute;
-    right: 0;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -142,6 +140,67 @@ body {
         transform: scale(0.95);
         box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
     }
+}
+
+/* Botón y Badge de Sesión */
+.btn-login {
+    background-color: var(--primary);
+    color: #ffffff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: background-color 0.2s;
+}
+
+.btn-login:hover {
+    background-color: var(--primary-hover);
+}
+
+.user-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    box-shadow: var(--shadow);
+}
+
+.btn-logout {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    font-weight: 700;
+    margin-left: 4px;
+}
+
+/* Banner Modo Lectura */
+.read-only-banner {
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-size: 0.92rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+body.dark-theme .read-only-banner {
+    background-color: #1e3a8a;
+    border-color: #3b82f6;
+    color: #dbeaff;
 }
 
 /* Tarjetas */
@@ -490,7 +549,7 @@ tr:last-child td {
     color: var(--badge-devuelto-text);
 }
 
-/* Modal Personalizada */
+/* Modales Personalizadas */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -541,14 +600,18 @@ tr:last-child td {
     gap: 12px;
 }
 
+.error-msg {
+    color: #ef4444;
+    font-size: 0.88rem;
+    margin-top: 8px;
+    display: none;
+}
+
 /* Responsividad */
 @media (max-width: 640px) {
     .header-container {
         flex-direction: column;
-        gap: 12px;
-    }
-    .header-actions {
-        position: static;
+        align-items: flex-start;
     }
     .security-bar {
         flex-direction: column;

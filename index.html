@@ -9,30 +9,42 @@
 <body>
 
     <div class="container">
-        <!-- Encabezado con Indicador En Vivo y Modo Oscuro -->
+        <!-- Encabezado con Estado de Sesión, Indicador En Vivo y Modo Oscuro -->
         <div class="header-container">
             <h1>Gestión de Inventario y Préstamos 📦</h1>
             <div class="header-actions">
                 <div class="live-indicator">
                     <span class="live-dot"></span> En vivo
                 </div>
+
+                <!-- Botón de Login / Sesión -->
+                <div id="authContainer">
+                    <button id="btnLogin" class="btn-login" onclick="abrirModalLogin()">🔐 Iniciar Sesión</button>
+                </div>
+
                 <button id="themeToggle" class="btn-theme" title="Cambiar tema">🌙</button>
             </div>
         </div>
 
-        <!-- Barra de Copias de Seguridad y Exportación -->
+        <!-- Banner Aviso Modo Lectura (Solo cuando no está logueado) -->
+        <div id="readOnlyBanner" class="read-only-banner" style="display: none;">
+            <span>🔒 <strong>Modo Lectura:</strong> Estás navegando como invitado. Inicia sesión como administrador para registrar o modificar préstamos.</span>
+            <button class="btn-login" style="padding: 4px 12px; font-size: 0.8rem;" onclick="abrirModalLogin()">Ingresar</button>
+        </div>
+
+        <!-- Barra de Seguridad y Exportación -->
         <div class="card security-bar">
             <span class="security-title">Seguridad de Datos 💾:</span>
             <div class="security-buttons">
                 <button class="btn-sec btn-json" onclick="exportarJSON()">📦 Copia JSON</button>
-                <button class="btn-sec btn-json" onclick="document.getElementById('jsonFileInput').click()">📥 Restaurar JSON</button>
+                <button id="btnRestaurarJson" class="btn-sec btn-json admin-only" onclick="document.getElementById('jsonFileInput').click()" style="display:none;">📥 Restaurar JSON</button>
                 <button class="btn-sec btn-csv" onclick="exportarCSV()">📄 Exportar Excel (CSV)</button>
             </div>
             <input type="file" id="jsonFileInput" accept=".json" style="display:none;" onchange="importarJSON(event)">
         </div>
 
-        <!-- Formulario para Añadir / Editar Préstamo -->
-        <div class="card">
+        <!-- Formulario para Añadir / Editar Préstamo (Solo Administradores) -->
+        <div class="card admin-only" id="cardFormulario" style="display: none;">
             <h2 class="card-title" id="formTitulo">Añadir Nuevo Registro</h2>
             <form id="formPrestamo">
                 <div class="form-grid">
@@ -93,13 +105,13 @@
                 <div class="table-responsive">
                     <table>
                         <thead>
-                            <tr>
+                            <tr id="headerTablaActivos">
                                 <th>Producto 📦</th>
                                 <th>Código 🏷️</th>
                                 <th>Prestatario 👤</th>
                                 <th>Fecha Préstamo 📅</th>
                                 <th>Estado / Alerta ⏰</th>
-                                <th>Acción 🛠️</th>
+                                <th class="col-accion">Acción 🛠️</th>
                             </tr>
                         </thead>
                         <tbody id="tablaCuerpo">
@@ -111,7 +123,7 @@
 
             <!-- Pestaña: Historial de Devoluciones -->
             <div id="tab-historial" class="tab-content">
-                <div style="display: flex; justify-content: flex-end; margin-bottom: 14px;">
+                <div class="admin-only" id="containerVaciarHistorial" style="display: flex; justify-content: flex-end; margin-bottom: 14px;">
                     <button class="btn-sec" style="color: #ef4444; border-color: #fca5a5;" onclick="solicitarVaciarHistorial()">🗑️ Vaciar Historial</button>
                 </div>
                 <div class="table-responsive">
@@ -146,6 +158,29 @@
         </div>
     </div>
 
+    <!-- Modal de Iniciar Sesión (Login) -->
+    <div class="modal-overlay" id="modalLoginOverlay">
+        <div class="modal-card">
+            <h3 class="modal-title">Iniciar Sesión 🔐</h3>
+            <p class="modal-body">Ingresa tus credenciales de administrador para gestionar el inventario.</p>
+            <form id="formLogin" onsubmit="ejecutarLogin(event)">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label for="loginUser">Usuario</label>
+                    <input type="text" id="loginUser" class="form-control" placeholder="Ej: admin" required autocomplete="username">
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label for="loginPass">Contraseña</label>
+                    <input type="password" id="loginPass" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+                <div id="loginErrorMsg" class="error-msg"></div>
+                <div class="modal-actions" style="margin-top: 20px;">
+                    <button type="button" class="btn-secondary" onclick="cerrarModalLogin()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Entrar 🚀</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const form = document.getElementById('formPrestamo');
         const tabla = document.getElementById('tablaCuerpo');
@@ -162,6 +197,7 @@
         let idEdicion = null;
         let estadoFiltroActual = 'todos';
         let ordenActual = 'fecha-desc';
+        let usuarioActual = null; // Guardará el objeto de usuario si está autenticado
 
         // --- MODO OSCURO / CLARO ---
         function inicializarTema() {
@@ -180,6 +216,89 @@
             localStorage.setItem('theme', esOscuro ? 'dark' : 'light');
             themeToggle.innerText = esOscuro ? '☀️' : '🌙';
         });
+
+        // --- SISTEMA DE AUTENTICACIÓN (LOGIN / LOGOUT) ---
+        function abrirModalLogin() {
+            document.getElementById('modalLoginOverlay').classList.add('active');
+            document.getElementById('loginUser').focus();
+            document.getElementById('loginErrorMsg').style.display = 'none';
+        }
+
+        function cerrarModalLogin() {
+            document.getElementById('modalLoginOverlay').classList.remove('active');
+            document.getElementById('formLogin').reset();
+        }
+
+        async function ejecutarLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUser').value;
+            const password = document.getElementById('loginPass').value;
+            const errorMsg = document.getElementById('loginErrorMsg');
+
+            try {
+                const response = await fetch('api.php?action=login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const res = await response.json();
+
+                if (res.status === 'success') {
+                    usuarioActual = res.user;
+                    cerrarModalLogin();
+                    actualizarInterfazSegunRol();
+                    await cargarDatosDesdeServidor();
+                } else {
+                    errorMsg.innerText = res.message || 'Error al iniciar sesión.';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (err) {
+                errorMsg.innerText = 'Error de conexión con el servidor.';
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        async function cerrarSesion() {
+            try {
+                await fetch('api.php?action=logout');
+                usuarioActual = null;
+                actualizarInterfazSegunRol();
+                await cargarDatosDesdeServidor();
+            } catch (err) {
+                console.error('Error al cerrar sesión:', err);
+            }
+        }
+
+        function actualizarInterfazSegunRol() {
+            const authContainer = document.getElementById('authContainer');
+            const readOnlyBanner = document.getElementById('readOnlyBanner');
+            const cardFormulario = document.getElementById('cardFormulario');
+            const btnRestaurarJson = document.getElementById('btnRestaurarJson');
+            const containerVaciarHistorial = document.getElementById('containerVaciarHistorial');
+
+            const esAdmin = usuarioActual && usuarioActual.role === 'admin';
+
+            if (esAdmin) {
+                authContainer.innerHTML = `
+                    <div class="user-badge">
+                        👤 <span>${usuarioActual.username}</span>
+                        <button class="btn-logout" onclick="cerrarSesion()" title="Cerrar sesión">🚪</button>
+                    </div>
+                `;
+                readOnlyBanner.style.display = 'none';
+                cardFormulario.style.display = 'block';
+                btnRestaurarJson.style.display = 'inline-flex';
+                containerVaciarHistorial.style.display = 'flex';
+            } else {
+                authContainer.innerHTML = `<button class="btn-login" onclick="abrirModalLogin()">🔐 Iniciar Sesión</button>`;
+                readOnlyBanner.style.display = 'flex';
+                cardFormulario.style.display = 'none';
+                btnRestaurarJson.style.display = 'none';
+                containerVaciarHistorial.style.display = 'none';
+            }
+
+            renderizarTabla(buscador.value);
+        }
 
         // --- VENTANA MODAL PERSONALIZADA ---
         function mostrarModal(titulo, mensaje) {
@@ -206,7 +325,7 @@
             });
         }
 
-        // --- COMUNICACIÓN CON BASE DE DATOS Y POLLING INTELIGENTE ---
+        // --- COMUNICACIÓN CON BASE DE DATOS Y POLLING ---
         async function cargarDatosDesdeServidor(silencioso = false) {
             try {
                 const response = await fetch('api.php?action=get_all');
@@ -215,22 +334,10 @@
                     const nuevosPrestamos = res.prestamos || [];
                     const nuevoHistorial = res.historial || [];
 
-                    // Migración automática inicial desde localStorage si existían datos antiguos
-                    const localP = JSON.parse(localStorage.getItem('prestamos')) || [];
-                    const localH = JSON.parse(localStorage.getItem('historial')) || [];
-                    if (nuevosPrestamos.length === 0 && nuevoHistorial.length === 0 && (localP.length > 0 || localH.length > 0)) {
-                        await fetch('api.php?action=importar_backup', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ prestamos: localP, historial: localH })
-                        });
-                        localStorage.removeItem('prestamos');
-                        localStorage.removeItem('historial');
-                        await cargarDatosDesdeServidor();
-                        return;
-                    }
+                    // Actualizar estado de usuario según la respuesta de la API
+                    usuarioActual = res.user || null;
+                    actualizarInterfazHeaderUnicamente();
 
-                    // Comprobar si realmente ha habido cambios para evitar parpadeos innecesarios
                     const prestamosCambiados = JSON.stringify(prestamos) !== JSON.stringify(nuevosPrestamos);
                     const historialCambiado = JSON.stringify(historial) !== JSON.stringify(nuevoHistorial);
 
@@ -246,10 +353,36 @@
             }
         }
 
-        // Iniciar actualización automática en tiempo real cada 5 segundos (5000 ms)
+        function actualizarInterfazHeaderUnicamente() {
+            const authContainer = document.getElementById('authContainer');
+            const readOnlyBanner = document.getElementById('readOnlyBanner');
+            const cardFormulario = document.getElementById('cardFormulario');
+            const btnRestaurarJson = document.getElementById('btnRestaurarJson');
+            const containerVaciarHistorial = document.getElementById('containerVaciarHistorial');
+            const esAdmin = usuarioActual && usuarioActual.role === 'admin';
+
+            if (esAdmin) {
+                authContainer.innerHTML = `
+                    <div class="user-badge">
+                        👤 <span>${usuarioActual.username}</span>
+                        <button class="btn-logout" onclick="cerrarSesion()" title="Cerrar sesión">🚪</button>
+                    </div>
+                `;
+                readOnlyBanner.style.display = 'none';
+                cardFormulario.style.display = 'block';
+                btnRestaurarJson.style.display = 'inline-flex';
+                containerVaciarHistorial.style.display = 'flex';
+            } else {
+                authContainer.innerHTML = `<button class="btn-login" onclick="abrirModalLogin()">🔐 Iniciar Sesión</button>`;
+                readOnlyBanner.style.display = 'flex';
+                cardFormulario.style.display = 'none';
+                btnRestaurarJson.style.display = 'none';
+                containerVaciarHistorial.style.display = 'none';
+            }
+        }
+
         function iniciarAutoActualizacion() {
             setInterval(() => {
-                // Solo auto-actualizar en segundo plano si el usuario no está editando un registro actualmente
                 if (idEdicion === null) {
                     cargarDatosDesdeServidor(true);
                 }
@@ -320,7 +453,7 @@
                 return;
             }
 
-            let csvContent = "\uFEFF"; // BOM UTF-8
+            let csvContent = "\uFEFF";
             csvContent += "EstadoRegistro,Producto,Codigo,Prestatario,FechaPrestamo,FechaDevolucion\n";
 
             prestamos.forEach(item => {
@@ -400,6 +533,13 @@
         // --- RENDERIZADO DE TABLAS ---
         function renderizarTabla(filtroTexto = '') {
             tabla.innerHTML = '';
+            const esAdmin = usuarioActual && usuarioActual.role === 'admin';
+
+            // Mostrar/Ocultar columna Acción en la cabecera
+            const colAccionHeader = document.querySelector('.col-accion');
+            if (colAccionHeader) {
+                colAccionHeader.style.display = esAdmin ? 'table-cell' : 'none';
+            }
 
             let prestamosFiltrados = prestamos.filter(item => {
                 const texto = filtroTexto.toLowerCase();
@@ -415,8 +555,9 @@
 
             prestamosFiltrados = ordenarLista(prestamosFiltrados);
 
+            const numCols = esAdmin ? 6 : 5;
             if (prestamosFiltrados.length === 0) {
-                tabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 20px;">No se encontraron registros activos.</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="${numCols}" style="text-align:center; color: var(--text-muted); padding: 20px;">No se encontraron registros activos.</td></tr>`;
                 return;
             }
 
@@ -424,16 +565,23 @@
                 const alerta = calcularAlerta(item.fecha);
                 const fila = document.createElement('tr');
                 
+                let celdaAccionHTML = '';
+                if (esAdmin) {
+                    celdaAccionHTML = `
+                        <td class="actions-cell">
+                            <button class="btn-icon" title="Editar" onclick="editarPrestamo(${item.id})">✏️</button>
+                            <button class="btn-icon" title="Devolver" onclick="devolverPrestamo(${item.id})">🔄</button>
+                        </td>
+                    `;
+                }
+
                 fila.innerHTML = `
                     <td><strong>${item.producto}</strong></td>
                     <td>${item.codigo || '-'}</td>
                     <td>${item.prestatario}</td>
                     <td>${item.fecha}</td>
                     <td><span class="badge ${alerta.clase}">${alerta.texto}</span></td>
-                    <td class="actions-cell">
-                        <button class="btn-icon" title="Editar" onclick="editarPrestamo(${item.id})">✏️</button>
-                        <button class="btn-icon" title="Devolver" onclick="devolverPrestamo(${item.id})">🔄</button>
-                    </td>
+                    ${celdaAccionHTML}
                 `;
                 tabla.appendChild(fila);
             });
