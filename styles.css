@@ -51,7 +51,7 @@ body {
     justify-content: center;
     align-items: center;
     position: relative;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 h1 {
@@ -78,6 +78,78 @@ h1 {
     transform: scale(1.1);
 }
 
+/* Barra de Copias de Seguridad 💾 */
+.backup-bar {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 12px 20px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.backup-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.backup-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-outline {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-outline:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.label-file {
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-outline-success {
+    background: #f0fdf4;
+    border: 1px solid #16a34a;
+    color: #16a34a;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+body.dark-theme .btn-outline-success {
+    background: #064e3b;
+    border-color: #34d399;
+    color: #34d399;
+}
+
+.btn-outline-success:hover {
+    background: #16a34a;
+    color: white;
+}
+
+/* Tarjetas */
 .card {
     background: var(--bg-card);
     padding: 28px;

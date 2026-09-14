@@ -14,6 +14,19 @@
             <button id="themeToggle" class="btn-theme" title="Cambiar tema">🌙</button>
         </div>
 
+        <!-- Barra de Copia de Seguridad y Datos 💾 -->
+        <div class="backup-bar">
+            <span class="backup-title">Seguridad de Datos 💾:</span>
+            <div class="backup-buttons">
+                <button class="btn-outline" onclick="exportarJSON()">📤 Copia JSON</button>
+                <label class="btn-outline label-file">
+                    📥 Restaurar JSON
+                    <input type="file" id="fileImport" accept=".json" onchange="importarJSON(event)" style="display:none;">
+                </label>
+                <button class="btn-outline-success" onclick="exportarCSV()">📄 Exportar Excel (CSV)</button>
+            </div>
+        </div>
+
         <!-- Tarjeta 1: Formulario 📝 -->
         <div class="card">
             <h2 id="formTitulo">Añadir Nuevo Registro</h2>
@@ -183,6 +196,86 @@
                 btnConfirmar.onclick = () => cerrar(true);
                 btnCancelarModal.onclick = () => cerrar(false);
             });
+        }
+
+        // --- GESTIÓN DE COPIAS DE SEGURIDAD (JSON / CSV) ---
+        function exportarJSON() {
+            if (prestamos.length === 0 && historial.length === 0) {
+                alert("No hay datos para exportar.");
+                return;
+            }
+            const backupData = {
+                fechaBackup: new Date().toISOString(),
+                prestamos: prestamos,
+                historial: historial
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `backup_inventario_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importarJSON(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (Array.isArray(data.prestamos) && Array.isArray(data.historial)) {
+                        const confirmado = await mostrarModal(
+                            "Restaurar Copia de Seguridad",
+                            "¿Deseas reemplazar todos los datos actuales con los del archivo de respaldo?"
+                        );
+                        if (confirmado) {
+                            prestamos = data.prestamos;
+                            historial = data.historial;
+                            localStorage.setItem('prestamos', JSON.stringify(prestamos));
+                            localStorage.setItem('historial', JSON.stringify(historial));
+                            renderizarTabla(buscador.value);
+                            renderizarHistorial();
+                            alert("¡Copia de seguridad restaurada correctamente! ✅");
+                        }
+                    } else {
+                        alert("El archivo JSON no tiene una estructura válida de inventario.");
+                    }
+                } catch (err) {
+                    alert("Error al procesar el archivo JSON: " + err.message);
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        }
+
+        function exportarCSV() {
+            if (prestamos.length === 0 && historial.length === 0) {
+                alert("No hay registros para exportar.");
+                return;
+            }
+
+            let csvContent = "\uFEFF"; // BOM UTF-8 para corregir acentos en Excel
+            csvContent += "EstadoRegistro,Producto,Codigo,Prestatario,FechaPrestamo,FechaDevolucion\n";
+
+            prestamos.forEach(item => {
+                csvContent += `"Activo","${item.producto}","${item.codigo || ''}","${item.prestatario}","${item.fecha}",""\n`;
+            });
+
+            historial.forEach(item => {
+                csvContent += `"Devuelto","${item.producto}","${item.codigo || ''}","${item.prestatario}","${item.fecha}","${item.fechaDevolucion}"\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `inventario_completo_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         // --- NAVEGACIÓN Y FECHA ---
