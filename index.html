@@ -26,7 +26,39 @@
             </div>
         </div>
 
-        <!-- Banner Aviso Modo Lectura (Solo cuando no está logueado) -->
+        <!-- Dashboard de Estadísticas en Tiempo Real -->
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statTotalActivos">0</span>
+                    <span class="stat-label">Préstamos Activos</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statEnAlerta" style="color: #d97706;">0</span>
+                    <span class="stat-label">Equipos en Alerta</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📜</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statDevoluciones" style="color: #2563eb;">0</span>
+                    <span class="stat-label">Devoluciones Totales</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👤</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statTopPrestatario" style="font-size: 1.1rem;">-</span>
+                    <span class="stat-label">Principal Solicitante</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Banner Aviso Modo Lectura -->
         <div id="readOnlyBanner" class="read-only-banner" style="display: none;">
             <span>🔒 <strong>Modo Lectura:</strong> Estás navegando como invitado. Inicia sesión como administrador para registrar o modificar préstamos.</span>
             <button class="btn-login" style="padding: 4px 12px; font-size: 0.8rem;" onclick="abrirModalLogin()">Ingresar</button>
@@ -43,7 +75,7 @@
             <input type="file" id="jsonFileInput" accept=".json" style="display:none;" onchange="importarJSON(event)">
         </div>
 
-        <!-- Formulario para Añadir / Editar Préstamo (Solo Administradores) -->
+        <!-- Formulario para Añadir / Editar Préstamo -->
         <div class="card admin-only" id="cardFormulario" style="display: none;">
             <h2 class="card-title" id="formTitulo">Añadir Nuevo Registro</h2>
             <form id="formPrestamo">
@@ -197,7 +229,7 @@
         let idEdicion = null;
         let estadoFiltroActual = 'todos';
         let ordenActual = 'fecha-desc';
-        let usuarioActual = null; // Guardará el objeto de usuario si está autenticado
+        let usuarioActual = null;
 
         // --- MODO OSCURO / CLARO ---
         function inicializarTema() {
@@ -300,6 +332,32 @@
             renderizarTabla(buscador.value);
         }
 
+        // --- CÁLCULO DE ESTADÍSTICAS ---
+        function actualizarEstadisticas() {
+            const totalActivos = prestamos.length;
+            const enAlerta = prestamos.filter(item => calcularAlerta(item.fecha).estado === 'alerta').length;
+            const totalDevoluciones = historial.length;
+
+            const conteoPrestatarios = {};
+            prestamos.forEach(item => {
+                conteoPrestatarios[item.prestatario] = (conteoPrestatarios[item.prestatario] || 0) + 1;
+            });
+
+            let topPrestatario = '-';
+            let maxCount = 0;
+            for (const [nombre, count] of Object.entries(conteoPrestatarios)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    topPrestatario = nombre;
+                }
+            }
+
+            document.getElementById('statTotalActivos').innerText = totalActivos;
+            document.getElementById('statEnAlerta').innerText = enAlerta;
+            document.getElementById('statDevoluciones').innerText = totalDevoluciones;
+            document.getElementById('statTopPrestatario').innerText = topPrestatario !== '-' ? `${topPrestatario} (${maxCount})` : '-';
+        }
+
         // --- VENTANA MODAL PERSONALIZADA ---
         function mostrarModal(titulo, mensaje) {
             return new Promise((resolve) => {
@@ -334,7 +392,6 @@
                     const nuevosPrestamos = res.prestamos || [];
                     const nuevoHistorial = res.historial || [];
 
-                    // Actualizar estado de usuario según la respuesta de la API
                     usuarioActual = res.user || null;
                     actualizarInterfazHeaderUnicamente();
 
@@ -346,6 +403,7 @@
                         historial = nuevoHistorial;
                         renderizarTabla(buscador.value);
                         renderizarHistorial();
+                        actualizarEstadisticas();
                     }
                 }
             } catch (err) {
@@ -535,7 +593,6 @@
             tabla.innerHTML = '';
             const esAdmin = usuarioActual && usuarioActual.role === 'admin';
 
-            // Mostrar/Ocultar columna Acción en la cabecera
             const colAccionHeader = document.querySelector('.col-accion');
             if (colAccionHeader) {
                 colAccionHeader.style.display = esAdmin ? 'table-cell' : 'none';
