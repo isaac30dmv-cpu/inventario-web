@@ -149,9 +149,9 @@
         const btnCancelar = document.getElementById('btnCancelar');
         const themeToggle = document.getElementById('themeToggle');
 
-        let prestamos = JSON.parse(localStorage.getItem('prestamos')) || [];
-        let historial = JSON.parse(localStorage.getItem('historial')) || [];
-        let indiceEdicion = null;
+        let prestamos = [];
+        let historial = [];
+        let idEdicion = null;
         let estadoFiltroActual = 'todos';
         let ordenActual = 'fecha-desc';
 
@@ -198,7 +198,41 @@
             });
         }
 
-        // --- GESTIÓN DE COPIAS DE SEGURIDAD (JSON / CSV) ---
+        // --- COMUNICACIÓN CON BASE DE DATOS SERVIDOR (PHP + SQLite) ---
+        async function cargarDatosDesdeServidor() {
+            try {
+                const response = await fetch('api.php?action=get_all');
+                const res = await response.json();
+                if (res.status === 'success') {
+                    prestamos = res.prestamos || [];
+                    historial = res.historial || [];
+
+                    // Migración automática si existen datos previos en localStorage
+                    const localP = JSON.parse(localStorage.getItem('prestamos')) || [];
+                    const localH = JSON.parse(localStorage.getItem('historial')) || [];
+                    if (prestamos.length === 0 && historial.length === 0 && (localP.length > 0 || localH.length > 0)) {
+                        await fetch('api.php?action=importar_backup', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ prestamos: localP, historial: localH })
+                        });
+                        localStorage.removeItem('prestamos');
+                        localStorage.removeItem('historial');
+                        await cargarDatosDesdeServidor();
+                        return;
+                    }
+
+                    renderizarTabla(buscador.value);
+                    renderizarHistorial();
+                } else {
+                    console.error('Error al cargar datos:', res.message);
+                }
+            } catch (err) {
+                console.error('Error de conexión con el servidor:', err);
+            }
+        }
+
+        // --- COPIAS DE SEGURIDAD (JSON / CSV) ---
         function exportarJSON() {
             if (prestamos.length === 0 && historial.length === 0) {
                 alert("No hay datos para exportar.");
@@ -229,19 +263,24 @@
                     if (Array.isArray(data.prestamos) && Array.isArray(data.historial)) {
                         const confirmado = await mostrarModal(
                             "Restaurar Copia de Seguridad",
-                            "¿Deseas reemplazar todos los datos actuales con los del archivo de respaldo?"
+                            "¿Deseas reemplazar la base de datos del servidor con los datos de esta copia de seguridad?"
                         );
                         if (confirmado) {
-                            prestamos = data.prestamos;
-                            historial = data.historial;
-                            localStorage.setItem('prestamos', JSON.stringify(prestamos));
-                            localStorage.setItem('historial', JSON.stringify(historial));
-                            renderizarTabla(buscador.value);
-                            renderizarHistorial();
-                            alert("¡Copia de seguridad restaurada correctamente! ✅");
+                            const response = await fetch('api.php?action=importar_backup', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(data)
+                            });
+                            const res = await response.json();
+                            if (res.status === 'success') {
+                                await cargarDatosDesdeServidor();
+                                alert("¡Copia de seguridad restaurada con éxito en el servidor! ✅");
+                            } else {
+                                alert("Error al importar: " + res.message);
+                            }
                         }
                     } else {
-                        alert("El archivo JSON no tiene una estructura válida de inventario.");
+                        alert("El archivo JSON no tiene una estructura válida.");
                     }
                 } catch (err) {
                     alert("Error al procesar el archivo JSON: " + err.message);
@@ -257,7 +296,7 @@
                 return;
             }
 
-            let csvContent = "\uFEFF"; // BOM UTF-8 para corregir acentos en Excel
+            let csvContent = "\uFEFF"; // BOM UTF-8
             csvContent += "EstadoRegistro,Producto,Codigo,Prestatario,FechaPrestamo,FechaDevolucion\n";
 
             prestamos.forEach(item => {
@@ -358,7 +397,6 @@
             }
 
             prestamosFiltrados.forEach((item) => {
-                const indiceOriginal = prestamos.indexOf(item);
                 const alerta = calcularAlerta(item.fecha);
                 const fila = document.createElement('tr');
                 
@@ -369,8 +407,8 @@
                     <td>${item.fecha}</td>
                     <td><span class="badge ${alerta.clase}">${alerta.texto}</span></td>
                     <td class="actions-cell">
-                        <button class="btn-icon" title="Editar" onclick="editarPrestamo(${indiceOriginal})">✏️</button>
-                        <button class="btn-icon" title="Devolver" onclick="devolverPrestamo(${indiceOriginal})">🔄</button>
+                        <button class="btn-icon" title="Editar" onclick="editarPrestamo(${item.id})">✏️</button>
+                        <button class="btn-icon" title="Devolver" onclick="devolverPrestamo(${item.id})">🔄</button>
                     </td>
                 `;
                 tabla.appendChild(fila);
@@ -398,15 +436,17 @@
             });
         }
 
-        // --- ACCIONES Y LÓGICA ---
-        function editarPrestamo(indice) {
-            const item = prestamos[indice];
+        // --- ACCIONES CON EL SERVIDOR ---
+        function editarPrestamo(id) {
+            const item = prestamos.find(p => Number(p.id) === Number(id));
+            if (!item) return;
+
             document.getElementById('producto').value = item.producto;
             document.getElementById('codigo').value = item.codigo || '';
             document.getElementById('prestatario').value = item.prestatario;
             document.getElementById('fecha').value = item.fecha;
 
-            indiceEdicion = indice;
+            idEdicion = id;
             formTitulo.innerText = "Editar Registro ✏️";
             btnGuardar.innerText = "Guardar Cambios 💾";
             btnCancelar.style.display = "inline-block";
@@ -414,7 +454,7 @@
         }
 
         function cancelarEdicion() {
-            indiceEdicion = null;
+            idEdicion = null;
             form.reset();
             establecerFechaHoy();
             formTitulo.innerText = "Añadir Nuevo Registro";
@@ -422,38 +462,51 @@
             btnCancelar.style.display = "none";
         }
 
-        function devolverPrestamo(indice) {
-            const itemDevuelto = prestamos[indice];
+        async function devolverPrestamo(id) {
             const hoy = new Date();
             const fechaDevolucion = hoy.toLocaleDateString('es-ES');
 
-            historial.unshift({ ...itemDevuelto, fechaDevolucion });
-            prestamos.splice(indice, 1);
-
-            if (indiceEdicion === indice) cancelarEdicion();
-
-            localStorage.setItem('prestamos', JSON.stringify(prestamos));
-            localStorage.setItem('historial', JSON.stringify(historial));
-
-            renderizarTabla(buscador.value);
-            renderizarHistorial();
+            try {
+                const response = await fetch('api.php?action=devolver_prestamo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id, fechaDevolucion: fechaDevolucion })
+                });
+                const res = await response.json();
+                if (res.status === 'success') {
+                    if (idEdicion === id) cancelarEdicion();
+                    await cargarDatosDesdeServidor();
+                } else {
+                    alert('Error al devolver el préstamo: ' + res.message);
+                }
+            } catch (err) {
+                console.error('Error al realizar devolución:', err);
+            }
         }
 
         async function solicitarVaciarHistorial() {
             if (historial.length === 0) return;
             const confirmado = await mostrarModal(
                 'Vaciar Historial', 
-                '¿Estás seguro de que deseas eliminar permanentemente todos los registros del historial de devoluciones?'
+                '¿Estás seguro de que deseas eliminar permanentemente todos los registros del historial de devoluciones del servidor?'
             );
 
             if (confirmado) {
-                historial = [];
-                localStorage.removeItem('historial');
-                renderizarHistorial();
+                try {
+                    const response = await fetch('api.php?action=vaciar_historial', { method: 'POST' });
+                    const res = await response.json();
+                    if (res.status === 'success') {
+                        await cargarDatosDesdeServidor();
+                    } else {
+                        alert('Error al vaciar historial: ' + res.message);
+                    }
+                } catch (err) {
+                    console.error('Error al vaciar historial:', err);
+                }
             }
         }
 
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const datosGuardar = {
                 producto: document.getElementById('producto').value,
@@ -462,15 +515,28 @@
                 fecha: document.getElementById('fecha').value
             };
 
-            if (indiceEdicion !== null) {
-                prestamos[indiceEdicion] = datosGuardar;
-            } else {
-                prestamos.push(datosGuardar);
+            let url = 'api.php?action=add_prestamo';
+            if (idEdicion !== null) {
+                url = 'api.php?action=edit_prestamo';
+                datosGuardar.id = idEdicion;
             }
 
-            localStorage.setItem('prestamos', JSON.stringify(prestamos));
-            cancelarEdicion();
-            renderizarTabla(buscador.value);
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datosGuardar)
+                });
+                const res = await response.json();
+                if (res.status === 'success') {
+                    cancelarEdicion();
+                    await cargarDatosDesdeServidor();
+                } else {
+                    alert('Error al guardar el registro: ' + res.message);
+                }
+            } catch (err) {
+                console.error('Error al conectar con la API:', err);
+            }
         });
 
         buscador.addEventListener('input', (e) => {
@@ -480,8 +546,7 @@
         // Inicialización
         inicializarTema();
         establecerFechaHoy();
-        renderizarTabla();
-        renderizarHistorial();
+        cargarDatosDesdeServidor();
     </script>
 </body>
 </html>
