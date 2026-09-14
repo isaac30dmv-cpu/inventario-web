@@ -49,13 +49,6 @@
                     <span class="stat-label">Devoluciones Totales</span>
                 </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">👤</div>
-                <div class="stat-info">
-                    <span class="stat-value" id="statTopPrestatario" style="font-size: 1.1rem;">-</span>
-                    <span class="stat-label">Principal Solicitante</span>
-                </div>
-            </div>
         </div>
 
         <!-- Banner Aviso Modo Lectura -->
@@ -338,24 +331,9 @@
             const enAlerta = prestamos.filter(item => calcularAlerta(item.fecha).estado === 'alerta').length;
             const totalDevoluciones = historial.length;
 
-            const conteoPrestatarios = {};
-            prestamos.forEach(item => {
-                conteoPrestatarios[item.prestatario] = (conteoPrestatarios[item.prestatario] || 0) + 1;
-            });
-
-            let topPrestatario = '-';
-            let maxCount = 0;
-            for (const [nombre, count] of Object.entries(conteoPrestatarios)) {
-                if (count > maxCount) {
-                    maxCount = count;
-                    topPrestatario = nombre;
-                }
-            }
-
             document.getElementById('statTotalActivos').innerText = totalActivos;
             document.getElementById('statEnAlerta').innerText = enAlerta;
             document.getElementById('statDevoluciones').innerText = totalDevoluciones;
-            document.getElementById('statTopPrestatario').innerText = topPrestatario !== '-' ? `${topPrestatario} (${maxCount})` : '-';
         }
 
         // --- VENTANA MODAL PERSONALIZADA ---
