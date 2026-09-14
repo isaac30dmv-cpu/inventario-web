@@ -3,75 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventario y Préstamos 📦</title>
+    <title>Gestión de Inventario y Préstamos</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
     <div class="container">
-        <!-- Cabecera principal con selector de tema 🌙/☀️ -->
+        <!-- Encabezado con Indicador En Vivo y Modo Oscuro -->
         <div class="header-container">
             <h1>Gestión de Inventario y Préstamos 📦</h1>
-            <button id="themeToggle" class="btn-theme" title="Cambiar tema">🌙</button>
-        </div>
-
-        <!-- Barra de Copia de Seguridad y Datos 💾 -->
-        <div class="backup-bar">
-            <span class="backup-title">Seguridad de Datos 💾:</span>
-            <div class="backup-buttons">
-                <button class="btn-outline" onclick="exportarJSON()">📤 Copia JSON</button>
-                <label class="btn-outline label-file">
-                    📥 Restaurar JSON
-                    <input type="file" id="fileImport" accept=".json" onchange="importarJSON(event)" style="display:none;">
-                </label>
-                <button class="btn-outline-success" onclick="exportarCSV()">📄 Exportar Excel (CSV)</button>
+            <div class="header-actions">
+                <div class="live-indicator">
+                    <span class="live-dot"></span> En vivo
+                </div>
+                <button id="themeToggle" class="btn-theme" title="Cambiar tema">🌙</button>
             </div>
         </div>
 
-        <!-- Tarjeta 1: Formulario 📝 -->
+        <!-- Barra de Copias de Seguridad y Exportación -->
+        <div class="card security-bar">
+            <span class="security-title">Seguridad de Datos 💾:</span>
+            <div class="security-buttons">
+                <button class="btn-sec btn-json" onclick="exportarJSON()">📦 Copia JSON</button>
+                <button class="btn-sec btn-json" onclick="document.getElementById('jsonFileInput').click()">📥 Restaurar JSON</button>
+                <button class="btn-sec btn-csv" onclick="exportarCSV()">📄 Exportar Excel (CSV)</button>
+            </div>
+            <input type="file" id="jsonFileInput" accept=".json" style="display:none;" onchange="importarJSON(event)">
+        </div>
+
+        <!-- Formulario para Añadir / Editar Préstamo -->
         <div class="card">
-            <h2 id="formTitulo">Añadir Nuevo Registro</h2>
+            <h2 class="card-title" id="formTitulo">Añadir Nuevo Registro</h2>
             <form id="formPrestamo">
-                <div class="input-group">
-                    <label for="producto">Producto</label>
-                    <input type="text" id="producto" placeholder="Nombre del Producto" required>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="producto">Producto</label>
+                        <input type="text" id="producto" class="form-control" placeholder="Nombre del Producto" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="codigo">Código / Etiqueta</label>
+                        <input type="text" id="codigo" class="form-control" placeholder="Código Único">
+                    </div>
+                    <div class="form-group">
+                        <label for="prestatario">Prestatario</label>
+                        <input type="text" id="prestatario" class="form-control" placeholder="Nombre del Solicitante" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fecha">Fecha</label>
+                        <input type="date" id="fecha" class="form-control" required>
+                    </div>
                 </div>
-                <div class="input-group">
-                    <label for="codigo">Código / Etiqueta</label>
-                    <input type="text" id="codigo" placeholder="Código Único">
+                <div class="form-actions">
+                    <button type="submit" id="btnGuardar" class="btn-primary">Registrar Préstamo ➕</button>
+                    <button type="button" id="btnCancelar" class="btn-secondary" style="display:none;" onclick="cancelarEdicion()">Cancelar</button>
                 </div>
-                <div class="input-group">
-                    <label for="prestatario">Prestatario</label>
-                    <input type="text" id="prestatario" placeholder="Nombre del Solicitante" required>
-                </div>
-                <div class="input-group">
-                    <label for="fecha">Fecha</label>
-                    <input type="date" id="fecha" required>
-                </div>
-                <button type="submit" id="btnGuardar" class="btn-primary">Registrar Préstamo ➕</button>
-                <button type="button" id="btnCancelar" class="btn-secondary" style="display: none;" onclick="cancelarEdicion()">Cancelar ❌</button>
             </form>
         </div>
 
-        <!-- Tarjeta 2: Panel con Pestañas 📑 -->
+        <!-- Panel Principal con Pestañas -->
         <div class="card">
-            <div class="tabs-header">
-                <button id="btnTabActivos" class="tab-btn active" onclick="cambiarPestana('activos')">Préstamos Activos 📋</button>
-                <button id="btnTabHistorial" class="tab-btn" onclick="cambiarPestana('historial')">Historial de Devoluciones 📜</button>
+            <div class="tabs">
+                <button class="tab-btn active" id="btnTabActivos" onclick="cambiarPestana('activos')">Préstamos Activos 📋</button>
+                <button class="tab-btn" id="btnTabHistorial" onclick="cambiarPestana('historial')">Historial de Devoluciones 📜</button>
             </div>
 
-            <!-- Pestaña 1: Préstamos Activos -->
+            <!-- Pestaña: Préstamos Activos -->
             <div id="tab-activos" class="tab-content active">
-                
-                <!-- Filtros y Ordenación 🗂️ -->
-                <div class="filters-toolbar">
-                    <div class="filter-pills">
+                <div class="controls-bar">
+                    <div class="pills-group">
                         <button class="pill-btn active" onclick="filtrarPorEstado('todos', this)">Todos</button>
                         <button class="pill-btn" onclick="filtrarPorEstado('ok', this)">En Regla ✅</button>
                         <button class="pill-btn" onclick="filtrarPorEstado('alerta', this)">En Alerta ⚠️</button>
                     </div>
-                    <div class="sort-container">
+                    <div class="sort-group">
                         <label for="selectOrden">Ordenar por:</label>
-                        <select id="selectOrden" onchange="cambiarOrden(this.value)">
+                        <select id="selectOrden" class="form-control" style="width: auto;" onchange="cambiarOrden(this.value)">
                             <option value="fecha-desc">Fecha (Más reciente)</option>
                             <option value="fecha-asc">Fecha (Más antigua)</option>
                             <option value="nombre-asc">Producto (A-Z)</option>
@@ -96,18 +102,18 @@
                                 <th>Acción 🛠️</th>
                             </tr>
                         </thead>
-                        <tbody id="tablaCuerpo"></tbody>
+                        <tbody id="tablaCuerpo">
+                            <!-- Inserción dinámica de registros -->
+                        </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Pestaña 2: Historial de Devoluciones -->
+            <!-- Pestaña: Historial de Devoluciones -->
             <div id="tab-historial" class="tab-content">
-                <div class="card-header-flex">
-                    <p class="tab-info">Registro general de elementos devueltos</p>
-                    <button id="btnVaciar" class="btn-danger-outline" onclick="solicitarVaciarHistorial()">Vaciar Historial 🗑️</button>
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 14px;">
+                    <button class="btn-sec" style="color: #ef4444; border-color: #fca5a5;" onclick="solicitarVaciarHistorial()">🗑️ Vaciar Historial</button>
                 </div>
-
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -116,24 +122,26 @@
                                 <th>Código 🏷️</th>
                                 <th>Prestatario 👤</th>
                                 <th>Fecha Préstamo 📅</th>
-                                <th>Fecha Devolución 🔄</th>
+                                <th>Devuelto el 🔄</th>
                             </tr>
                         </thead>
-                        <tbody id="tablaHistorial"></tbody>
+                        <tbody id="tablaHistorial">
+                            <!-- Inserción dinámica de historial -->
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal elegante de confirmación 🔔 -->
-    <div id="modalOverlay" class="modal-overlay">
-        <div class="modal-box">
-            <h3 id="modalTitulo">Confirmación</h3>
-            <p id="modalMensaje">¿Estás seguro de realizar esta acción?</p>
+    <!-- Modal Personalizada de Confirmación -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-card">
+            <h3 class="modal-title" id="modalTitulo">Confirmación</h3>
+            <p class="modal-body" id="modalMensaje">¿Estás seguro de realizar esta acción?</p>
             <div class="modal-actions">
-                <button id="btnModalCancelar" class="btn-secondary">Cancelar</button>
-                <button id="btnModalConfirmar" class="btn-danger">Confirmar</button>
+                <button class="btn-secondary" id="btnModalCancelar">Cancelar</button>
+                <button class="btn-primary" id="btnModalConfirmar">Confirmar</button>
             </div>
         </div>
     </div>
@@ -198,19 +206,19 @@
             });
         }
 
-        // --- COMUNICACIÓN CON BASE DE DATOS SERVIDOR (PHP + SQLite) ---
-        async function cargarDatosDesdeServidor() {
+        // --- COMUNICACIÓN CON BASE DE DATOS Y POLLING INTELIGENTE ---
+        async function cargarDatosDesdeServidor(silencioso = false) {
             try {
                 const response = await fetch('api.php?action=get_all');
                 const res = await response.json();
                 if (res.status === 'success') {
-                    prestamos = res.prestamos || [];
-                    historial = res.historial || [];
+                    const nuevosPrestamos = res.prestamos || [];
+                    const nuevoHistorial = res.historial || [];
 
-                    // Migración automática si existen datos previos en localStorage
+                    // Migración automática inicial desde localStorage si existían datos antiguos
                     const localP = JSON.parse(localStorage.getItem('prestamos')) || [];
                     const localH = JSON.parse(localStorage.getItem('historial')) || [];
-                    if (prestamos.length === 0 && historial.length === 0 && (localP.length > 0 || localH.length > 0)) {
+                    if (nuevosPrestamos.length === 0 && nuevoHistorial.length === 0 && (localP.length > 0 || localH.length > 0)) {
                         await fetch('api.php?action=importar_backup', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -222,14 +230,30 @@
                         return;
                     }
 
-                    renderizarTabla(buscador.value);
-                    renderizarHistorial();
-                } else {
-                    console.error('Error al cargar datos:', res.message);
+                    // Comprobar si realmente ha habido cambios para evitar parpadeos innecesarios
+                    const prestamosCambiados = JSON.stringify(prestamos) !== JSON.stringify(nuevosPrestamos);
+                    const historialCambiado = JSON.stringify(historial) !== JSON.stringify(nuevoHistorial);
+
+                    if (prestamosCambiados || historialCambiado || !silencioso) {
+                        prestamos = nuevosPrestamos;
+                        historial = nuevoHistorial;
+                        renderizarTabla(buscador.value);
+                        renderizarHistorial();
+                    }
                 }
             } catch (err) {
-                console.error('Error de conexión con el servidor:', err);
+                console.error('Error al sincronizar con el servidor:', err);
             }
+        }
+
+        // Iniciar actualización automática en tiempo real cada 5 segundos (5000 ms)
+        function iniciarAutoActualizacion() {
+            setInterval(() => {
+                // Solo auto-actualizar en segundo plano si el usuario no está editando un registro actualmente
+                if (idEdicion === null) {
+                    cargarDatosDesdeServidor(true);
+                }
+            }, 5000);
         }
 
         // --- COPIAS DE SEGURIDAD (JSON / CSV) ---
@@ -547,6 +571,7 @@
         inicializarTema();
         establecerFechaHoy();
         cargarDatosDesdeServidor();
+        iniciarAutoActualizacion();
     </script>
 </body>
 </html>
