@@ -55,8 +55,8 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="prestatario">Prestatario *</label>
-                                <input type="text" id="prestatario" class="form-control" required>
+                                <label for="prestatario">Prestatario</label>
+                                <input type="text" id="prestatario" class="form-control" placeholder="(opcional)">
                             </div>
                             <div class="form-group">
                                 <label for="observaciones">Observaciones / Estado</label>
@@ -382,11 +382,11 @@
             csvContent += "EstadoRegistro,Producto,Codigo,Categoria,Prestatario,Observaciones,FechaPrestamo,FechaDevolucion\n";
 
             prestamos.forEach(item => {
-                csvContent += `"Activo","${item.producto}","${item.codigo || ''}","${item.categoria || ''}","${item.prestatario}","${item.observaciones || ''}","${item.fecha}",""\n`;
+                csvContent += `"Activo","${item.producto}","${item.codigo || ''}","${item.categoria || ''}","${item.prestatario || ''}","${item.observaciones || ''}","${item.fecha}",""\n`;
             });
 
             historial.forEach(item => {
-                csvContent += `"Devuelto","${item.producto}","${item.codigo || ''}","${item.categoria || ''}","${item.prestatario}","${item.observaciones || ''}","${item.fecha}","${item.fechaDevolucion}"\n`;
+                csvContent += `"Devuelto","${item.producto}","${item.codigo || ''}","${item.categoria || ''}","${item.prestatario || ''}","${item.observaciones || ''}","${item.fecha}","${item.fechaDevolucion}"\n`;
             });
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -449,7 +449,7 @@
                 if (ordenActual === 'fecha-desc') return new Date(b.fecha) - new Date(a.fecha);
                 if (ordenActual === 'fecha-asc') return new Date(a.fecha) - new Date(b.fecha);
                 if (ordenActual === 'nombre-asc') return a.producto.localeCompare(b.producto);
-                if (ordenActual === 'prestatario-asc') return a.prestatario.localeCompare(b.prestatario);
+                if (ordenActual === 'prestatario-asc') return (a.prestatario || '').localeCompare(b.prestatario || '');
                 return 0;
             });
         }
@@ -460,7 +460,7 @@
             let prestamosFiltrados = prestamos.filter(item => {
                 const texto = filtroTexto.toLowerCase();
                 const coincideTexto = item.producto.toLowerCase().includes(texto) ||
-                                     item.prestatario.toLowerCase().includes(texto) ||
+                                     (item.prestatario && item.prestatario.toLowerCase().includes(texto)) ||
                                      (item.codigo && item.codigo.toLowerCase().includes(texto)) ||
                                      (item.categoria && item.categoria.toLowerCase().includes(texto)) ||
                                      (item.observaciones && item.observaciones.toLowerCase().includes(texto));
@@ -488,7 +488,7 @@
                     <td><strong>${item.producto}</strong></td>
                     <td>${item.codigo || '-'}</td>
                     <td>${catHTML}</td>
-                    <td>${item.prestatario}</td>
+                    <td>${item.prestatario || '-'}</td>
                     <td>${obsHTML}</td>
                     <td>${item.fecha}</td>
                     <td><span class="badge ${alerta.clase}">${alerta.texto}</span></td>
@@ -518,7 +518,7 @@
                     <td><strong>${item.producto}</strong></td>
                     <td>${item.codigo || '-'}</td>
                     <td>${catHTML}</td>
-                    <td>${item.prestatario}</td>
+                    <td>${item.prestatario || '-'}</td>
                     <td>${obsHTML}</td>
                     <td>${item.fecha}</td>
                     <td><span class="badge devuelto">${item.fechaDevolucion}</span></td>
@@ -534,7 +534,7 @@
             document.getElementById('producto').value = item.producto;
             document.getElementById('codigo').value = item.codigo || '';
             document.getElementById('categoria').value = item.categoria || '';
-            document.getElementById('prestatario').value = item.prestatario;
+            document.getElementById('prestatario').value = item.prestatario || '';
             document.getElementById('observaciones').value = item.observaciones || '';
             document.getElementById('fecha').value = item.fecha;
 
