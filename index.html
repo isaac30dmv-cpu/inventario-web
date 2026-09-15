@@ -62,19 +62,31 @@
             <form id="formPrestamo">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="producto">Producto</label>
+                        <label for="producto">Producto *</label>
                         <input type="text" id="producto" class="form-control" placeholder="Nombre del Producto" required>
                     </div>
                     <div class="form-group">
                         <label for="codigo">Código / Etiqueta</label>
-                        <input type="text" id="codigo" class="form-control" placeholder="Código Único">
+                        <input type="text" id="codigo" class="form-control" placeholder="Código Único (opcional)">
                     </div>
                     <div class="form-group">
-                        <label for="prestatario">Prestatario</label>
+                        <label for="categoria">Categoría</label>
+                        <select id="categoria" class="form-control">
+                            <option value="">-- Sin Categoría (opcional) --</option>
+                            <option value="Informática 💻">Informática 💻</option>
+                            <option value="Audiovisual 📹">Audiovisual 📹</option>
+                            <option value="Herramientas 🛠️">Herramientas 🛠️</option>
+                            <option value="Mobiliario 🪑">Mobiliario 🪑</option>
+                            <option value="Redes / Telecom 🌐">Redes / Telecom 🌐</option>
+                            <option value="Otros 📦">Otros 📦</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="prestatario">Prestatario *</label>
                         <input type="text" id="prestatario" class="form-control" placeholder="Nombre del Solicitante" required>
                     </div>
                     <div class="form-group">
-                        <label for="fecha">Fecha</label>
+                        <label for="fecha">Fecha *</label>
                         <input type="date" id="fecha" class="form-control" required>
                     </div>
                 </div>
@@ -112,7 +124,7 @@
                 </div>
 
                 <div class="search-container">
-                    <input type="text" id="buscador" class="search-input" placeholder="🔍 Buscar por producto, prestatario, código...">
+                    <input type="text" id="buscador" class="search-input" placeholder="🔍 Buscar por producto, prestatario, código, categoría...">
                 </div>
 
                 <div class="table-responsive">
@@ -121,6 +133,7 @@
                             <tr id="headerTablaActivos">
                                 <th>Producto 📦</th>
                                 <th>Código 🏷️</th>
+                                <th>Categoría 📂</th>
                                 <th>Prestatario 👤</th>
                                 <th>Fecha Préstamo 📅</th>
                                 <th>Estado / Alerta ⏰</th>
@@ -145,6 +158,7 @@
                             <tr>
                                 <th>Producto 📦</th>
                                 <th>Código 🏷️</th>
+                                <th>Categoría 📂</th>
                                 <th>Prestatario 👤</th>
                                 <th>Fecha Préstamo 📅</th>
                                 <th>Devuelto el 🔄</th>
@@ -340,14 +354,14 @@
             }
 
             let csvContent = "\uFEFF";
-            csvContent += "EstadoRegistro,Producto,Codigo,Prestatario,FechaPrestamo,FechaDevolucion\n";
+            csvContent += "EstadoRegistro,Producto,Codigo,Categoria,Prestatario,FechaPrestamo,FechaDevolucion\n";
 
             prestamos.forEach(item => {
-                csvContent += `"Activo","${item.producto}","${item.codigo || ''}","${item.prestatario}","${item.fecha}",""\n`;
+                csvContent += `"Activo","${item.producto}","${item.codigo || ''}","${item.categoria || ''}","${item.prestatario}","${item.fecha}",""\n`;
             });
 
             historial.forEach(item => {
-                csvContent += `"Devuelto","${item.producto}","${item.codigo || ''}","${item.prestatario}","${item.fecha}","${item.fechaDevolucion}"\n`;
+                csvContent += `"Devuelto","${item.producto}","${item.codigo || ''}","${item.categoria || ''}","${item.prestatario}","${item.fecha}","${item.fechaDevolucion}"\n`;
             });
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -424,7 +438,8 @@
                 const texto = filtroTexto.toLowerCase();
                 const coincideTexto = item.producto.toLowerCase().includes(texto) ||
                                      item.prestatario.toLowerCase().includes(texto) ||
-                                     (item.codigo && item.codigo.toLowerCase().includes(texto));
+                                     (item.codigo && item.codigo.toLowerCase().includes(texto)) ||
+                                     (item.categoria && item.categoria.toLowerCase().includes(texto));
 
                 const alerta = calcularAlerta(item.fecha);
                 const coincideEstado = (estadoFiltroActual === 'todos') || (alerta.estado === estadoFiltroActual);
@@ -435,7 +450,7 @@
             prestamosFiltrados = ordenarLista(prestamosFiltrados);
 
             if (prestamosFiltrados.length === 0) {
-                tabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 20px;">No se encontraron registros activos.</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 20px;">No se encontraron registros activos.</td></tr>`;
                 return;
             }
 
@@ -443,9 +458,12 @@
                 const alerta = calcularAlerta(item.fecha);
                 const fila = document.createElement('tr');
                 
+                const catHTML = item.categoria ? `<span class="badge-cat">${item.categoria}</span>` : '<span style="color:var(--text-muted);">-</span>';
+
                 fila.innerHTML = `
                     <td><strong>${item.producto}</strong></td>
                     <td>${item.codigo || '-'}</td>
+                    <td>${catHTML}</td>
                     <td>${item.prestatario}</td>
                     <td>${item.fecha}</td>
                     <td><span class="badge ${alerta.clase}">${alerta.texto}</span></td>
@@ -462,15 +480,18 @@
             tablaHistorial.innerHTML = '';
 
             if (historial.length === 0) {
-                tablaHistorial.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 20px;">No hay devoluciones registradas.</td></tr>`;
+                tablaHistorial.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 20px;">No hay devoluciones registradas.</td></tr>`;
                 return;
             }
 
             historial.forEach((item) => {
                 const fila = document.createElement('tr');
+                const catHTML = item.categoria ? `<span class="badge-cat">${item.categoria}</span>` : '<span style="color:var(--text-muted);">-</span>';
+
                 fila.innerHTML = `
                     <td><strong>${item.producto}</strong></td>
                     <td>${item.codigo || '-'}</td>
+                    <td>${catHTML}</td>
                     <td>${item.prestatario}</td>
                     <td>${item.fecha}</td>
                     <td><span class="badge devuelto">${item.fechaDevolucion}</span></td>
@@ -486,6 +507,7 @@
 
             document.getElementById('producto').value = item.producto;
             document.getElementById('codigo').value = item.codigo || '';
+            document.getElementById('categoria').value = item.categoria || '';
             document.getElementById('prestatario').value = item.prestatario;
             document.getElementById('fecha').value = item.fecha;
 
@@ -499,6 +521,7 @@
         function cancelarEdicion() {
             idEdicion = null;
             form.reset();
+            document.getElementById('categoria').value = '';
             establecerFechaHoy();
             formTitulo.innerText = "Añadir Nuevo Registro";
             btnGuardar.innerText = "Registrar Préstamo ➕";
@@ -554,6 +577,7 @@
             const datosGuardar = {
                 producto: document.getElementById('producto').value,
                 codigo: document.getElementById('codigo').value,
+                categoria: document.getElementById('categoria').value,
                 prestatario: document.getElementById('prestatario').value,
                 fecha: document.getElementById('fecha').value
             };
