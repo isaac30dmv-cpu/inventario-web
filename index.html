@@ -59,6 +59,10 @@
                                 <input type="text" id="prestatario" class="form-control" placeholder="Ej: Juan Pérez" required>
                             </div>
                             <div class="form-group">
+                                <label for="observaciones">Observaciones / Estado</label>
+                                <textarea id="observaciones" class="form-control" placeholder="Ej: Incluye cargador y funda. Pequeño golpe en lateral. (opcional)"></textarea>
+                            </div>
+                            <div class="form-group">
                                 <label for="fecha">Fecha *</label>
                                 <input type="date" id="fecha" class="form-control" required>
                             </div>
@@ -139,7 +143,7 @@
 
                         <div class="search-container">
                             <span class="search-icon">🔍</span>
-                            <input type="text" id="buscador" class="search-input" placeholder="Buscar por producto, prestatario, código, categoría...">
+                            <input type="text" id="buscador" class="search-input" placeholder="Buscar por producto, prestatario, código, categoría, notas...">
                         </div>
 
                         <div class="table-responsive">
@@ -150,6 +154,7 @@
                                         <th>Código</th>
                                         <th>Categoría</th>
                                         <th>Prestatario</th>
+                                        <th>Observaciones / Estado</th>
                                         <th>Fecha Préstamo</th>
                                         <th>Estado / Alerta</th>
                                         <th>Acción</th>
@@ -175,6 +180,7 @@
                                         <th>Código</th>
                                         <th>Categoría</th>
                                         <th>Prestatario</th>
+                                        <th>Observaciones / Estado</th>
                                         <th>Fecha Préstamo</th>
                                         <th>Devuelto El</th>
                                     </tr>
@@ -373,14 +379,14 @@
             }
 
             let csvContent = "\uFEFF";
-            csvContent += "EstadoRegistro,Producto,Codigo,Categoria,Prestatario,FechaPrestamo,FechaDevolucion\n";
+            csvContent += "EstadoRegistro,Producto,Codigo,Categoria,Prestatario,Observaciones,FechaPrestamo,FechaDevolucion\n";
 
             prestamos.forEach(item => {
-                csvContent += `"Activo","${item.producto}","${item.codigo || ''}","${item.categoria || ''}","${item.prestatario}","${item.fecha}",""\n`;
+                csvContent += `"Activo","${item.producto}","${item.codigo || ''}","${item.categoria || ''}","${item.prestatario}","${item.observaciones || ''}","${item.fecha}",""\n`;
             });
 
             historial.forEach(item => {
-                csvContent += `"Devuelto","${item.producto}","${item.codigo || ''}","${item.categoria || ''}","${item.prestatario}","${item.fecha}","${item.fechaDevolucion}"\n`;
+                csvContent += `"Devuelto","${item.producto}","${item.codigo || ''}","${item.categoria || ''}","${item.prestatario}","${item.observaciones || ''}","${item.fecha}","${item.fechaDevolucion}"\n`;
             });
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -456,7 +462,8 @@
                 const coincideTexto = item.producto.toLowerCase().includes(texto) ||
                                      item.prestatario.toLowerCase().includes(texto) ||
                                      (item.codigo && item.codigo.toLowerCase().includes(texto)) ||
-                                     (item.categoria && item.categoria.toLowerCase().includes(texto));
+                                     (item.categoria && item.categoria.toLowerCase().includes(texto)) ||
+                                     (item.observaciones && item.observaciones.toLowerCase().includes(texto));
 
                 const alerta = calcularAlerta(item.fecha);
                 const coincideEstado = (estadoFiltroActual === 'todos') || (alerta.estado === estadoFiltroActual);
@@ -467,7 +474,7 @@
             prestamosFiltrados = ordenarLista(prestamosFiltrados);
 
             if (prestamosFiltrados.length === 0) {
-                tabla.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 24px;">No se encontraron registros activos.</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--text-muted); padding: 24px;">No se encontraron registros activos.</td></tr>`;
                 return;
             }
 
@@ -475,12 +482,14 @@
                 const alerta = calcularAlerta(item.fecha);
                 const fila = document.createElement('tr');
                 const catHTML = item.categoria ? `<span class="badge-cat">${item.categoria}</span>` : '<span style="color:var(--text-muted);">-</span>';
+                const obsHTML = item.observaciones ? `<div class="obs-text" title="${item.observaciones}">${item.observaciones}</div>` : '<span style="color:var(--text-muted);">-</span>';
 
                 fila.innerHTML = `
                     <td><strong>${item.producto}</strong></td>
                     <td>${item.codigo || '-'}</td>
                     <td>${catHTML}</td>
                     <td>${item.prestatario}</td>
+                    <td>${obsHTML}</td>
                     <td>${item.fecha}</td>
                     <td><span class="badge ${alerta.clase}">${alerta.texto}</span></td>
                     <td class="actions-cell">
@@ -496,19 +505,21 @@
             tablaHistorial.innerHTML = '';
 
             if (historial.length === 0) {
-                tablaHistorial.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 24px;">No hay devoluciones registradas.</td></tr>`;
+                tablaHistorial.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 24px;">No hay devoluciones registradas.</td></tr>`;
                 return;
             }
 
             historial.forEach((item) => {
                 const fila = document.createElement('tr');
                 const catHTML = item.categoria ? `<span class="badge-cat">${item.categoria}</span>` : '<span style="color:var(--text-muted);">-</span>';
+                const obsHTML = item.observaciones ? `<div class="obs-text" title="${item.observaciones}">${item.observaciones}</div>` : '<span style="color:var(--text-muted);">-</span>';
 
                 fila.innerHTML = `
                     <td><strong>${item.producto}</strong></td>
                     <td>${item.codigo || '-'}</td>
                     <td>${catHTML}</td>
                     <td>${item.prestatario}</td>
+                    <td>${obsHTML}</td>
                     <td>${item.fecha}</td>
                     <td><span class="badge devuelto">${item.fechaDevolucion}</span></td>
                 `;
@@ -524,6 +535,7 @@
             document.getElementById('codigo').value = item.codigo || '';
             document.getElementById('categoria').value = item.categoria || '';
             document.getElementById('prestatario').value = item.prestatario;
+            document.getElementById('observaciones').value = item.observaciones || '';
             document.getElementById('fecha').value = item.fecha;
 
             idEdicion = id;
@@ -537,6 +549,7 @@
             idEdicion = null;
             form.reset();
             document.getElementById('categoria').value = '';
+            document.getElementById('observaciones').value = '';
             establecerFechaHoy();
             formTitulo.innerText = "➕ Nuevo Préstamo";
             btnGuardar.innerText = "Guardar Registro 💾";
@@ -594,6 +607,7 @@
                 codigo: document.getElementById('codigo').value,
                 categoria: document.getElementById('categoria').value,
                 prestatario: document.getElementById('prestatario').value,
+                observaciones: document.getElementById('observaciones').value,
                 fecha: document.getElementById('fecha').value
             };
 

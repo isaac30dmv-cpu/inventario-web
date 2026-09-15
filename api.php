@@ -14,7 +14,8 @@ try {
         codigo TEXT,
         prestatario TEXT NOT NULL,
         fecha TEXT NOT NULL,
-        categoria TEXT
+        categoria TEXT,
+        observaciones TEXT
     )");
 
     $db->exec("CREATE TABLE IF NOT EXISTS historial (
@@ -24,16 +25,15 @@ try {
         prestatario TEXT NOT NULL,
         fecha TEXT NOT NULL,
         fechaDevolucion TEXT NOT NULL,
-        categoria TEXT
+        categoria TEXT,
+        observaciones TEXT
     )");
 
-    // Asegurar que la columna 'categoria' existe en bases de datos creadas anteriormente
-    try {
-        $db->exec("ALTER TABLE prestamos ADD COLUMN categoria TEXT");
-    } catch (Exception $e) {}
-    try {
-        $db->exec("ALTER TABLE historial ADD COLUMN categoria TEXT");
-    } catch (Exception $e) {}
+    // Migraciones automáticas de columnas para bases de datos existentes
+    try { $db->exec("ALTER TABLE prestamos ADD COLUMN categoria TEXT"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE historial ADD COLUMN categoria TEXT"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE prestamos ADD COLUMN observaciones TEXT"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE historial ADD COLUMN observaciones TEXT"); } catch (Exception $e) {}
 
 } catch (PDOException $e) {
     echo json_encode(['status' => 'error', 'message' => 'Error de conexión a la base de datos: ' . $e->getMessage()]);
@@ -59,26 +59,28 @@ switch ($action) {
         break;
 
     case 'add_prestamo':
-        $stmt = $db->prepare("INSERT INTO prestamos (producto, codigo, prestatario, fecha, categoria) VALUES (:producto, :codigo, :prestatario, :fecha, :categoria)");
+        $stmt = $db->prepare("INSERT INTO prestamos (producto, codigo, prestatario, fecha, categoria, observaciones) VALUES (:producto, :codigo, :prestatario, :fecha, :categoria, :observaciones)");
         $stmt->execute([
             ':producto' => $input['producto'] ?? '',
             ':codigo' => $input['codigo'] ?? '',
             ':prestatario' => $input['prestatario'] ?? '',
             ':fecha' => $input['fecha'] ?? '',
-            ':categoria' => $input['categoria'] ?? ''
+            ':categoria' => $input['categoria'] ?? '',
+            ':observaciones' => $input['observaciones'] ?? ''
         ]);
         echo json_encode(['status' => 'success', 'id' => $db->lastInsertId()]);
         break;
 
     case 'edit_prestamo':
-        $stmt = $db->prepare("UPDATE prestamos SET producto = :producto, codigo = :codigo, prestatario = :prestatario, fecha = :fecha, categoria = :categoria WHERE id = :id");
+        $stmt = $db->prepare("UPDATE prestamos SET producto = :producto, codigo = :codigo, prestatario = :prestatario, fecha = :fecha, categoria = :categoria, observaciones = :observaciones WHERE id = :id");
         $stmt->execute([
             ':id' => $input['id'],
             ':producto' => $input['producto'] ?? '',
             ':codigo' => $input['codigo'] ?? '',
             ':prestatario' => $input['prestatario'] ?? '',
             ':fecha' => $input['fecha'] ?? '',
-            ':categoria' => $input['categoria'] ?? ''
+            ':categoria' => $input['categoria'] ?? '',
+            ':observaciones' => $input['observaciones'] ?? ''
         ]);
         echo json_encode(['status' => 'success']);
         break;
@@ -92,14 +94,15 @@ switch ($action) {
         $item = $stmtSelect->fetch(PDO::FETCH_ASSOC);
 
         if ($item) {
-            $stmtInsert = $db->prepare("INSERT INTO historial (producto, codigo, prestatario, fecha, fechaDevolucion, categoria) VALUES (:producto, :codigo, :prestatario, :fecha, :fechaDevolucion, :categoria)");
+            $stmtInsert = $db->prepare("INSERT INTO historial (producto, codigo, prestatario, fecha, fechaDevolucion, categoria, observaciones) VALUES (:producto, :codigo, :prestatario, :fecha, :fechaDevolucion, :categoria, :observaciones)");
             $stmtInsert->execute([
                 ':producto' => $item['producto'],
                 ':codigo' => $item['codigo'],
                 ':prestatario' => $item['prestatario'],
                 ':fecha' => $item['fecha'],
                 ':fechaDevolucion' => $fechaDevolucion,
-                ':categoria' => $item['categoria'] ?? ''
+                ':categoria' => $item['categoria'] ?? '',
+                ':observaciones' => $item['observaciones'] ?? ''
             ]);
 
             $stmtDelete = $db->prepare("DELETE FROM prestamos WHERE id = :id");
@@ -120,18 +123,19 @@ switch ($action) {
         $db->exec("DELETE FROM prestamos");
         $db->exec("DELETE FROM historial");
 
-        $stmtP = $db->prepare("INSERT INTO prestamos (producto, codigo, prestatario, fecha, categoria) VALUES (:producto, :codigo, :prestatario, :fecha, :categoria)");
+        $stmtP = $db->prepare("INSERT INTO prestamos (producto, codigo, prestatario, fecha, categoria, observaciones) VALUES (:producto, :codigo, :prestatario, :fecha, :categoria, :observaciones)");
         foreach ($input['prestamos'] as $item) {
             $stmtP->execute([
                 ':producto' => $item['producto'],
                 ':codigo' => $item['codigo'] ?? '',
                 ':prestatario' => $item['prestatario'],
                 ':fecha' => $item['fecha'],
-                ':categoria' => $item['categoria'] ?? ''
+                ':categoria' => $item['categoria'] ?? '',
+                ':observaciones' => $item['observaciones'] ?? ''
             ]);
         }
 
-        $stmtH = $db->prepare("INSERT INTO historial (producto, codigo, prestatario, fecha, fechaDevolucion, categoria) VALUES (:producto, :codigo, :prestatario, :fecha, :fechaDevolucion, :categoria)");
+        $stmtH = $db->prepare("INSERT INTO historial (producto, codigo, prestatario, fecha, fechaDevolucion, categoria, observaciones) VALUES (:producto, :codigo, :prestatario, :fecha, :fechaDevolucion, :categoria, :observaciones)");
         foreach ($input['historial'] as $item) {
             $stmtH->execute([
                 ':producto' => $item['producto'],
@@ -139,7 +143,8 @@ switch ($action) {
                 ':prestatario' => $item['prestatario'],
                 ':fecha' => $item['fecha'],
                 ':fechaDevolucion' => $item['fechaDevolucion'] ?? '',
-                ':categoria' => $item['categoria'] ?? ''
+                ':categoria' => $item['categoria'] ?? '',
+                ':observaciones' => $item['observaciones'] ?? ''
             ]);
         }
 
