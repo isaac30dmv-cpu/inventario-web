@@ -482,7 +482,11 @@
                 const alerta = calcularAlerta(item.fecha);
                 const fila = document.createElement('tr');
                 const catHTML = item.categoria ? `<span class="badge-cat">${item.categoria}</span>` : '<span style="color:var(--text-muted);">-</span>';
-                const obsHTML = item.observaciones ? `<div class="obs-text" title="${item.observaciones}">${item.observaciones}</div>` : '<span style="color:var(--text-muted);">-</span>';
+                
+                // Aplicamos white-space: pre-line aquí para mantener los saltos de línea
+                const obsHTML = item.observaciones 
+                    ? `<div class="obs-text" style="white-space: pre-line;" title="${item.observaciones}">${item.observaciones}</div>` 
+                    : '<span style="color:var(--text-muted);">-</span>';
 
                 fila.innerHTML = `
                     <td><strong>${item.producto}</strong></td>
@@ -512,7 +516,11 @@
             historial.forEach((item) => {
                 const fila = document.createElement('tr');
                 const catHTML = item.categoria ? `<span class="badge-cat">${item.categoria}</span>` : '<span style="color:var(--text-muted);">-</span>';
-                const obsHTML = item.observaciones ? `<div class="obs-text" title="${item.observaciones}">${item.observaciones}</div>` : '<span style="color:var(--text-muted);">-</span>';
+                
+                // Aplicamos white-space: pre-line aquí para mantener los saltos de línea
+                const obsHTML = item.observaciones 
+                    ? `<div class="obs-text" style="white-space: pre-line;" title="${item.observaciones}">${item.observaciones}</div>` 
+                    : '<span style="color:var(--text-muted);">-</span>';
 
                 fila.innerHTML = `
                     <td><strong>${item.producto}</strong></td>
