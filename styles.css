@@ -679,3 +679,47 @@ tr:last-child td { border-bottom: none; }
     .dashboard-grid { grid-template-columns: 1fr; }
     .controls-bar { flex-direction: column; align-items: flex-start; }
 }
+/* --- FIX DE LA TABLA Y BOTONES DE ACCIÓN --- */
+
+/* 1. Asegurar la estructura correcta de la tabla y sus filas */
+table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+}
+
+tbody tr {
+    display: table-row !important;
+}
+
+th, td {
+    display: table-cell !important;
+    vertical-align: middle !important; /* Centra todo el contenido verticalmente */
+}
+
+/* 2. Reintegrar la celda de acciones dentro de la fila */
+td.actions-cell {
+    position: static !important; /* Reintegra la celda a la tabla */
+    white-space: nowrap !important;
+    width: 1% !important; /* Mantiene la columna ajustada al tamaño de los botones */
+    padding: 12px 16px !important;
+}
+
+/* 3. Alinear los botones de forma horizontal y centrada */
+.actions-wrapper {
+    display: flex !important;
+    flex-direction: row !important; /* Fuerza la disposición horizontal */
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+}
+
+.btn-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 32px !important;
+    height: 32px !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+}
