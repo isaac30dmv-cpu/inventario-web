@@ -9,172 +9,187 @@
 <body>
 
     <div class="container">
-        <!-- Encabezado Principal -->
+        <!-- Cabecera Superior -->
         <header class="header-container">
             <div class="brand-title">
-                <span class="brand-icon">📦</span>
-                <h1>Gestión de Inventario</h1>
+                <div class="brand-icon">📦</div>
+                <h1>Panel de Inventario</h1>
             </div>
             <div class="header-actions">
                 <div class="live-indicator">
-                    <span class="live-dot"></span> En vivo
+                    <span class="live-dot"></span> Sincronizado
                 </div>
                 <button id="themeToggle" class="btn-theme" title="Cambiar tema">🌙</button>
             </div>
         </header>
 
-        <!-- Dashboard de Métricas -->
-        <section class="dashboard-grid">
-            <div class="stat-card activos">
-                <div class="stat-icon-wrapper">📦</div>
-                <div class="stat-info">
-                    <span class="stat-value" id="statTotalActivos">0</span>
-                    <span class="stat-label">Préstamos Activos</span>
-                </div>
-            </div>
-            <div class="stat-card alertas">
-                <div class="stat-icon-wrapper">⚠️</div>
-                <div class="stat-info">
-                    <span class="stat-value" id="statEnAlerta">0</span>
-                    <span class="stat-label">Equipos en Alerta</span>
-                </div>
-            </div>
-            <div class="stat-card devoluciones">
-                <div class="stat-icon-wrapper">📜</div>
-                <div class="stat-info">
-                    <span class="stat-value" id="statDevoluciones">0</span>
-                    <span class="stat-label">Devoluciones Totales</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Barra de Herramientas y Exportación -->
-        <section class="card security-bar">
-            <span class="security-title">💾 Copias de Seguridad & Exportación</span>
-            <div class="security-buttons">
-                <button class="btn-sec btn-json" onclick="exportarJSON()">📦 Copia JSON</button>
-                <button class="btn-sec btn-json" onclick="document.getElementById('jsonFileInput').click()">📥 Restaurar JSON</button>
-                <button class="btn-sec btn-csv" onclick="exportarCSV()">📄 Exportar Excel (CSV)</button>
-            </div>
-            <input type="file" id="jsonFileInput" accept=".json" style="display:none;" onchange="importarJSON(event)">
-        </section>
-
-        <!-- Formulario de Registro -->
-        <section class="card" id="cardFormulario">
-            <h2 class="card-title" id="formTitulo">Añadir Nuevo Registro</h2>
-            <form id="formPrestamo">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="producto">Producto *</label>
-                        <input type="text" id="producto" class="form-control" placeholder="Nombre del Producto" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="codigo">Código / Etiqueta</label>
-                        <input type="text" id="codigo" class="form-control" placeholder="Código Único (opcional)">
-                    </div>
-                    <div class="form-group">
-                        <label for="categoria">Categoría</label>
-                        <select id="categoria" class="form-control">
-                            <option value="">-- Sin Categoría (opcional) --</option>
-                            <option value="Informática 💻">Informática 💻</option>
-                            <option value="Audiovisual 📹">Audiovisual 📹</option>
-                            <option value="Herramientas 🛠️">Herramientas 🛠️</option>
-                            <option value="Mobiliario 🪑">Mobiliario 🪑</option>
-                            <option value="Redes / Telecom 🌐">Redes / Telecom 🌐</option>
-                            <option value="Otros 📦">Otros 📦</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="prestatario">Prestatario *</label>
-                        <input type="text" id="prestatario" class="form-control" placeholder="Nombre del Solicitante" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="fecha">Fecha *</label>
-                        <input type="date" id="fecha" class="form-control" required>
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" id="btnGuardar" class="btn-primary">Registrar Préstamo ➕</button>
-                    <button type="button" id="btnCancelar" class="btn-secondary" style="display:none;" onclick="cancelarEdicion()">Cancelar</button>
-                </div>
-            </form>
-        </section>
-
-        <!-- Panel Principal con Tablas -->
-        <main class="card">
-            <div class="tabs-header">
-                <button class="tab-btn active" id="btnTabActivos" onclick="cambiarPestana('activos')">Préstamos Activos 📋</button>
-                <button class="tab-btn" id="btnTabHistorial" onclick="cambiarPestana('historial')">Historial de Devoluciones 📜</button>
-            </div>
-
-            <!-- Pestaña: Préstamos Activos -->
-            <div id="tab-activos" class="tab-content active">
-                <div class="controls-bar">
-                    <div class="pills-group">
-                        <button class="pill-btn active" onclick="filtrarPorEstado('todos', this)">Todos</button>
-                        <button class="pill-btn" onclick="filtrarPorEstado('ok', this)">En Regla ✅</button>
-                        <button class="pill-btn" onclick="filtrarPorEstado('alerta', this)">En Alerta ⚠️</button>
-                    </div>
-                    <div class="sort-group">
-                        <label for="selectOrden">Ordenar por:</label>
-                        <select id="selectOrden" class="form-control" style="width: auto;" onchange="cambiarOrden(this.value)">
-                            <option value="fecha-desc">Fecha (Más reciente)</option>
-                            <option value="fecha-asc">Fecha (Más antigua)</option>
-                            <option value="nombre-asc">Producto (A-Z)</option>
-                            <option value="prestatario-asc">Prestatario (A-Z)</option>
-                        </select>
-                    </div>
+        <!-- Distribución Principal del Dashboard (2 Columnas) -->
+        <div class="app-grid">
+            
+            <!-- Columna Izquierda: Formulario & Herramientas -->
+            <aside class="sidebar-column">
+                
+                <!-- Formulario -->
+                <div class="card" id="cardFormulario">
+                    <h2 class="card-title" id="formTitulo">➕ Nuevo Préstamo</h2>
+                    <form id="formPrestamo">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="producto">Producto *</label>
+                                <input type="text" id="producto" class="form-control" placeholder="Ej: Portátil Dell" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="codigo">Código / Etiqueta</label>
+                                <input type="text" id="codigo" class="form-control" placeholder="Ej: PRT-004 (opcional)">
+                            </div>
+                            <div class="form-group">
+                                <label for="categoria">Categoría</label>
+                                <select id="categoria" class="form-control">
+                                    <option value="">-- Sin Categoría --</option>
+                                    <option value="Informática 💻">Informática 💻</option>
+                                    <option value="Audiovisual 📹">Audiovisual 📹</option>
+                                    <option value="Herramientas 🛠️">Herramientas 🛠️</option>
+                                    <option value="Mobiliario 🪑">Mobiliario 🪑</option>
+                                    <option value="Redes / Telecom 🌐">Redes / Telecom 🌐</option>
+                                    <option value="Otros 📦">Otros 📦</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="prestatario">Prestatario *</label>
+                                <input type="text" id="prestatario" class="form-control" placeholder="Ej: Juan Pérez" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="fecha">Fecha *</label>
+                                <input type="date" id="fecha" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" id="btnGuardar" class="btn-primary">Guardar Registro 💾</button>
+                            <button type="button" id="btnCancelar" class="btn-secondary" style="display:none;" onclick="cancelarEdicion()">Cancelar</button>
+                        </div>
+                    </form>
                 </div>
 
-                <div class="search-container">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="buscador" class="search-input" placeholder="Buscar por producto, prestatario, código, categoría...">
+                <!-- Herramientas de Seguridad -->
+                <div class="card security-bar">
+                    <h3 class="card-title" style="margin-bottom: 0;">💾 Copias de Seguridad</h3>
+                    <div class="security-buttons">
+                        <button class="btn-sec" onclick="exportarJSON()">📦 Descargar Backup JSON</button>
+                        <button class="btn-sec" onclick="document.getElementById('jsonFileInput').click()">📥 Restaurar Backup JSON</button>
+                        <button class="btn-sec" onclick="exportarCSV()">📄 Exportar a Excel (CSV)</button>
+                    </div>
+                    <input type="file" id="jsonFileInput" accept=".json" style="display:none;" onchange="importarJSON(event)">
                 </div>
 
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr id="headerTablaActivos">
-                                <th>Producto</th>
-                                <th>Código</th>
-                                <th>Categoría</th>
-                                <th>Prestatario</th>
-                                <th>Fecha Préstamo</th>
-                                <th>Estado / Alerta</th>
-                                <th>Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablaCuerpo">
-                            <!-- Inserción dinámica -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            </aside>
 
-            <!-- Pestaña: Historial de Devoluciones -->
-            <div id="tab-historial" class="tab-content">
-                <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
-                    <button class="btn-sec" style="color: #ef4444; border-color: #fca5a5;" onclick="solicitarVaciarHistorial()">🗑️ Vaciar Historial</button>
-                </div>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Código</th>
-                                <th>Categoría</th>
-                                <th>Prestatario</th>
-                                <th>Fecha Préstamo</th>
-                                <th>Devuelto El</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablaHistorial">
-                            <!-- Inserción dinámica -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
+            <!-- Columna Derecha: Métricas y Tabla Principal -->
+            <main class="main-column">
+                
+                <!-- Métricas Rápidas -->
+                <section class="dashboard-grid">
+                    <div class="stat-card activos">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="statTotalActivos">0</span>
+                            <span class="stat-label">Préstamos Activos</span>
+                        </div>
+                    </div>
+                    <div class="stat-card alertas">
+                        <div class="stat-icon">⚠️</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="statEnAlerta" style="color: #d97706;">0</span>
+                            <span class="stat-label">Equipos en Alerta</span>
+                        </div>
+                    </div>
+                    <div class="stat-card devoluciones">
+                        <div class="stat-icon">📜</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="statDevoluciones" style="color: #10b981;">0</span>
+                            <span class="stat-label">Devoluciones Totales</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Panel Principal de Registros -->
+                <section class="tabs-container">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" id="btnTabActivos" onclick="cambiarPestana('activos')">Préstamos Activos 📋</button>
+                        <button class="tab-btn" id="btnTabHistorial" onclick="cambiarPestana('historial')">Historial Devoluciones 📜</button>
+                    </div>
+
+                    <!-- Pestaña Activos -->
+                    <div id="tab-activos" class="tab-content active">
+                        <div class="controls-bar">
+                            <div class="pills-group">
+                                <button class="pill-btn active" onclick="filtrarPorEstado('todos', this)">Todos</button>
+                                <button class="pill-btn" onclick="filtrarPorEstado('ok', this)">En Regla ✅</button>
+                                <button class="pill-btn" onclick="filtrarPorEstado('alerta', this)">En Alerta ⚠️</button>
+                            </div>
+                            <div class="sort-group">
+                                <label for="selectOrden">Ordenar:</label>
+                                <select id="selectOrden" class="form-control" style="width: auto; padding: 8px 12px;" onchange="cambiarOrden(this.value)">
+                                    <option value="fecha-desc">Más reciente</option>
+                                    <option value="fecha-asc">Más antigua</option>
+                                    <option value="nombre-asc">Producto (A-Z)</option>
+                                    <option value="prestatario-asc">Prestatario (A-Z)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="search-container">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="buscador" class="search-input" placeholder="Buscar por producto, prestatario, código, categoría...">
+                        </div>
+
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Código</th>
+                                        <th>Categoría</th>
+                                        <th>Prestatario</th>
+                                        <th>Fecha Préstamo</th>
+                                        <th>Estado / Alerta</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaCuerpo">
+                                    <!-- Dinámico -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pestaña Historial -->
+                    <div id="tab-historial" class="tab-content">
+                        <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+                            <button class="btn-sec" style="color: #ef4444; border-color: #fca5a5; padding: 8px 14px;" onclick="solicitarVaciarHistorial()">🗑️ Vaciar Historial</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Código</th>
+                                        <th>Categoría</th>
+                                        <th>Prestatario</th>
+                                        <th>Fecha Préstamo</th>
+                                        <th>Devuelto El</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaHistorial">
+                                    <!-- Dinámico -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </section>
+
+            </main>
+        </div>
     </div>
 
     <!-- Modal Personalizada -->
@@ -260,7 +275,7 @@
             });
         }
 
-        // --- COMUNICACIÓN SERVIDOR Y POLLING ---
+        // --- SERVIDOR Y POLLING ---
         async function cargarDatosDesdeServidor(silencioso = false) {
             try {
                 const response = await fetch('api.php?action=get_all');
@@ -293,7 +308,7 @@
             }, 5000);
         }
 
-        // --- COPIAS DE SEGURIDAD ---
+        // --- BACKUPS ---
         function exportarJSON() {
             if (prestamos.length === 0 && historial.length === 0) {
                 alert("No hay datos para exportar.");
@@ -335,7 +350,7 @@
                             const res = await response.json();
                             if (res.status === 'success') {
                                 await cargarDatosDesdeServidor();
-                                alert("¡Copia de seguridad restaurada con éxito en el servidor! ✅");
+                                alert("¡Copia de seguridad restaurada con éxito! ✅");
                             } else {
                                 alert("Error al importar: " + res.message);
                             }
@@ -378,7 +393,7 @@
             document.body.removeChild(link);
         }
 
-        // --- NAVEGACIÓN Y FECHA ---
+        // --- TABLAS Y NAVEGACIÓN ---
         function cambiarPestana(pestana) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -403,15 +418,14 @@
             const mesesDiferencia = (hoy.getFullYear() - inicio.getFullYear()) * 12 + (hoy.getMonth() - inicio.getMonth());
 
             if (mesesDiferencia >= 12) {
-                return { texto: 'Atención Inmediata (12+ Meses) 🚨', clase: 'alerta-12', estado: 'alerta' };
+                return { texto: '12+ Meses 🚨', clase: 'alerta-12', estado: 'alerta' };
             } else if (mesesDiferencia >= 6) {
-                return { texto: 'Préstamo de 6+ Meses ⚠️', clase: 'alerta-6', estado: 'alerta' };
+                return { texto: '6+ Meses ⚠️', clase: 'alerta-6', estado: 'alerta' };
             } else {
                 return { texto: 'En Regla ✅', clase: 'normal', estado: 'ok' };
             }
         }
 
-        // --- FILTROS Y ORDENACIÓN ---
         function filtrarPorEstado(estado, elemento) {
             estadoFiltroActual = estado;
             document.querySelectorAll('.pill-btn').forEach(btn => btn.classList.remove('active'));
@@ -434,7 +448,6 @@
             });
         }
 
-        // --- RENDERIZADO DE TABLAS ---
         function renderizarTabla(filtroTexto = '') {
             tabla.innerHTML = '';
 
@@ -503,7 +516,6 @@
             });
         }
 
-        // --- ACCIONES CON EL SERVIDOR ---
         function editarPrestamo(id) {
             const item = prestamos.find(p => Number(p.id) === Number(id));
             if (!item) return;
@@ -515,9 +527,9 @@
             document.getElementById('fecha').value = item.fecha;
 
             idEdicion = id;
-            formTitulo.innerText = "Editar Registro ✏️";
+            formTitulo.innerText = "✏️ Editar Registro";
             btnGuardar.innerText = "Guardar Cambios 💾";
-            btnCancelar.style.display = "inline-block";
+            btnCancelar.style.display = "block";
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -526,8 +538,8 @@
             form.reset();
             document.getElementById('categoria').value = '';
             establecerFechaHoy();
-            formTitulo.innerText = "Añadir Nuevo Registro";
-            btnGuardar.innerText = "Registrar Préstamo ➕";
+            formTitulo.innerText = "➕ Nuevo Préstamo";
+            btnGuardar.innerText = "Guardar Registro 💾";
             btnCancelar.style.display = "none";
         }
 
@@ -546,7 +558,7 @@
                     if (idEdicion === id) cancelarEdicion();
                     await cargarDatosDesdeServidor();
                 } else {
-                    alert('Error al devolver el préstamo: ' + res.message);
+                    alert('Error al devolver: ' + res.message);
                 }
             } catch (err) {
                 console.error('Error al realizar devolución:', err);
@@ -557,7 +569,7 @@
             if (historial.length === 0) return;
             const confirmado = await mostrarModal(
                 'Vaciar Historial', 
-                '¿Estás seguro de que deseas eliminar permanentemente todos los registros del historial de devoluciones del servidor?'
+                '¿Estás seguro de que deseas eliminar permanentemente todos los registros del historial?'
             );
 
             if (confirmado) {
@@ -602,7 +614,7 @@
                     cancelarEdicion();
                     await cargarDatosDesdeServidor();
                 } else {
-                    alert('Error al guardar el registro: ' + res.message);
+                    alert('Error al guardar: ' + res.message);
                 }
             } catch (err) {
                 console.error('Error al conectar con la API:', err);
