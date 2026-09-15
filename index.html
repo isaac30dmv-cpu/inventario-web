@@ -227,6 +227,17 @@
         let estadoFiltroActual = 'todos';
         let ordenActual = 'fecha-desc';
 
+        // --- FUNCIÓN PARA FORMATEAR FECHAS A DD/MM/AAAA ---
+        function formatearFecha(fechaStr) {
+            if (!fechaStr) return '-';
+            if (fechaStr.includes('/')) return fechaStr; // Si ya usa barras, devolver tal cual
+            const partes = fechaStr.split('-');
+            if (partes.length === 3) {
+                return `${partes[2]}/${partes[1]}/${partes[0]}`; // AAAA-MM-DD -> DD/MM/AAAA
+            }
+            return fechaStr;
+        }
+
         // --- MODO OSCURO / CLARO ---
         function inicializarTema() {
             const temaGuardado = localStorage.getItem('theme');
@@ -382,11 +393,11 @@
             csvContent += "EstadoRegistro,Producto,Codigo,Categoria,Prestatario,Observaciones,FechaPrestamo,FechaDevolucion\n";
 
             prestamos.forEach(item => {
-                csvContent += `"Activo","${item.producto}","${item.codigo || ''}","${item.categoria || ''}","${item.prestatario || ''}","${item.observaciones || ''}","${item.fecha}",""\n`;
+                csvContent += `"Activo","${item.producto}","${item.codigo || ''}","${item.categoria || ''}","${item.prestatario || ''}","${item.observaciones || ''}","${formatearFecha(item.fecha)}",""\n`;
             });
 
             historial.forEach(item => {
-                csvContent += `"Devuelto","${item.producto}","${item.codigo || ''}","${item.categoria || ''}","${item.prestatario || ''}","${item.observaciones || ''}","${item.fecha}","${item.fechaDevolucion}"\n`;
+                csvContent += `"Devuelto","${item.producto}","${item.codigo || ''}","${item.categoria || ''}","${item.prestatario || ''}","${item.observaciones || ''}","${formatearFecha(item.fecha)}","${formatearFecha(item.fechaDevolucion)}"\n`;
             });
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -483,9 +494,8 @@
                 const fila = document.createElement('tr');
                 const catHTML = item.categoria ? `<span class="badge-cat">${item.categoria}</span>` : '<span style="color:var(--text-muted);">-</span>';
                 
-                // Aplicamos white-space: pre-line aquí para mantener los saltos de línea
                 const obsHTML = item.observaciones 
-                    ? `<div class="obs-text" style="white-space: pre-line;" title="${item.observaciones}">${item.observaciones}</div>` 
+                    ? `<div class="obs-text" style="white-space: pre-line; word-break: break-word;" title="${item.observaciones}">${item.observaciones}</div>` 
                     : '<span style="color:var(--text-muted);">-</span>';
 
                 fila.innerHTML = `
@@ -494,7 +504,7 @@
                     <td>${catHTML}</td>
                     <td>${item.prestatario || '-'}</td>
                     <td>${obsHTML}</td>
-                    <td>${item.fecha}</td>
+                    <td>${formatearFecha(item.fecha)}</td>
                     <td><span class="badge ${alerta.clase}">${alerta.texto}</span></td>
                     <td class="actions-cell">
                         <button class="btn-icon" title="Editar" onclick="editarPrestamo(${item.id})">✏️</button>
@@ -517,9 +527,8 @@
                 const fila = document.createElement('tr');
                 const catHTML = item.categoria ? `<span class="badge-cat">${item.categoria}</span>` : '<span style="color:var(--text-muted);">-</span>';
                 
-                // Aplicamos white-space: pre-line aquí para mantener los saltos de línea
                 const obsHTML = item.observaciones 
-                    ? `<div class="obs-text" style="white-space: pre-line;" title="${item.observaciones}">${item.observaciones}</div>` 
+                    ? `<div class="obs-text" style="white-space: pre-line; word-break: break-word;" title="${item.observaciones}">${item.observaciones}</div>` 
                     : '<span style="color:var(--text-muted);">-</span>';
 
                 fila.innerHTML = `
@@ -528,8 +537,8 @@
                     <td>${catHTML}</td>
                     <td>${item.prestatario || '-'}</td>
                     <td>${obsHTML}</td>
-                    <td>${item.fecha}</td>
-                    <td><span class="badge devuelto">${item.fechaDevolucion}</span></td>
+                    <td>${formatearFecha(item.fecha)}</td>
+                    <td><span class="badge devuelto">${formatearFecha(item.fechaDevolucion)}</span></td>
                 `;
                 tablaHistorial.appendChild(fila);
             });
@@ -566,7 +575,7 @@
 
         async function devolverPrestamo(id) {
             const hoy = new Date();
-            const fechaDevolucion = hoy.toLocaleDateString('es-ES');
+            const fechaDevolucion = hoy.toISOString().split('T')[0];
 
             try {
                 const response = await fetch('api.php?action=devolver_prestamo', {
