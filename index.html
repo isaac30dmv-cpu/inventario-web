@@ -230,10 +230,10 @@
         // --- FUNCIÓN PARA FORMATEAR FECHAS A DD/MM/AAAA ---
         function formatearFecha(fechaStr) {
             if (!fechaStr) return '-';
-            if (fechaStr.includes('/')) return fechaStr; // Si ya usa barras, devolver tal cual
+            if (fechaStr.includes('/')) return fechaStr;
             const partes = fechaStr.split('-');
             if (partes.length === 3) {
-                return `${partes[2]}/${partes[1]}/${partes[0]}`; // AAAA-MM-DD -> DD/MM/AAAA
+                return `${partes[2]}/${partes[1]}/${partes[0]}`;
             }
             return fechaStr;
         }
@@ -507,8 +507,10 @@
                     <td>${formatearFecha(item.fecha)}</td>
                     <td><span class="badge ${alerta.clase}">${alerta.texto}</span></td>
                     <td class="actions-cell">
-                        <button class="btn-icon" title="Editar" onclick="editarPrestamo(${item.id})">✏️</button>
-                        <button class="btn-icon" title="Devolver" onclick="devolverPrestamo(${item.id})">🔄</button>
+                        <div class="actions-wrapper">
+                            <button class="btn-icon" title="Editar" onclick="editarPrestamo(${item.id})">✏️</button>
+                            <button class="btn-icon" title="Devolver" onclick="devolverPrestamo(${item.id})">🔄</button>
+                        </div>
                     </td>
                 `;
                 tabla.appendChild(fila);
