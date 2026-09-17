@@ -53,7 +53,7 @@
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 22px;
+            gap: 24px;
         }
 
         /* Header UI */
@@ -118,8 +118,8 @@
         /* Layout Grid */
         .main-grid {
             display: grid;
-            grid-template-columns: 340px 1fr;
-            gap: 22px;
+            grid-template-columns: 360px 1fr;
+            gap: 24px;
         }
 
         @media (max-width: 1080px) {
@@ -131,49 +131,51 @@
         .card {
             background: var(--card-bg);
             border-radius: var(--radius-lg);
-            padding: 24px;
+            padding: 28px;
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-color);
         }
 
-        /* Sidebar Forms */
+        /* Formulario con espacio holgado */
         .form-section {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 22px; /* Mayor separación entre campos */
         }
 
         .form-section h3 {
-            font-size: 1.15rem;
+            font-size: 1.2rem;
             font-weight: 800;
             display: flex;
             align-items: center;
             gap: 8px;
             letter-spacing: -0.2px;
+            margin-bottom: 6px;
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px; /* Separación entre label e input */
         }
 
         .form-group label {
-            font-size: 0.72rem;
+            font-size: 0.74rem;
             font-weight: 800;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.6px;
+            margin-left: 2px;
         }
 
         .form-control {
             width: 100%;
-            padding: 11px 14px;
+            padding: 13px 16px; /* Más padding interno para los inputs */
             border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
             background: var(--card-bg);
             color: var(--text-color);
-            font-size: 0.9rem;
+            font-size: 0.92rem;
             outline: none;
             transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
@@ -185,24 +187,25 @@
 
         textarea.form-control {
             resize: vertical;
-            min-height: 70px;
+            min-height: 85px;
+            line-height: 1.4;
         }
 
         .btn-submit {
             background: var(--primary-color);
             color: white;
             border: none;
-            padding: 12px;
+            padding: 14px;
             border-radius: var(--radius-md);
             font-weight: 700;
-            font-size: 0.92rem;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: background-color 0.15s ease, transform 0.1s ease;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 8px;
-            margin-top: 4px;
+            margin-top: 8px;
         }
 
         .btn-submit:hover {
@@ -216,11 +219,11 @@
         .btn-secondary-btn {
             background: transparent;
             border: 1px solid var(--border-color);
-            padding: 10px 12px;
+            padding: 11px 14px;
             border-radius: var(--radius-md);
             color: var(--text-color);
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.88rem;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -240,7 +243,7 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 16px;
-            margin-bottom: 22px;
+            margin-bottom: 24px;
         }
 
         @media (max-width: 768px) {
@@ -289,7 +292,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* Tabs and Table section */
+        /* Tabs y Tablas */
         .tab-buttons {
             display: flex;
             gap: 12px;
@@ -382,7 +385,7 @@
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
         }
 
-        /* Table Design */
+        /* Tabla */
         .table-wrapper {
             overflow-x: auto;
             border-radius: var(--radius-md);
@@ -453,7 +456,7 @@
         body.dark-theme .badge-fisico-desperfecto { background: rgba(146, 64, 14, 0.3); color: #fbbf24; }
         body.dark-theme .badge-fisico-averiado { background: rgba(153, 27, 27, 0.3); color: #f87171; }
 
-        /* Action Buttons in Table */
+        /* Botones de acción */
         .btn-prestar-quick {
             background: rgba(79, 70, 229, 0.1);
             color: var(--primary-color);
@@ -608,11 +611,12 @@
 
     <!-- Content Grid -->
     <div class="main-grid">
-        <!-- Sidebar Left -->
+        <!-- Sidebar Formulario -->
         <div class="sidebar">
-            <div class="card form-section">
-                <h3 id="formTitulo">➕ Registrar Equipo</h3>
-                <form id="formPrestamo">
+            <div class="card">
+                <form id="formPrestamo" class="form-section">
+                    <h3 id="formTitulo">➕ Registrar Equipo</h3>
+
                     <div class="form-group">
                         <label>PRODUCTO / EQUIPO *</label>
                         <input type="text" id="producto" class="form-control" placeholder="Ej. Arduino Uno, Taladro, Monitor" required>
@@ -666,8 +670,8 @@
                         <input type="date" id="fecha" class="form-control" required>
                     </div>
 
-                    <button type="submit" id="btnGuardar" class="btn-submit" style="width: 100%;">Guardar Equipo 💾</button>
-                    <button type="button" id="btnCancelar" class="btn-secondary-btn" style="display: none; margin-top: 8px;" onclick="cancelarEdicion()">Cancelar Edición</button>
+                    <button type="submit" id="btnGuardar" class="btn-submit">Guardar Equipo 💾</button>
+                    <button type="button" id="btnCancelar" class="btn-secondary-btn" style="display: none;" onclick="cancelarEdicion()">Cancelar Edición</button>
                 </form>
             </div>
 
@@ -1230,7 +1234,6 @@
         });
     }
 
-    // Prestar Rápido: Prestatario OPCIONAL
     async function prestarRapido(id) {
         const item = prestamos.find(p => String(p.id) === String(id));
         if (!item) return;
@@ -1253,7 +1256,6 @@
         await guardarEnServidor(datosActualizados, 'api.php?action=edit_prestamo');
     }
 
-    // Eliminar Equipo del Almacén / Inventario
     async function eliminarPrestamo(id) {
         const item = prestamos.find(p => String(p.id) === String(id));
         if (!item) return;
