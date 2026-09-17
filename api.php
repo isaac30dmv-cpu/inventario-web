@@ -1,153 +1,107 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 
-$dbFile = __DIR__ . '/inventario.db';
+$file = 'datos.json';
 
-try {
-    $db = new PDO("sqlite:" . $dbFile);
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Crear tablas si no existen
-    $db->exec("CREATE TABLE IF NOT EXISTS prestamos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        producto TEXT NOT NULL,
-        codigo TEXT,
-        prestatario TEXT NOT NULL,
-        fecha TEXT NOT NULL,
-        categoria TEXT,
-        observaciones TEXT
-    )");
-
-    $db->exec("CREATE TABLE IF NOT EXISTS historial (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        producto TEXT NOT NULL,
-        codigo TEXT,
-        prestatario TEXT NOT NULL,
-        fecha TEXT NOT NULL,
-        fechaDevolucion TEXT NOT NULL,
-        categoria TEXT,
-        observaciones TEXT
-    )");
-
-    // Migraciones automáticas de columnas para bases de datos existentes
-    try { $db->exec("ALTER TABLE prestamos ADD COLUMN categoria TEXT"); } catch (Exception $e) {}
-    try { $db->exec("ALTER TABLE historial ADD COLUMN categoria TEXT"); } catch (Exception $e) {}
-    try { $db->exec("ALTER TABLE prestamos ADD COLUMN observaciones TEXT"); } catch (Exception $e) {}
-    try { $db->exec("ALTER TABLE historial ADD COLUMN observaciones TEXT"); } catch (Exception $e) {}
-
-} catch (PDOException $e) {
-    echo json_encode(['status' => 'error', 'message' => 'Error de conexión a la base de datos: ' . $e->getMessage()]);
-    exit;
+// Si no existe el archivo JSON, lo creamos con estructura vacía
+if (!file_exists($file)) {
+    $initialData = ['prestamos' => [], 'historial' => []];
+    file_put_contents($file, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }
 
+$data = json_decode(file_get_contents($file), true) ?: ['prestamos' => [], 'historial' => []];
 $action = $_GET['action'] ?? '';
-$input = json_decode(file_get_contents('php://input'), true) ?? [];
+
+// Leer cuerpo de la petición en JSON
+$input = json_decode(file_get_contents('php://input'), true);
 
 switch ($action) {
+
     case 'get_all':
-        $stmtP = $db->query("SELECT * FROM prestamos ORDER BY id DESC");
-        $prestamos = $stmtP->fetchAll(PDO::FETCH_ASSOC);
-
-        $stmtH = $db->query("SELECT * FROM historial ORDER BY id DESC");
-        $historial = $stmtH->fetchAll(PDO::FETCH_ASSOC);
-
-        echo json_encode([
-            'status' => 'success',
-            'prestamos' => $prestamos,
-            'historial' => $historial
-        ]);
+        echo json_encode(['status' => 'success', 'prestamos' => $data['prestamos'], 'historial' => $data['historial']]);
         break;
 
     case 'add_prestamo':
-        $stmt = $db->prepare("INSERT INTO prestamos (producto, codigo, prestatario, fecha, categoria, observaciones) VALUES (:producto, :codigo, :prestatario, :fecha, :categoria, :observaciones)");
-        $stmt->execute([
-            ':producto' => $input['producto'] ?? '',
-            ':codigo' => $input['codigo'] ?? '',
-            ':prestatario' => $input['prestatario'] ?? '',
-            ':fecha' => $input['fecha'] ?? '',
-            ':categoria' => $input['categoria'] ?? '',
-            ':observaciones' => $input['observaciones'] ?? ''
-        ]);
-        echo json_encode(['status' => 'success', 'id' => $db->lastInsertId()]);
+        if (!empty($input['producto'])) {
+            $nuevoItem = [
+                'id' => time() . rand(100, 999),
+                'producto' => trim($input['producto']),
+                'codigo' => trim($input['codigo'] ?? ''),
+                'categoria' => trim($input['categoria'] ?? ''),
+                'estadoDisponibilidad' => trim($input['estadoDisponibilidad'] ?? 'disponible'),
+                'prestatario' => trim($input['prestatario'] ?? ''),
+                'estadoFisico' => trim($input['estadoFisico'] ?? 'operativo'),
+                'observaciones' => trim($input['observaciones'] ?? ''),
+                'fecha' => $input['fecha'] ?? date('Y-m-d')
+            ];
+            
+            array_unshift($data['prestamos'], $nuevoItem);
+            file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            echo json_encode(['status' => 'success', 'item' => $nuevoItem]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'El nombre del producto es obligatorio.']);
+        }
         break;
 
     case 'edit_prestamo':
-        $stmt = $db->prepare("UPDATE prestamos SET producto = :producto, codigo = :codigo, prestatario = :prestatario, fecha = :fecha, categoria = :categoria, observaciones = :observaciones WHERE id = :id");
-        $stmt->execute([
-            ':id' => $input['id'],
-            ':producto' => $input['producto'] ?? '',
-            ':codigo' => $input['codigo'] ?? '',
-            ':prestatario' => $input['prestatario'] ?? '',
-            ':fecha' => $input['fecha'] ?? '',
-            ':categoria' => $input['categoria'] ?? '',
-            ':observaciones' => $input['observaciones'] ?? ''
-        ]);
-        echo json_encode(['status' => 'success']);
+        if (!empty($input['id'])) {
+            $encontrado = false;
+            foreach ($data['prestamos'] as &$item) {
+                if ($item['id'] == $input['id']) {
+                    $item['producto'] = trim($input['producto']);
+                    $item['codigo'] = trim($input['codigo'] ?? '');
+                    $item['categoria'] = trim($input['categoria'] ?? '');
+                    $item['estadoDisponibilidad'] = trim($input['estadoDisponibilidad'] ?? 'disponible');
+                    $item['prestatario'] = trim($input['prestatario'] ?? '');
+                    $item['estadoFisico'] = trim($input['estadoFisico'] ?? 'operativo');
+                    $item['observaciones'] = trim($input['observaciones'] ?? '');
+                    $item['fecha'] = $input['fecha'];
+                    $encontrado = true;
+                    break;
+                }
+            }
+            if ($encontrado) {
+                file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+                echo json_encode(['status' => 'success']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Equipo no encontrado.']);
+            }
+        }
         break;
 
     case 'devolver_prestamo':
-        $id = $input['id'] ?? 0;
-        $fechaDevolucion = $input['fechaDevolucion'] ?? date('d/m/Y');
+        if (!empty($input['id'])) {
+            $idDevolver = $input['id'];
+            $fechaDev = $input['fechaDevolucion'] ?? date('Y-m-d');
 
-        $stmtSelect = $db->prepare("SELECT * FROM prestamos WHERE id = :id");
-        $stmtSelect->execute([':id' => $id]);
-        $item = $stmtSelect->fetch(PDO::FETCH_ASSOC);
+            foreach ($data['prestamos'] as $item) {
+                if ($item['id'] == $idDevolver) {
+                    $itemHistorial = $item;
+                    $itemHistorial['fechaDevolucion'] = $fechaDev;
+                    array_unshift($data['historial'], $itemHistorial);
+                    break;
+                }
+            }
 
-        if ($item) {
-            $stmtInsert = $db->prepare("INSERT INTO historial (producto, codigo, prestatario, fecha, fechaDevolucion, categoria, observaciones) VALUES (:producto, :codigo, :prestatario, :fecha, :fechaDevolucion, :categoria, :observaciones)");
-            $stmtInsert->execute([
-                ':producto' => $item['producto'],
-                ':codigo' => $item['codigo'],
-                ':prestatario' => $item['prestatario'],
-                ':fecha' => $item['fecha'],
-                ':fechaDevolucion' => $fechaDevolucion,
-                ':categoria' => $item['categoria'] ?? '',
-                ':observaciones' => $item['observaciones'] ?? ''
-            ]);
+            file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            echo json_encode(['status' => 'success']);
+        }
+        break;
 
-            $stmtDelete = $db->prepare("DELETE FROM prestamos WHERE id = :id");
-            $stmtDelete->execute([':id' => $id]);
-
+    case 'importar_backup':
+        if (isset($input['prestamos']) && isset($input['historial'])) {
+            $data['prestamos'] = $input['prestamos'];
+            $data['historial'] = $input['historial'];
+            file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
             echo json_encode(['status' => 'success']);
         } else {
-            echo json_encode(['status' => 'error', 'message' => 'Registro no encontrado.']);
+            echo json_encode(['status' => 'error', 'message' => 'Estructura de copia no válida.']);
         }
         break;
 
     case 'vaciar_historial':
-        $db->exec("DELETE FROM historial");
-        echo json_encode(['status' => 'success']);
-        break;
-
-    case 'importar_backup':
-        $db->exec("DELETE FROM prestamos");
-        $db->exec("DELETE FROM historial");
-
-        $stmtP = $db->prepare("INSERT INTO prestamos (producto, codigo, prestatario, fecha, categoria, observaciones) VALUES (:producto, :codigo, :prestatario, :fecha, :categoria, :observaciones)");
-        foreach ($input['prestamos'] as $item) {
-            $stmtP->execute([
-                ':producto' => $item['producto'],
-                ':codigo' => $item['codigo'] ?? '',
-                ':prestatario' => $item['prestatario'],
-                ':fecha' => $item['fecha'],
-                ':categoria' => $item['categoria'] ?? '',
-                ':observaciones' => $item['observaciones'] ?? ''
-            ]);
-        }
-
-        $stmtH = $db->prepare("INSERT INTO historial (producto, codigo, prestatario, fecha, fechaDevolucion, categoria, observaciones) VALUES (:producto, :codigo, :prestatario, :fecha, :fechaDevolucion, :categoria, :observaciones)");
-        foreach ($input['historial'] as $item) {
-            $stmtH->execute([
-                ':producto' => $item['producto'],
-                ':codigo' => $item['codigo'] ?? '',
-                ':prestatario' => $item['prestatario'],
-                ':fecha' => $item['fecha'],
-                ':fechaDevolucion' => $item['fechaDevolucion'] ?? '',
-                ':categoria' => $item['categoria'] ?? '',
-                ':observaciones' => $item['observaciones'] ?? ''
-            ]);
-        }
-
+        $data['historial'] = [];
+        file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         echo json_encode(['status' => 'success']);
         break;
 
@@ -155,3 +109,4 @@ switch ($action) {
         echo json_encode(['status' => 'error', 'message' => 'Acción no válida.']);
         break;
 }
+?>
