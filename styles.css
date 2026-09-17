@@ -264,7 +264,7 @@ td {
 }
 
 /* Grupos y Desplegables */
-.group-header-row { background: var(--input-bg) !important; font-weight: 900; }
+.group-header-row { background: var(--input-bg) !important; cursor: pointer; }
 .group-header-row:hover { background: var(--border-color) !important; }
 .group-header-cell { padding: 14px 16px !important; font-weight: 900; font-size: 0.95rem; }
 .group-arrow { margin-right: 8px; font-size: 0.9rem; }

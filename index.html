@@ -3,731 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Inventario y Préstamos 50/50</title>
+    <title>Gestor de Inventario y Préstamos</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
     <div class="container">
-        <!-- Cabecera Superior -->
+        <!-- Cabecera Principal -->
         <header class="header-container">
             <div class="brand-title">
-                <div class="brand-icon">📦</div>
-                <h1>Gestor de Inventario y Préstamos</h1>
+                <h1>📦 Gestor de Inventario y Préstamos</h1>
             </div>
             <div class="header-actions">
                 <div class="live-indicator">
-                    <span class="live-dot"></span> Sincronizado
+                    <span class="live-dot"></span> <span id="statusText">Sincronizado</span>
                 </div>
-                <button id="themeToggle" class="btn-theme" title="Cambiar tema">🌙</button>
+                <button class="btn-theme" id="btnThemeToggle" onclick="toggleTheme()" title="Cambiar Tema">🌙</button>
             </div>
         </header>
 
-        <!-- Distribución Principal -->
+        <!-- Cuadrícula Principal -->
         <div class="app-grid">
-            
-            <!-- Columna Izquierda: Formulario y Herramientas -->
-            <aside class="sidebar-column">
-                
+            <!-- Columna Izquierda: Formulario + Copias de Seguridad -->
+            <aside class="sidebar">
                 <!-- Formulario -->
-                <div class="card" id="cardFormulario">
-                    <h2 class="card-title" id="formTitulo">➕ Registrar Equipo</h2>
-                    <form id="formPrestamo">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="producto">Producto / Equipo *</label>
-                                <input type="text" id="producto" class="form-control" placeholder="Ej. Arduino Uno, Taladro, Monitor" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="codigo">Código / Etiqueta</label>
-                                <input type="text" id="codigo" class="form-control" placeholder="Ej. MISE-AUQ-114">
-                            </div>
-                            <div class="form-group">
-                                <label for="categoria">Categoría</label>
-                                <select id="categoria" class="form-control">
-                                    <option value="">-- Sin Categoría --</option>
-                                    <option value="Informática 💻">Informática 💻</option>
-                                    <option value="Audiovisual 📹">Audiovisual 📹</option>
-                                    <option value="Herramientas 🛠️">Herramientas 🛠️</option>
-                                    <option value="Mobiliario 🪑">Mobiliario 🪑</option>
-                                    <option value="Redes / Telecom 🌐">Redes / Telecom 🌐</option>
-                                    <option value="Otros 📦">Otros 📦</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="estadoDisponibilidad">Situación Actual *</label>
-                                <select id="estadoDisponibilidad" class="form-control" onchange="togglePrestatario()">
-                                    <option value="disponible">🟢 En Almacén (Disponible)</option>
-                                    <option value="prestado">🤝 En Préstamo</option>
-                                </select>
-                            </div>
-                            <div class="form-group" id="groupPrestatario" style="display:none;">
-                                <label for="prestatario">Prestatario / Asignado a</label>
-                                <input type="text" id="prestatario" class="form-control" placeholder="Nombre de la persona o aula">
-                            </div>
-                            <div class="form-group">
-                                <label for="estadoFisico">Estado Físico del Equipo</label>
-                                <select id="estadoFisico" class="form-control">
-                                    <option value="operativo">🟢 Operativo / Listo</option>
-                                    <option value="desperfecto">🟡 Con marcas / Falta accesorio</option>
-                                    <option value="averiado">🔴 Averiado / En reparación</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="observaciones">Observaciones / Notas</label>
-                                <textarea id="observaciones" class="form-control" placeholder="Notas sobre el estado, cables incluidos..."></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="fecha">Fecha Registro / Préstamo *</label>
-                                <input type="date" id="fecha" class="form-control" required>
-                            </div>
+                <div class="card">
+                    <h2 class="card-title" id="formTitle">➕ Registrar Equipo</h2>
+                    <form id="equipoForm" onsubmit="guardarEquipo(event)" class="form-grid">
+                        <input type="hidden" id="equipoId">
+                        
+                        <div class="form-group">
+                            <label for="productoInput">Producto / Equipo *</label>
+                            <input type="text" id="productoInput" class="form-control" placeholder="Ej. PC, Monitor, Taladro" required>
                         </div>
+
+                        <div class="form-group">
+                            <label for="codigoInput">Código / Etiqueta</label>
+                            <input type="text" id="codigoInput" class="form-control" placeholder="Ej. MISE-AUQ-114">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="categoriaSelect">Categoría</label>
+                            <select id="categoriaSelect" class="form-control">
+                                <option value="">-- Sin Categoría --</option>
+                                <option value="Informática">Informática</option>
+                                <option value="Herramientas">Herramientas</option>
+                                <option value="Audiovisual">Audiovisual</option>
+                                <option value="Electrónica">Electrónica</option>
+                                <option value="Otros">Otros</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="situacionSelect">Situación Actual *</label>
+                            <select id="situacionSelect" class="form-control" onchange="togglePrestatarioField()" required>
+                                <option value="disponible">🟢 En Almacén (Disponible)</option>
+                                <option value="prestado">🤝 Prestado</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="prestatarioGroup">
+                            <label for="prestatarioInput">Prestatario / Aula (Opcional)</label>
+                            <input type="text" id="prestatarioInput" class="form-control" placeholder="Ej. Juan Pérez, Aula 102">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="estadoFisicoSelect">Estado Físico del Equipo</label>
+                            <select id="estadoFisicoSelect" class="form-control">
+                                <option value="operativo">🟢 Operativo / Listo</option>
+                                <option value="desperfecto">🟡 Con Desperfectos</option>
+                                <option value="averiado">🔴 Averiado / Fuera de servicio</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="observacionesInput">Observaciones / Notas</label>
+                            <textarea id="observacionesInput" class="form-control" placeholder="Notas sobre el estado, cables incluidos..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fechaInput">Fecha Registro / Préstamo *</label>
+                            <input type="date" id="fechaInput" class="form-control" required>
+                        </div>
+
                         <div class="form-actions">
-                            <button type="submit" id="btnGuardar" class="btn-primary">Guardar Equipo 💾</button>
-                            <button type="button" id="btnCancelar" class="btn-secondary" style="display:none;" onclick="cancelarEdicion()">Cancelar</button>
+                            <button type="submit" class="btn-primary" id="btnSubmitForm">Guardar Equipo 💾</button>
+                            <button type="button" class="btn-secondary" id="btnCancelEdit" style="display:none;" onclick="cancelarEdicion()">Cancelar</button>
                         </div>
                     </form>
                 </div>
 
-                <!-- Herramientas de Seguridad -->
-                <div class="card security-bar">
-                    <h3 class="card-title" style="margin-bottom: 0;">💾 Copias de Seguridad</h3>
+                <!-- Copias de Seguridad -->
+                <div class="card">
+                    <h2 class="card-title">💾 Copias de Seguridad</h2>
                     <div class="security-buttons">
-                        <button class="btn-sec" onclick="exportarJSON()">📦 Descargar Backup JSON</button>
-                        <button class="btn-sec" onclick="document.getElementById('jsonFileInput').click()">📥 Restaurar Backup JSON</button>
-                        <button class="btn-sec" onclick="exportarCSV()">📄 Exportar a Excel (CSV)</button>
+                        <button class="btn-sec" onclick="descargarBackup()">📦 Descargar Backup JSON</button>
+                        <button class="btn-sec" onclick="document.getElementById('inputRestaurar').click()">📥 Restaurar Backup JSON</button>
+                        <input type="file" id="inputRestaurar" accept=".json" style="display:none" onchange="restaurarBackup(event)">
+                        <button class="btn-sec" onclick="exportarCSV()">📊 Exportar a Excel (CSV)</button>
                     </div>
-                    <input type="file" id="jsonFileInput" accept=".json" style="display:none;" onchange="importarJSON(event)">
                 </div>
-
             </aside>
 
-            <!-- Columna Derecha: Métricas 50/50 y Tabla -->
-            <main class="main-column">
-                
-                <!-- Métricas Híbridas (Mejora 3) -->
-                <section class="dashboard-grid">
-                    <div class="stat-card activos">
+            <!-- Columna Derecha: Dashboard y Tablas -->
+            <main class="main-content">
+                <!-- Métricas (4 en una sola fila) -->
+                <div class="dashboard-grid">
+                    <div class="stat-card">
                         <div class="stat-icon">📦</div>
                         <div class="stat-info">
-                            <span class="stat-value" id="statTotalActivos">0</span>
+                            <span class="stat-value" id="statTotal">0</span>
                             <span class="stat-label">Total Equipos</span>
                         </div>
                     </div>
-                    <div class="stat-card disponibles">
+                    <div class="stat-card">
                         <div class="stat-icon">🟢</div>
                         <div class="stat-info">
-                            <span class="stat-value" id="statEnAlmacen" style="color: #10b981;">0</span>
+                            <span class="stat-value" id="statAlmacen">0</span>
                             <span class="stat-label">En Almacén</span>
                         </div>
                     </div>
-                    <div class="stat-card prestados">
+                    <div class="stat-card">
                         <div class="stat-icon">🤝</div>
                         <div class="stat-info">
-                            <span class="stat-value" id="statEnPrestamo" style="color: #2563eb;">0</span>
+                            <span class="stat-value" id="statPrestados">0</span>
                             <span class="stat-label">En Préstamo</span>
                         </div>
                     </div>
-                    <div class="stat-card alertas">
+                    <div class="stat-card">
                         <div class="stat-icon">⚠️</div>
                         <div class="stat-info">
-                            <span class="stat-value" id="statEnAlerta" style="color: #d97706;">0</span>
+                            <span class="stat-value" id="statAlertas">0</span>
                             <span class="stat-label">Préstamos en Alerta</span>
                         </div>
                     </div>
-                </section>
+                </div>
 
-                <!-- Panel Principal de Registros -->
-                <section class="tabs-container">
+                <!-- Contenedor Principal con Pestañas -->
+                <div class="tabs-container">
                     <div class="tabs-header">
-                        <button class="tab-btn active" id="btnTabActivos" onclick="cambiarPestana('activos')">Inventario de Equipos 📋</button>
-                        <button class="tab-btn" id="btnTabHistorial" onclick="cambiarPestana('historial')">Historial de Devoluciones 📜</button>
+                        <button class="tab-btn active" onclick="cambiarTab('inventario')">Inventario de Equipos 📋</button>
+                        <button class="tab-btn" onclick="cambiarTab('historial')">Historial de Devoluciones 📜</button>
                     </div>
 
-                    <!-- Pestaña Activos -->
-                    <div id="tab-activos" class="tab-content active">
-                        <!-- Filtros Rápidos (Mejora 4) -->
+                    <!-- Pestaña Inventario -->
+                    <div id="tabInventario" class="tab-content active">
+                        <!-- Filtros y Orden -->
                         <div class="controls-bar">
                             <div class="pills-group">
-                                <button class="pill-btn active" onclick="filtrarPorEstado('todos', this)">Todos</button>
-                                <button class="pill-btn" onclick="filtrarPorEstado('disponible', this)">🟢 En Almacén</button>
-                                <button class="pill-btn" onclick="filtrarPorEstado('prestado', this)">🤝 En Préstamo</button>
-                                <button class="pill-btn" onclick="filtrarPorEstado('averiado', this)">🔴 Averiados</button>
-                                <button class="pill-btn" onclick="filtrarPorEstado('alerta', this)">⚠️ En Alerta</button>
+                                <button class="pill-btn active" onclick="filtrarEstado('todos', this)">Todos</button>
+                                <button class="pill-btn" onclick="filtrarEstado('disponible', this)">🟢 En Almacén</button>
+                                <button class="pill-btn" onclick="filtrarEstado('prestado', this)">🤝 En Préstamo</button>
+                                <button class="pill-btn" onclick="filtrarEstado('averiado', this)">🔴 Averiados</button>
+                                <button class="pill-btn" onclick="filtrarEstado('alerta', this)">⚠️ En Alerta</button>
                             </div>
                             <div class="sort-group">
-                                <label for="selectOrden">Ordenar:</label>
-                                <select id="selectOrden" class="form-control" style="width: auto; padding: 8px 12px;" onchange="cambiarOrden(this.value)">
-                                    <option value="nombre-asc">Producto (A-Z)</option>
-                                    <option value="fecha-desc">Más reciente</option>
-                                    <option value="fecha-asc">Más antigua</option>
+                                <label for="sortSelect">Ordenar:</label>
+                                <select id="sortSelect" class="form-control" style="width: auto;" onchange="renderizar()">
+                                    <option value="producto-asc">Producto (A-Z)</option>
+                                    <option value="producto-desc">Producto (Z-A)</option>
+                                    <option value="fecha-desc">Más Recientes</option>
+                                    <option value="fecha-asc">Más Antiguos</option>
                                 </select>
                             </div>
                         </div>
 
+                        <!-- Buscador -->
                         <div class="search-container">
                             <span class="search-icon">🔍</span>
-                            <input type="text" id="buscador" class="search-input" placeholder="Buscar por producto, código, prestatario, notas...">
+                            <input type="text" id="searchInput" class="search-input" placeholder="Buscar por producto, código, prestatario, notas..." oninput="renderizar()">
                         </div>
 
+                        <!-- Tabla de Inventario -->
                         <div class="table-responsive">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Producto</th>
-                                        <th>Código</th>
-                                        <th>Categoría</th>
-                                        <th>Estado Físico</th>
-                                        <th>Situación / Prestatario</th>
-                                        <th>Fecha Reg./Préstamo</th>
-                                        <th>Alerta</th>
-                                        <th>Acción</th>
+                                        <th>PRODUCTO</th>
+                                        <th>CÓDIGO</th>
+                                        <th>CATEGORÍA</th>
+                                        <th>ESTADO FÍSICO</th>
+                                        <th>SITUACIÓN / PRESTATARIO</th>
+                                        <th>FECHA REG./PRÉSTAMO</th>
+                                        <th>ALERTA</th>
+                                        <th>ACCIÓN</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tablaCuerpo">
-                                    <!-- Dinámico -->
+                                <tbody id="tablaInventarioBody">
+                                    <!-- Filas generadas dinámicamente -->
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
                     <!-- Pestaña Historial -->
-                    <div id="tab-historial" class="tab-content">
-                        <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
-                            <button class="btn-sec" style="color: #ef4444; border-color: #fca5a5; padding: 8px 14px;" onclick="solicitarVaciarHistorial()">🗑️ Vaciar Historial</button>
+                    <div id="tabHistorial" class="tab-content">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                            <p style="color:var(--text-muted); font-weight:700;">Registro histórico de equipos devueltos al almacén.</p>
+                            <button class="btn-secondary" onclick="vaciarHistorial()">🗑️ Vaciar Historial</button>
                         </div>
                         <div class="table-responsive">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Producto</th>
-                                        <th>Código</th>
-                                        <th>Categoría</th>
-                                        <th>Último Prestatario</th>
-                                        <th>Observaciones</th>
-                                        <th>Fecha Préstamo</th>
-                                        <th>Devuelto El</th>
+                                        <th>PRODUCTO</th>
+                                        <th>CÓDIGO</th>
+                                        <th>CATEGORÍA</th>
+                                        <th>PRESTATARIO</th>
+                                        <th>FECHA PRÉSTAMO</th>
+                                        <th>FECHA DEVOLUCIÓN</th>
+                                        <th>ESTADO</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tablaHistorial">
-                                    <!-- Dinámico -->
+                                <tbody id="tablaHistorialBody">
+                                    <!-- Filas del historial -->
                                 </tbody>
                             </table>
                         </div>
                     </div>
-
-                </section>
-
+                </div>
             </main>
         </div>
     </div>
 
-    <!-- Modal Personalizada -->
-    <div class="modal-overlay" id="modalOverlay">
+    <!-- Modal Personalizado para Prestar Equipo -->
+    <div id="modalPrestar" class="modal-overlay">
         <div class="modal-card">
-            <h3 class="modal-title" id="modalTitulo">Confirmación</h3>
-            <p class="modal-body" id="modalMensaje">¿Estás seguro de realizar esta acción?</p>
+            <h3 class="modal-title">🤝 Prestar Equipo</h3>
+            <p class="modal-body">Indica el nombre del prestatario o aula. Si lo dejas en blanco, se registrará sin prestatario.</p>
+            
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="prestatarioModalInput">Prestatario / Destino (Opcional)</label>
+                <input type="text" id="prestatarioModalInput" class="form-control" placeholder="Ej. Juan Pérez, Aula 102 (Opcional)">
+            </div>
+
             <div class="modal-actions">
-                <button class="btn-secondary" id="btnModalCancelar">Cancelar</button>
-                <button class="btn-primary" id="btnModalConfirmar">Confirmar</button>
+                <button type="button" class="btn-secondary" onclick="cerrarModalPrestar()">Cancelar</button>
+                <button type="button" class="btn-primary" style="width:auto;" onclick="confirmarPrestamoRapido()">Confirmar Préstamo</button>
             </div>
         </div>
     </div>
 
-    <script>
-        const form = document.getElementById('formPrestamo');
-        const tabla = document.getElementById('tablaCuerpo');
-        const tablaHistorial = document.getElementById('tablaHistorial');
-        const buscador = document.getElementById('buscador');
-        const fechaInput = document.getElementById('fecha');
-        const formTitulo = document.getElementById('formTitulo');
-        const btnGuardar = document.getElementById('btnGuardar');
-        const btnCancelar = document.getElementById('btnCancelar');
-        const themeToggle = document.getElementById('themeToggle');
-
-        let prestamos = [];
-        let historial = [];
-        let idEdicion = null;
-        let estadoFiltroActual = 'todos';
-        let ordenActual = 'nombre-asc';
-        let gruposAbiertos = new Set();
-
-        function togglePrestatario() {
-            const situacion = document.getElementById('estadoDisponibilidad').value;
-            const groupPrestatario = document.getElementById('groupPrestatario');
-            if (situacion === 'prestado') {
-                groupPrestatario.style.display = 'block';
-            } else {
-                groupPrestatario.style.display = 'none';
-            }
-        }
-
-        function formatearFecha(fechaStr) {
-            if (!fechaStr) return '-';
-            if (fechaStr.includes('/')) return fechaStr;
-            const partes = fechaStr.split('-');
-            if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
-            return fechaStr;
-        }
-
-        function inicializarTema() {
-            const temaGuardado = localStorage.getItem('theme');
-            if (temaGuardado === 'dark') {
-                document.body.classList.add('dark-theme');
-                themeToggle.innerText = '☀️';
-            } else {
-                themeToggle.innerText = '🌙';
-            }
-        }
-
-        themeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-theme');
-            const esOscuro = document.body.classList.contains('dark-theme');
-            localStorage.setItem('theme', esOscuro ? 'dark' : 'light');
-            themeToggle.innerText = esOscuro ? '☀️' : '🌙';
-        });
-
-        function actualizarEstadisticas() {
-            const total = prestamos.length;
-            const enAlmacen = prestamos.filter(item => (item.estadoDisponibilidad || 'prestado') === 'disponible').length;
-            const enPrestamo = prestamos.filter(item => (item.estadoDisponibilidad || 'prestado') === 'prestado').length;
-            const enAlerta = prestamos.filter(item => (item.estadoDisponibilidad || 'prestado') === 'prestado' && calcularAlerta(item.fecha).estado === 'alerta').length;
-
-            document.getElementById('statTotalActivos').innerText = total;
-            document.getElementById('statEnAlmacen').innerText = enAlmacen;
-            document.getElementById('statEnPrestamo').innerText = enPrestamo;
-            document.getElementById('statEnAlerta').innerText = enAlerta;
-        }
-
-        function mostrarModal(titulo, mensaje) {
-            return new Promise((resolve) => {
-                const overlay = document.getElementById('modalOverlay');
-                document.getElementById('modalTitulo').innerText = titulo;
-                document.getElementById('modalMensaje').innerText = mensaje;
-                overlay.classList.add('active');
-
-                const cerrar = (res) => {
-                    overlay.classList.remove('active');
-                    document.getElementById('btnModalConfirmar').onclick = null;
-                    document.getElementById('btnModalCancelar').onclick = null;
-                    resolve(res);
-                };
-
-                document.getElementById('btnModalConfirmar').onclick = () => cerrar(true);
-                document.getElementById('btnModalCancelar').onclick = () => cerrar(false);
-            });
-        }
-
-        async function cargarDatosDesdeServidor(silencioso = false) {
-            try {
-                const response = await fetch('api.php?action=get_all');
-                const res = await response.json();
-                if (res.status === 'success') {
-                    const nuevosPrestamos = res.prestamos || [];
-                    const nuevoHistorial = res.historial || [];
-
-                    if (JSON.stringify(prestamos) !== JSON.stringify(nuevosPrestamos) || JSON.stringify(historial) !== JSON.stringify(nuevoHistorial) || !silencioso) {
-                        prestamos = nuevosPrestamos;
-                        historial = nuevoHistorial;
-                        renderizarTabla(buscador.value);
-                        renderizarHistorial();
-                        actualizarEstadisticas();
-                    }
-                }
-            } catch (err) {
-                console.error('Error al sincronizar con el servidor:', err);
-            }
-        }
-
-        function iniciarAutoActualizacion() {
-            setInterval(() => {
-                if (idEdicion === null) cargarDatosDesdeServidor(true);
-            }, 5000);
-        }
-
-        function exportarJSON() {
-            if (prestamos.length === 0 && historial.length === 0) {
-                alert("No hay datos para exportar.");
-                return;
-            }
-            const backupData = { fechaBackup: new Date().toISOString(), prestamos, historial };
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
-            const anchor = document.createElement('a');
-            anchor.setAttribute("href", dataStr);
-            anchor.setAttribute("download", `backup_inventario_${new Date().toISOString().split('T')[0]}.json`);
-            document.body.appendChild(anchor);
-            anchor.click();
-            anchor.remove();
-        }
-
-        function importarJSON(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async function(event) {
-                try {
-                    const data = JSON.parse(event.target.result);
-                    if (Array.isArray(data.prestamos) && Array.isArray(data.historial)) {
-                        if (await mostrarModal("Restaurar Copia", "¿Deseas reemplazar la base de datos con esta copia?")) {
-                            const response = await fetch('api.php?action=importar_backup', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(data)
-                            });
-                            const res = await response.json();
-                            if (res.status === 'success') {
-                                await cargarDatosDesdeServidor();
-                                alert("¡Copia restaurada con éxito! ✅");
-                            }
-                        }
-                    }
-                } catch (err) { alert("Error al procesar el JSON."); }
-            };
-            reader.readAsText(file);
-            e.target.value = '';
-        }
-
-        function exportarCSV() {
-            if (prestamos.length === 0 && historial.length === 0) return alert("Sin datos.");
-            let csv = "\uFEFFEstado,Producto,Codigo,Categoria,Situacion,Prestatario,EstadoFisico,Observaciones,Fecha\n";
-            prestamos.forEach(i => {
-                csv += `"${i.estadoDisponibilidad || 'prestado'}","${i.producto}","${i.codigo||''}","${i.categoria||''}","${i.estadoDisponibilidad === 'disponible' ? 'En Almacén' : 'Prestado'}","${i.prestatario||''}","${i.estadoFisico||'operativo'}","${i.observaciones||''}","${formatearFecha(i.fecha)}"\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `inventario_5050_${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-        }
-
-        function cambiarPestana(p) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            if (p === 'activos') {
-                document.getElementById('btnTabActivos').classList.add('active');
-                document.getElementById('tab-activos').classList.add('active');
-            } else {
-                document.getElementById('btnTabHistorial').classList.add('active');
-                document.getElementById('tab-historial').classList.add('active');
-            }
-        }
-
-        function establecerFechaHoy() {
-            fechaInput.value = new Date().toISOString().split('T')[0];
-        }
-
-        function calcularAlerta(fecha) {
-            if (!fecha) return { texto: '-', clase: 'normal', estado: 'ok' };
-            const hoy = new Date();
-            const inicio = new Date(fecha);
-            const meses = (hoy.getFullYear() - inicio.getFullYear()) * 12 + (hoy.getMonth() - inicio.getMonth());
-            if (meses >= 12) return { texto: '12+ Meses 🚨', clase: 'alerta-12', estado: 'alerta' };
-            if (meses >= 6) return { texto: '6+ Meses ⚠️', clase: 'alerta-6', estado: 'alerta' };
-            return { texto: 'En Regla ✅', clase: 'normal', estado: 'ok' };
-        }
-
-        function filtrarPorEstado(estado, el) {
-            estadoFiltroActual = estado;
-            document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
-            el.classList.add('active');
-            renderizarTabla(buscador.value);
-        }
-
-        function cambiarOrden(criterio) {
-            ordenActual = criterio;
-            renderizarTabla(buscador.value);
-        }
-
-        function ordenarLista(lista) {
-            return lista.sort((a, b) => {
-                if (ordenActual === 'fecha-desc') return new Date(b.fecha) - new Date(a.fecha);
-                if (ordenActual === 'fecha-asc') return new Date(a.fecha) - new Date(b.fecha);
-                if (ordenActual === 'nombre-asc') return a.producto.localeCompare(b.producto);
-                return 0;
-            });
-        }
-
-        function toggleGrupo(clave) {
-            if (gruposAbiertos.has(clave)) gruposAbiertos.delete(clave);
-            else gruposAbiertos.add(clave);
-            renderizarTabla(buscador.value);
-        }
-
-        function renderizarTabla(filtroTexto = '') {
-            tabla.innerHTML = '';
-
-            let filtrados = prestamos.filter(item => {
-                const texto = filtroTexto.toLowerCase();
-                const disp = item.estadoDisponibilidad || 'prestado';
-                const fis = item.estadoFisico || 'operativo';
-
-                const coincideTexto = item.producto.toLowerCase().includes(texto) ||
-                                     (item.codigo && item.codigo.toLowerCase().includes(texto)) ||
-                                     (item.prestatario && item.prestatario.toLowerCase().includes(texto)) ||
-                                     (item.observaciones && item.observaciones.toLowerCase().includes(texto));
-
-                let coincideEstado = true;
-                if (estadoFiltroActual === 'disponible') coincideEstado = (disp === 'disponible');
-                else if (estadoFiltroActual === 'prestado') coincideEstado = (disp === 'prestado');
-                else if (estadoFiltroActual === 'averiado') coincideEstado = (fis === 'averiado');
-                else if (estadoFiltroActual === 'alerta') coincideEstado = (disp === 'prestado' && calcularAlerta(item.fecha).estado === 'alerta');
-
-                return coincideTexto && coincideEstado;
-            });
-
-            filtrados = ordenarLista(filtrados);
-
-            if (filtrados.length === 0) {
-                tabla.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--text-muted); padding: 24px;">No se encontraron registros.</td></tr>`;
-                return;
-            }
-
-            // Agrupar por Producto
-            const grupos = {};
-            filtrados.forEach(item => {
-                const clave = item.producto.trim().toLowerCase();
-                if (!grupos[clave]) grupos[clave] = { nombre: item.producto, items: [] };
-                grupos[clave].items.push(item);
-            });
-
-            Object.keys(grupos).forEach(clave => {
-                const grupo = grupos[clave];
-                let estaAbierto = gruposAbiertos.has(clave) || filtroTexto.trim() !== '';
-                const flecha = estaAbierto ? '🔽' : '▶️';
-                const cantidad = grupo.items.length;
-
-                // Contar disponibilidad en el grupo
-                const dispCount = grupo.items.filter(i => (i.estadoDisponibilidad || 'prestado') === 'disponible').length;
-                const prestCount = cantidad - dispCount;
-
-                const filaGrupo = document.createElement('tr');
-                filaGrupo.className = 'group-header-row';
-                filaGrupo.style.cursor = 'pointer';
-                filaGrupo.onclick = () => toggleGrupo(clave);
-                filaGrupo.innerHTML = `
-                    <td colspan="8" class="group-header-cell" style="padding: 12px 16px;">
-                        <span class="group-arrow">${flecha}</span>
-                        <strong>${grupo.nombre}</strong>
-                        <span class="badge-count" style="background:#2563eb; color:#fff; font-size:0.75rem; padding:3px 9px; border-radius:12px; margin-left:10px; font-weight:700;">${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}</span>
-                        <span style="font-size:0.8rem; margin-left: 10px; color: var(--text-muted);">(${dispCount} en almacén 🟢 | ${prestCount} prestados 🤝)</span>
-                        <span class="group-hint" style="float: right; font-size: 0.8rem; opacity: 0.7;">${estaAbierto ? 'Clic para plegar ▲' : 'Clic para desplegar unidades ▼'}</span>
-                    </td>
-                `;
-                tabla.appendChild(filaGrupo);
-
-                if (estaAbierto) {
-                    grupo.items.forEach(item => {
-                        const disp = item.estadoDisponibilidad || 'prestado';
-                        const fis = item.estadoFisico || 'operativo';
-                        const alerta = disp === 'prestado' ? calcularAlerta(item.fecha) : { texto: '-', clase: 'normal' };
-
-                        // Badge Estado Físico
-                        let badgeFisico = '<span class="badge badge-fisico-operativo">🟢 Operativo</span>';
-                        if (fis === 'desperfecto') badgeFisico = '<span class="badge badge-fisico-desperfecto">🟡 Con Marcas</span>';
-                        if (fis === 'averiado') badgeFisico = '<span class="badge badge-fisico-averiado">🔴 Averiado</span>';
-
-                        // Columna Situación
-                        let situacionHTML = '';
-                        if (disp === 'disponible') {
-                            situacionHTML = `<span class="badge badge-disponible">🟢 En Almacén</span>`;
-                        } else {
-                            situacionHTML = `<span class="badge badge-prestado">🤝 Prestado</span>` + (item.prestatario ? `<br><small>👤 <strong>${item.prestatario}</strong></small>` : '');
-                        }
-
-                        // Botón de Acción Dinámico (Prestar vs Devolver)
-                        let btnAccionRapida = '';
-                        if (disp === 'disponible') {
-                            btnAccionRapida = `<button class="btn-prestar-quick" title="Prestar este equipo" onclick="prestarRapido(${item.id})">🤝 Prestar</button>`;
-                        } else {
-                            btnAccionRapida = `<button class="btn-icon" title="Devolver al Almacén" onclick="devolverPrestamo(${item.id})">🔄</button>`;
-                        }
-
-                        const catHTML = item.categoria ? `<span class="badge-cat">${item.categoria}</span>` : '-';
-                        const fila = document.createElement('tr');
-                        fila.className = 'child-row';
-
-                        fila.innerHTML = `
-                            <td style="padding-left: 28px;"><strong>${item.producto}</strong></td>
-                            <td><code>${item.codigo || '-'}</code></td>
-                            <td>${catHTML}</td>
-                            <td>${badgeFisico}</td>
-                            <td>${situacionHTML}</td>
-                            <td>${formatearFecha(item.fecha)}</td>
-                            <td><span class="badge ${alerta.clase}">${alerta.texto}</span></td>
-                            <td class="actions-cell">
-                                <div class="actions-wrapper">
-                                    ${btnAccionRapida}
-                                    <button class="btn-icon" title="Editar" onclick="editarPrestamo(${item.id})">✏️</button>
-                                </div>
-                            </td>
-                        `;
-                        tabla.appendChild(fila);
-                    });
-                }
-            });
-        }
-
-        function renderizarHistorial() {
-            tablaHistorial.innerHTML = '';
-            if (historial.length === 0) {
-                tablaHistorial.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 24px;">No hay devoluciones registradas.</td></tr>`;
-                return;
-            }
-            historial.forEach((item) => {
-                const fila = document.createElement('tr');
-                const catHTML = item.categoria ? `<span class="badge-cat">${item.categoria}</span>` : '-';
-                fila.innerHTML = `
-                    <td><strong>${item.producto}</strong></td>
-                    <td>${item.codigo || '-'}</td>
-                    <td>${catHTML}</td>
-                    <td>${item.prestatario || '-'}</td>
-                    <td>${item.observaciones || '-'}</td>
-                    <td>${formatearFecha(item.fecha)}</td>
-                    <td><span class="badge devuelto">${formatearFecha(item.fechaDevolucion)}</span></td>
-                `;
-                tablaHistorial.appendChild(fila);
-            });
-        }
-
-        async function prestarRapido(id) {
-            const persona = prompt("¿A quién se le presta este equipo? (Nombre de la persona o aula):");
-            if (!persona || persona.trim() === '') return;
-
-            const item = prestamos.find(p => Number(p.id) === Number(id));
-            if (!item) return;
-
-            const datosActualizados = {
-                ...item,
-                estadoDisponibilidad: 'prestado',
-                prestatario: persona.trim(),
-                fecha: new Date().toISOString().split('T')[0]
-            };
-
-            await guardarEnServidor(datosActualizados, 'api.php?action=edit_prestamo');
-        }
-
-        async function devolverPrestamo(id) {
-            const hoy = new Date().toISOString().split('T')[0];
-            const item = prestamos.find(p => Number(p.id) === Number(id));
-
-            try {
-                // Registrar en historial de devoluciones
-                await fetch('api.php?action=devolver_prestamo', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: id, fechaDevolucion: hoy })
-                });
-
-                // Cambiar el producto de nuevo a "disponible" en almacén
-                if (item) {
-                    const datosDevuelto = {
-                        ...item,
-                        estadoDisponibilidad: 'disponible',
-                        prestatario: ''
-                    };
-                    await guardarEnServidor(datosDevuelto, 'api.php?action=edit_prestamo');
-                } else {
-                    await cargarDatosDesdeServidor();
-                }
-            } catch (err) {
-                console.error('Error al realizar devolución:', err);
-            }
-        }
-
-        function editarPrestamo(id) {
-            const item = prestamos.find(p => Number(p.id) === Number(id));
-            if (!item) return;
-
-            document.getElementById('producto').value = item.producto;
-            document.getElementById('codigo').value = item.codigo || '';
-            document.getElementById('categoria').value = item.categoria || '';
-            document.getElementById('estadoDisponibilidad').value = item.estadoDisponibilidad || 'prestado';
-            document.getElementById('prestatario').value = item.prestatario || '';
-            document.getElementById('estadoFisico').value = item.estadoFisico || 'operativo';
-            document.getElementById('observaciones').value = item.observaciones || '';
-            document.getElementById('fecha').value = item.fecha;
-
-            togglePrestatario();
-
-            idEdicion = id;
-            formTitulo.innerText = "✏️ Editar Equipo";
-            btnGuardar.innerText = "Guardar Cambios 💾";
-            btnCancelar.style.display = "block";
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function cancelarEdicion() {
-            idEdicion = null;
-            form.reset();
-            document.getElementById('categoria').value = '';
-            document.getElementById('estadoDisponibilidad').value = 'disponible';
-            document.getElementById('estadoFisico').value = 'operativo';
-            togglePrestatario();
-            establecerFechaHoy();
-            formTitulo.innerText = "➕ Registrar Equipo";
-            btnGuardar.innerText = "Guardar Equipo 💾";
-            btnCancelar.style.display = "none";
-        }
-
-        async function guardarEnServidor(datos, url) {
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(datos)
-                });
-                const res = await response.json();
-                if (res.status === 'success') {
-                    if (idEdicion !== null) cancelarEdicion();
-                    await cargarDatosDesdeServidor();
-                } else {
-                    alert('Error al guardar: ' + res.message);
-                }
-            } catch (err) {
-                console.error('Error al conectar con la API:', err);
-            }
-        }
-
-        async function solicitarVaciarHistorial() {
-            if (historial.length === 0) return;
-            if (await mostrarModal('Vaciar Historial', '¿Eliminar permanentemente todo el historial?')) {
-                await fetch('api.php?action=vaciar_historial', { method: 'POST' });
-                await cargarDatosDesdeServidor();
-            }
-        }
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const datosGuardar = {
-                producto: document.getElementById('producto').value,
-                codigo: document.getElementById('codigo').value,
-                categoria: document.getElementById('categoria').value,
-                estadoDisponibilidad: document.getElementById('estadoDisponibilidad').value,
-                prestatario: document.getElementById('prestatario').value,
-                estadoFisico: document.getElementById('estadoFisico').value,
-                observaciones: document.getElementById('observaciones').value,
-                fecha: document.getElementById('fecha').value
-            };
-
-            let url = 'api.php?action=add_prestamo';
-            if (idEdicion !== null) {
-                url = 'api.php?action=edit_prestamo';
-                datosGuardar.id = idEdicion;
-            }
-
-            await guardarEnServidor(datosGuardar, url);
-        });
-
-        buscador.addEventListener('input', (e) => renderizarTabla(e.target.value));
-
-        // Inicializar
-        inicializarTema();
-        togglePrestatario();
-        establecerFechaHoy();
-        cargarDatosDesdeServidor();
-        iniciarAutoActualizacion();
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
