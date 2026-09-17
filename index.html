@@ -140,7 +140,7 @@
         .form-section {
             display: flex;
             flex-direction: column;
-            gap: 22px; /* Mayor separación entre campos */
+            gap: 22px;
         }
 
         .form-section h3 {
@@ -156,7 +156,7 @@
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 8px; /* Separación entre label e input */
+            gap: 8px;
         }
 
         .form-group label {
@@ -170,7 +170,7 @@
 
         .form-control {
             width: 100%;
-            padding: 13px 16px; /* Más padding interno para los inputs */
+            padding: 13px 16px;
             border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
             background: var(--card-bg);
@@ -456,17 +456,34 @@
         body.dark-theme .badge-fisico-desperfecto { background: rgba(146, 64, 14, 0.3); color: #fbbf24; }
         body.dark-theme .badge-fisico-averiado { background: rgba(153, 27, 27, 0.3); color: #f87171; }
 
-        /* Botones de acción */
-        .btn-prestar-quick {
-            background: rgba(79, 70, 229, 0.1);
-            color: var(--primary-color);
-            border: 1px solid rgba(79, 70, 229, 0.2);
-            padding: 6px 12px;
+        /* Botones de acción alineados y normalizados */
+        .actions-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: nowrap;
+        }
+
+        .btn-prestar-quick, .btn-devolver-quick {
+            height: 32px;
+            padding: 0 12px;
             border-radius: var(--radius-sm);
             cursor: pointer;
             font-weight: 700;
             font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
             transition: all 0.15s ease;
+            box-sizing: border-box;
+        }
+
+        .btn-prestar-quick {
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary-color);
+            border: 1px solid rgba(79, 70, 229, 0.2);
         }
 
         .btn-prestar-quick:hover {
@@ -474,15 +491,36 @@
             color: white;
         }
 
+        .btn-devolver-quick {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .btn-devolver-quick:hover {
+            background: #10b981;
+            color: white;
+        }
+
+        body.dark-theme .btn-devolver-quick {
+            color: #34d399;
+        }
+
         .btn-icon {
+            height: 32px;
+            padding: 0 9px;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-sm);
             cursor: pointer;
             font-size: 0.88rem;
-            padding: 5px 9px;
             color: var(--text-color);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.15s ease;
+            box-sizing: border-box;
+            white-space: nowrap;
         }
 
         .btn-icon:hover {
@@ -500,12 +538,6 @@
             background: var(--danger-color);
             color: white;
             border-color: var(--danger-color);
-        }
-
-        .actions-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
 
         code {
@@ -838,7 +870,6 @@
     let ordenActual = 'nombre-asc';
     let gruposAbiertos = new Set();
 
-    // Sistema de Modal Flotante Interno
     function mostrarModalAlerta(titulo, mensaje) {
         return new Promise((resolve) => {
             const overlay = document.getElementById('modalOverlay');
@@ -1184,7 +1215,7 @@
                     if (disp === 'disponible') {
                         btnAccionRapida = `<button class="btn-prestar-quick" title="Prestar este equipo" onclick="prestarRapido('${item.id}')">🤝 Prestar</button>`;
                     } else {
-                        btnAccionRapida = `<button class="btn-icon" title="Devolver al Almacén" onclick="devolverPrestamo('${item.id}')">🔄 Devolver</button>`;
+                        btnAccionRapida = `<button class="btn-devolver-quick" title="Devolver al Almacén" onclick="devolverPrestamo('${item.id}')">🔄 Devolver</button>`;
                     }
 
                     const catHTML = item.categoria ? `<span class="badge badge-cat">${item.categoria}</span>` : '-';
