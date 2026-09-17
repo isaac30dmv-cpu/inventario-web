@@ -226,6 +226,7 @@
         let idEdicion = null;
         let estadoFiltroActual = 'todos';
         let ordenActual = 'fecha-desc';
+        let gruposAbiertos = new Set(); // Mantiene el estado de despliegue por producto
 
         // --- FUNCIÓN PARA FORMATEAR FECHAS A DD/MM/AAAA ---
         function formatearFecha(fechaStr) {
@@ -465,6 +466,16 @@
             });
         }
 
+        // --- CONTROL DE VISTA ACORDEÓN ---
+        function toggleGrupo(clave) {
+            if (gruposAbiertos.has(clave)) {
+                gruposAbiertos.delete(clave);
+            } else {
+                gruposAbiertos.add(clave);
+            }
+            renderizarTabla(buscador.value);
+        }
+
         function renderizarTabla(filtroTexto = '') {
             tabla.innerHTML = '';
 
@@ -489,31 +500,71 @@
                 return;
             }
 
-            prestamosFiltrados.forEach((item) => {
-                const alerta = calcularAlerta(item.fecha);
-                const fila = document.createElement('tr');
-                const catHTML = item.categoria ? `<span class="badge-cat">${item.categoria}</span>` : '<span style="color:var(--text-muted);">-</span>';
-                
-                const obsHTML = item.observaciones 
-                    ? `<div class="obs-text" style="white-space: pre-line; word-break: break-word;" title="${item.observaciones}">${item.observaciones}</div>` 
-                    : '<span style="color:var(--text-muted);">-</span>';
+            // Agrupar items por nombre de producto
+            const grupos = {};
+            prestamosFiltrados.forEach(item => {
+                const clave = item.producto.trim().toLowerCase();
+                if (!grupos[clave]) {
+                    grupos[clave] = {
+                        nombre: item.producto,
+                        items: []
+                    };
+                }
+                grupos[clave].items.push(item);
+            });
 
-                fila.innerHTML = `
-                    <td><strong>${item.producto}</strong></td>
-                    <td>${item.codigo || '-'}</td>
-                    <td>${catHTML}</td>
-                    <td>${item.prestatario || '-'}</td>
-                    <td>${obsHTML}</td>
-                    <td>${formatearFecha(item.fecha)}</td>
-                    <td><span class="badge ${alerta.clase}">${alerta.texto}</span></td>
-                    <td class="actions-cell">
-                        <div class="actions-wrapper">
-                            <button class="btn-icon" title="Editar" onclick="editarPrestamo(${item.id})">✏️</button>
-                            <button class="btn-icon" title="Devolver" onclick="devolverPrestamo(${item.id})">🔄</button>
-                        </div>
+            // Renderizar acordeón
+            Object.keys(grupos).forEach(clave => {
+                const grupo = grupos[clave];
+                let estaAbierto = gruposAbiertos.has(clave) || filtroTexto.trim() !== '';
+                const flecha = estaAbierto ? '🔽' : '▶️';
+                const cantidad = grupo.items.length;
+
+                // Fila Principal del Grupo
+                const filaGrupo = document.createElement('tr');
+                filaGrupo.className = 'group-header-row';
+                filaGrupo.style.cursor = 'pointer';
+                filaGrupo.onclick = () => toggleGrupo(clave);
+                filaGrupo.innerHTML = `
+                    <td colspan="8" class="group-header-cell" style="padding: 12px 16px;">
+                        <span class="group-arrow">${flecha}</span>
+                        <strong>${grupo.nombre}</strong>
+                        <span class="badge-count" style="background:#2563eb; color:#fff; font-size:0.75rem; padding:3px 9px; border-radius:12px; margin-left:10px; font-weight:700;">${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}</span>
+                        <span class="group-hint" style="float: right; font-size: 0.8rem; opacity: 0.7;">${estaAbierto ? 'Clic para plegar ▲' : 'Clic para desplegar unidades ▼'}</span>
                     </td>
                 `;
-                tabla.appendChild(fila);
+                tabla.appendChild(filaGrupo);
+
+                // Filas Hijas (Solo si está desplegado)
+                if (estaAbierto) {
+                    grupo.items.forEach(item => {
+                        const alerta = calcularAlerta(item.fecha);
+                        const fila = document.createElement('tr');
+                        fila.className = 'child-row';
+
+                        const catHTML = item.categoria ? `<span class="badge-cat">${item.categoria}</span>` : '<span style="color:var(--text-muted);">-</span>';
+                        const obsHTML = item.observaciones 
+                            ? `<div class="obs-text" style="white-space: pre-line; word-break: break-word;" title="${item.observaciones}">${item.observaciones}</div>` 
+                            : '<span style="color:var(--text-muted);">-</span>';
+
+                        fila.innerHTML = `
+                            <td style="padding-left: 28px;"><strong>${item.producto}</strong></td>
+                            <td><code>${item.codigo || '-'}</code></td>
+                            <td>${catHTML}</td>
+                            <td>${item.prestatario || '-'}</td>
+                            <td>${obsHTML}</td>
+                            <td>${formatearFecha(item.fecha)}</td>
+                            <td><span class="badge ${alerta.clase}">${alerta.texto}</span></td>
+                            <td class="actions-cell">
+                                <div class="actions-wrapper">
+                                    <button class="btn-icon" title="Editar" onclick="editarPrestamo(${item.id})">✏️</button>
+                                    <button class="btn-icon" title="Devolver" onclick="devolverPrestamo(${item.id})">🔄</button>
+                                </div>
+                            </td>
+                        `;
+                        tabla.appendChild(fila);
+                    });
+                }
             });
         }
 
