@@ -1,248 +1,1143 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestor de Inventario y Préstamos</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestor de Inventario y Préstamos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #f3f6f9;
+      --card-bg: #ffffff;
+      --text-main: #2d3748;
+      --text-muted: #718096;
+      --border-color: #e2e8f0;
+      --primary: #5850ec;
+      --primary-hover: #4338ca;
+      --success-bg: #def7ec;
+      --success-text: #03543f;
+      --warning-bg: #fef3c7;
+      --warning-text: #92400e;
+      --danger-bg: #fde8e8;
+      --danger-text: #9b1c1c;
+      --info-bg: #e1effe;
+      --info-text: #1e429f;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 20px;
+      font-size: 14px;
+    }
+
+    /* Container layout */
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      padding: 16px 24px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-sync {
+      background: #def7ec;
+      color: #03543f;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-sync::before {
+      content: "●";
+      color: #31c48d;
+    }
+
+    .btn-icon {
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 1024px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left Sidebar Form */
+    .form-card {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      height: fit-content;
+    }
+
+    .form-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 13px;
+      background: #f8fafc;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      background: #fff;
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+
+    .btn-submit:hover {
+      background: var(--primary-hover);
+    }
+
+    /* Dashboard Metrics Cards */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .metric-card {
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .metric-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .metric-card:nth-child(1) .metric-icon { background: #fef3c7; }
+    .metric-card:nth-child(2) .metric-icon { background: #def7ec; }
+    .metric-card:nth-child(3) .metric-icon { background: #fef3c7; }
+    .metric-card:nth-child(4) .metric-icon { background: #fde8e8; }
+
+    .metric-val {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .metric-lbl {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* Main Content Container */
+    .content-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    /* Tab Switcher */
+    .tabs-header {
+      display: flex;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tab-btn.active {
+      background: #eef2ff;
+      color: var(--primary);
+    }
+
+    /* Filters bar */
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .pills-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .search-box {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 12px 10px 36px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: #f8fafc;
+      font-size: 13px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    /* Inventory Table Styling */
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th {
+      background: #f8fafc;
+      padding: 10px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+
+    .group-row {
+      background: #f8fafc;
+      font-weight: 600;
+    }
+
+    .group-row td {
+      padding: 10px 12px;
+      color: var(--text-main);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-code {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      font-family: monospace;
+    }
+
+    .badge-success { background: var(--success-bg); color: var(--success-text); }
+    .badge-warning { background: var(--warning-bg); color: var(--warning-text); }
+    .badge-danger { background: var(--danger-bg); color: var(--danger-text); }
+    .badge-info { background: var(--info-bg); color: var(--info-text); }
+
+    .date-badge {
+      font-weight: 600;
+      color: #1e293b;
+      letter-spacing: 0.3px;
+    }
+
+    /* Action Buttons */
+    .btn-action {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: white;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      background: #f1f5f9;
+    }
+
+    .btn-action.btn-prestar {
+      color: var(--primary);
+      border-color: #c7d2fe;
+    }
+
+    .btn-action.btn-devolver {
+      color: #0369a1;
+      border-color: #bae6fd;
+      background: #f0f9ff;
+    }
+
+    .btn-icon-only {
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: white;
+      cursor: pointer;
+      margin-left: 4px;
+    }
+
+    .btn-icon-only:hover {
+      background: #f1f5f9;
+    }
+
+    /* CUSTOM MODAL DIALOG (Replaces native browser confirm/alert) */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: white;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 440px;
+      padding: 24px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      transform: scale(0.95);
+      transition: transform 0.25s ease;
+    }
+
+    .modal-overlay.active .modal-box {
+      transform: scale(1);
+    }
+
+    .modal-icon-wrapper {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+
+    .modal-icon-wrapper.warning {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .modal-icon-wrapper.danger {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .modal-icon-wrapper.success {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+
+    .modal-text {
+      font-size: 14px;
+      color: #64748b;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .btn-modal {
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-modal-cancel {
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    .btn-modal-cancel:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-modal-confirm {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-modal-confirm:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-modal-danger {
+      background: #dc2626;
+      color: white;
+    }
+
+    .btn-modal-danger:hover {
+      background: #b91c1c;
+    }
+
+    /* Notification Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      background: #0f172a;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Cabecera Principal -->
-        <header class="header-container">
-            <div class="brand-title">
-                <h1>📦 Gestor de Inventario y Préstamos</h1>
-            </div>
-            <div class="header-actions">
-                <div class="live-indicator">
-                    <span class="live-dot"></span> <span id="statusText">Sincronizado</span>
-                </div>
-                <button class="btn-theme" id="btnThemeToggle" onclick="toggleTheme()" title="Cambiar Tema">🌙</button>
-            </div>
-        </header>
 
-        <!-- Cuadrícula Principal -->
-        <div class="app-grid">
-            <!-- Columna Izquierda: Formulario + Copias de Seguridad -->
-            <aside class="sidebar">
-                <!-- Formulario -->
-                <div class="card">
-                    <h2 class="card-title" id="formTitle">➕ Registrar Equipo</h2>
-                    <form id="equipoForm" onsubmit="guardarEquipo(event)" class="form-grid">
-                        <input type="hidden" id="equipoId">
-                        
-                        <div class="form-group">
-                            <label for="productoInput">Producto / Equipo *</label>
-                            <input type="text" id="productoInput" class="form-control" placeholder="Ej. PC, Monitor, Taladro" required>
-                        </div>
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="brand">
+      <span>📦</span> Gestor de Inventario y Préstamos
+    </div>
+    <div class="header-actions">
+      <span class="badge-sync">Sincronizado</span>
+      <button class="btn-icon">🌙</button>
+    </div>
+  </header>
 
-                        <div class="form-group">
-                            <label for="codigoInput">Código / Etiqueta</label>
-                            <input type="text" id="codigoInput" class="form-control" placeholder="Ej. MISE-AUQ-114">
-                        </div>
+  <!-- Metrics Summary Header -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-icon">📦</div>
+      <div>
+        <div class="metric-val" id="metric-total">1</div>
+        <div class="metric-lbl">Total Equipos</div>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">🟢</div>
+      <div>
+        <div class="metric-val" id="metric-almacen">1</div>
+        <div class="metric-lbl">En Almacén</div>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">🤝</div>
+      <div>
+        <div class="metric-val" id="metric-prestamo">0</div>
+        <div class="metric-lbl">En Préstamo</div>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">⚠️</div>
+      <div>
+        <div class="metric-val" id="metric-alerta">0</div>
+        <div class="metric-lbl">Préstamos en Alerta</div>
+      </div>
+    </div>
+  </div>
 
-                        <div class="form-group">
-                            <label for="categoriaSelect">Categoría</label>
-                            <select id="categoriaSelect" class="form-control">
-                                <option value="">-- Sin Categoría --</option>
-                                <option value="Informática">Informática</option>
-                                <option value="Herramientas">Herramientas</option>
-                                <option value="Audiovisual">Audiovisual</option>
-                                <option value="Electrónica">Electrónica</option>
-                                <option value="Otros">Otros</option>
-                            </select>
-                        </div>
+  <!-- Main Content Layout -->
+  <div class="main-grid">
+    <!-- Left Sidebar: Form -->
+    <div class="form-card">
+      <div class="form-title">
+        <span>➕</span> <span id="form-header-title">Registrar Equipo</span>
+      </div>
 
-                        <div class="form-group">
-                            <label for="situacionSelect">Situación Actual *</label>
-                            <select id="situacionSelect" class="form-control" onchange="togglePrestatarioField()" required>
-                                <option value="disponible">🟢 En Almacén (Disponible)</option>
-                                <option value="prestado">🤝 Prestado</option>
-                            </select>
-                        </div>
+      <form id="equipment-form">
+        <input type="hidden" id="edit-id" value="">
 
-                        <div class="form-group" id="prestatarioGroup">
-                            <label for="prestatarioInput">Prestatario / Aula (Opcional)</label>
-                            <input type="text" id="prestatarioInput" class="form-control" placeholder="Ej. Juan Pérez, Aula 102">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="estadoFisicoSelect">Estado Físico del Equipo</label>
-                            <select id="estadoFisicoSelect" class="form-control">
-                                <option value="operativo">🟢 Operativo / Listo</option>
-                                <option value="desperfecto">🟡 Con Desperfectos</option>
-                                <option value="averiado">🔴 Averiado / Fuera de servicio</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="observacionesInput">Observaciones / Notas</label>
-                            <textarea id="observacionesInput" class="form-control" placeholder="Notas sobre el estado, cables incluidos..."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="fechaInput">Fecha Registro / Préstamo *</label>
-                            <input type="date" id="fechaInput" class="form-control" required>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="submit" class="btn-primary" id="btnSubmitForm">Guardar Equipo 💾</button>
-                            <button type="button" class="btn-secondary" id="btnCancelEdit" style="display:none;" onclick="cancelarEdicion()">Cancelar</button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Copias de Seguridad -->
-                <div class="card">
-                    <h2 class="card-title">💾 Copias de Seguridad</h2>
-                    <div class="security-buttons">
-                        <button class="btn-sec" onclick="descargarBackup()">📦 Descargar Backup JSON</button>
-                        <button class="btn-sec" onclick="document.getElementById('inputRestaurar').click()">📥 Restaurar Backup JSON</button>
-                        <input type="file" id="inputRestaurar" accept=".json" style="display:none" onchange="restaurarBackup(event)">
-                        <button class="btn-sec" onclick="exportarCSV()">📊 Exportar a Excel (CSV)</button>
-                    </div>
-                </div>
-            </aside>
-
-            <!-- Columna Derecha: Dashboard y Tablas -->
-            <main class="main-content">
-                <!-- Métricas (4 en una sola fila) -->
-                <div class="dashboard-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon">📦</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="statTotal">0</span>
-                            <span class="stat-label">Total Equipos</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🟢</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="statAlmacen">0</span>
-                            <span class="stat-label">En Almacén</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🤝</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="statPrestados">0</span>
-                            <span class="stat-label">En Préstamo</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">⚠️</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="statAlertas">0</span>
-                            <span class="stat-label">Préstamos en Alerta</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Contenedor Principal con Pestañas -->
-                <div class="tabs-container">
-                    <div class="tabs-header">
-                        <button class="tab-btn active" onclick="cambiarTab('inventario')">Inventario de Equipos 📋</button>
-                        <button class="tab-btn" onclick="cambiarTab('historial')">Historial de Devoluciones 📜</button>
-                    </div>
-
-                    <!-- Pestaña Inventario -->
-                    <div id="tabInventario" class="tab-content active">
-                        <!-- Filtros y Orden -->
-                        <div class="controls-bar">
-                            <div class="pills-group">
-                                <button class="pill-btn active" onclick="filtrarEstado('todos', this)">Todos</button>
-                                <button class="pill-btn" onclick="filtrarEstado('disponible', this)">🟢 En Almacén</button>
-                                <button class="pill-btn" onclick="filtrarEstado('prestado', this)">🤝 En Préstamo</button>
-                                <button class="pill-btn" onclick="filtrarEstado('averiado', this)">🔴 Averiados</button>
-                                <button class="pill-btn" onclick="filtrarEstado('alerta', this)">⚠️ En Alerta</button>
-                            </div>
-                            <div class="sort-group">
-                                <label for="sortSelect">Ordenar:</label>
-                                <select id="sortSelect" class="form-control" style="width: auto;" onchange="renderizar()">
-                                    <option value="producto-asc">Producto (A-Z)</option>
-                                    <option value="producto-desc">Producto (Z-A)</option>
-                                    <option value="fecha-desc">Más Recientes</option>
-                                    <option value="fecha-asc">Más Antiguos</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Buscador -->
-                        <div class="search-container">
-                            <span class="search-icon">🔍</span>
-                            <input type="text" id="searchInput" class="search-input" placeholder="Buscar por producto, código, prestatario, notas..." oninput="renderizar()">
-                        </div>
-
-                        <!-- Tabla de Inventario -->
-                        <div class="table-responsive">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>PRODUCTO</th>
-                                        <th>CÓDIGO</th>
-                                        <th>CATEGORÍA</th>
-                                        <th>ESTADO FÍSICO</th>
-                                        <th>SITUACIÓN / PRESTATARIO</th>
-                                        <th>FECHA REG./PRÉSTAMO</th>
-                                        <th>ALERTA</th>
-                                        <th>ACCIÓN</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tablaInventarioBody">
-                                    <!-- Filas generadas dinámicamente -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Pestaña Historial -->
-                    <div id="tabHistorial" class="tab-content">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                            <p style="color:var(--text-muted); font-weight:700;">Registro histórico de equipos devueltos al almacén.</p>
-                            <button class="btn-secondary" onclick="vaciarHistorial()">🗑️ Vaciar Historial</button>
-                        </div>
-                        <div class="table-responsive">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>PRODUCTO</th>
-                                        <th>CÓDIGO</th>
-                                        <th>CATEGORÍA</th>
-                                        <th>PRESTATARIO</th>
-                                        <th>FECHA PRÉSTAMO</th>
-                                        <th>FECHA DEVOLUCIÓN</th>
-                                        <th>ESTADO</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tablaHistorialBody">
-                                    <!-- Filas del historial -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </main>
+        <div class="form-group">
+          <label class="form-label">Producto / Equipo *</label>
+          <input type="text" id="inp-producto" class="form-control" placeholder="Ej. PC, Monitor, Taladro" required>
         </div>
+
+        <div class="form-group">
+          <label class="form-label">Código / Etiqueta</label>
+          <input type="text" id="inp-codigo" class="form-control" placeholder="Ej. MISE-AUQ-114">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Categoría</label>
+          <select id="inp-categoria" class="form-control">
+            <option value="">-- Sin Categoría --</option>
+            <option value="Informática">Informática</option>
+            <option value="Herramientas">Herramientas</option>
+            <option value="Audiovisual">Audiovisual</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Situación Actual *</label>
+          <select id="inp-situacion" class="form-control" required>
+            <option value="En Almacén">🟢 En Almacén (Disponible)</option>
+            <option value="En Préstamo">🤝 En Préstamo</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Prestatario / Aula (Opcional)</label>
+          <input type="text" id="inp-prestatario" class="form-control" placeholder="Ej. Juan Pérez, Aula 102">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Estado Físico del Equipo</label>
+          <select id="inp-estado" class="form-control">
+            <option value="Operativo">🟢 Operativo / Listo</option>
+            <option value="Averiado">🔴 Averiado / Mantenimiento</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Observaciones / Notas</label>
+          <textarea id="inp-notas" class="form-control" placeholder="Notas sobre el estado, cables incluidos..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Fecha Registro / Préstamo *</label>
+          <input type="date" id="inp-fecha" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          Guardar Equipo 💾
+        </button>
+      </form>
     </div>
 
-    <!-- Modal Personalizado para Prestar Equipo -->
-    <div id="modalPrestar" class="modal-overlay">
-        <div class="modal-card">
-            <h3 class="modal-title">🤝 Prestar Equipo</h3>
-            <p class="modal-body">Indica el nombre del prestatario o aula. Si lo dejas en blanco, se registrará sin prestatario.</p>
-            
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label for="prestatarioModalInput">Prestatario / Destino (Opcional)</label>
-                <input type="text" id="prestatarioModalInput" class="form-control" placeholder="Ej. Juan Pérez, Aula 102 (Opcional)">
-            </div>
+    <!-- Right Side: Content Tabs & Data Table -->
+    <div class="content-card">
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchTab('inventario')">Inventario de Equipos 📋</button>
+        <button class="tab-btn" onclick="switchTab('historial')">Historial de Devoluciones 📜</button>
+      </div>
 
-            <div class="modal-actions">
-                <button type="button" class="btn-secondary" onclick="cerrarModalPrestar()">Cancelar</button>
-                <button type="button" class="btn-primary" style="width:auto;" onclick="confirmarPrestamoRapido()">Confirmar Préstamo</button>
-            </div>
+      <div id="tab-inventario-content">
+        <div class="filter-bar">
+          <div class="pills-group">
+            <button class="pill-btn active" onclick="filterBy('Todos', this)">Todos</button>
+            <button class="pill-btn" onclick="filterBy('En Almacén', this)">🟢 En Almacén</button>
+            <button class="pill-btn" onclick="filterBy('En Préstamo', this)">🤝 En Préstamo</button>
+            <button class="pill-btn" onclick="filterBy('Averiado', this)">🔴 Averiados</button>
+            <button class="pill-btn" onclick="filterBy('En Alerta', this)">⚠️ En Alerta</button>
+          </div>
+          <div>
+            <span style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-right: 6px;">Ordenar:</span>
+            <select class="form-control" style="display: inline-block; width: auto; padding: 4px 8px;">
+              <option>Producto (A-Z)</option>
+              <option>Fecha (Más reciente)</option>
+            </select>
+          </div>
         </div>
-    </div>
 
-    <script src="app.js"></script>
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" class="search-input" placeholder="Buscar por producto, código, prestatario, notas..." oninput="renderTable()">
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Código</th>
+                <th>Categoría</th>
+                <th>Estado Físico</th>
+                <th>Situación / Prestatario</th>
+                <th>Fecha Reg./Préstamo</th>
+                <th>Alerta</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-historial-content" style="display: none;">
+        <h3 style="margin-bottom: 12px; font-size: 15px;">Registro de Devoluciones Realizadas</h3>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha Devolución</th>
+                <th>Producto</th>
+                <th>Código</th>
+                <th>Devuelto por (Prestatario)</th>
+                <th>Fecha Original Préstamo</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOM MODAL DIALOG (REPLACES GOOGLE / BROWSER NATIVE ALERT/CONFIRM) -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-box">
+      <div class="modal-icon-wrapper warning" id="modal-icon">⚠️</div>
+      <h3 class="modal-title" id="modal-title">Confirmar Acción</h3>
+      <p class="modal-text" id="modal-message">¿Estás seguro de que deseas realizar esta acción?</p>
+      <div class="modal-actions">
+        <button class="btn-modal btn-modal-cancel" id="modal-btn-cancel" onclick="closeCustomModal(false)">Cancelar</button>
+        <button class="btn-modal btn-modal-confirm" id="modal-btn-confirm" onclick="closeCustomModal(true)">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    // Initial State & Data
+    let equipos = [
+      {
+        id: 1,
+        producto: "pc",
+        codigo: "mise",
+        categoria: "-",
+        estado: "Operativo",
+        situacion: "En Almacén",
+        prestatario: "",
+        fecha: "2026-09-17",
+        notas: ""
+      }
+    ];
+
+    let historialDevoluciones = [];
+    let activeFilter = 'Todos';
+    let modalCallback = null;
+
+    // Set default date to today
+    document.addEventListener("DOMContentLoaded", () => {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('inp-fecha').value = today;
+      renderTable();
+      updateMetrics();
+    });
+
+    // Format date string from YYYY-MM-DD to DD/MM/YYYY for UI display
+    function formatDateDisplay(dateStr) {
+      if (!dateStr || dateStr === '-') return '-';
+      if (dateStr.includes('/')) return dateStr;
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return dateStr;
+    }
+
+    // Custom Modal System (Eliminates Browser / Google Alerts & IP prompts)
+    function showCustomModal({ title, message, icon = '⚠️', iconClass = 'warning', confirmText = 'Aceptar', cancelText = 'Cancelar', isDanger = false, onConfirm }) {
+      document.getElementById('modal-title').innerText = title;
+      document.getElementById('modal-message').innerText = message;
+      document.getElementById('modal-icon').innerText = icon;
+      document.getElementById('modal-icon').className = `modal-icon-wrapper ${iconClass}`;
+      
+      const confirmBtn = document.getElementById('modal-btn-confirm');
+      confirmBtn.innerText = confirmText;
+      confirmBtn.className = isDanger ? 'btn-modal btn-modal-danger' : 'btn-modal btn-modal-confirm';
+
+      modalCallback = onConfirm;
+      document.getElementById('custom-modal').classList.add('active');
+    }
+
+    function closeCustomModal(confirmed) {
+      document.getElementById('custom-modal').classList.remove('active');
+      if (confirmed && typeof modalCallback === 'function') {
+        modalCallback();
+      }
+      modalCallback = null;
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<span>✅</span> ${msg}`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Render Table
+    function renderTable() {
+      const tbody = document.getElementById('inventory-table-body');
+      tbody.innerHTML = '';
+
+      const query = document.getElementById('search-input').value.toLowerCase();
+
+      // Filter equipos
+      let filtered = equipos.filter(item => {
+        const matchesSearch = item.producto.toLowerCase().includes(query) ||
+                              item.codigo.toLowerCase().includes(query) ||
+                              item.prestatario.toLowerCase().includes(query);
+        
+        if (activeFilter === 'Todos') return matchesSearch;
+        if (activeFilter === 'En Almacén') return matchesSearch && item.situacion === 'En Almacén';
+        if (activeFilter === 'En Préstamo') return matchesSearch && item.situacion === 'En Préstamo';
+        if (activeFilter === 'Averiado') return matchesSearch && item.estado === 'Averiado';
+        return matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 24px;">No se encontraron registros.</td></tr>`;
+        return;
+      }
+
+      // Group by product name
+      const grouped = {};
+      filtered.forEach(item => {
+        if (!grouped[item.producto]) grouped[item.producto] = [];
+        grouped[item.producto].push(item);
+      });
+
+      Object.keys(grouped).forEach(prodName => {
+        const items = grouped[prodName];
+        const countAlmacen = items.filter(i => i.situacion === 'En Almacén').length;
+        const countPrestamo = items.filter(i => i.situacion === 'En Préstamo').length;
+
+        // Group Header Row
+        const groupRow = document.createElement('tr');
+        groupRow.className = 'group-row';
+        groupRow.innerHTML = `
+          <td colspan="8">
+            <span style="cursor: pointer;">▼ <strong>${prodName}</strong></span>
+            <span class="badge badge-info" style="margin-left: 8px;">${items.length} unidad${items.length > 1 ? 'es' : ''}</span>
+            <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">
+              (${countAlmacen} en almacén 🟢 | ${countPrestamo} prestados 🤝)
+            </span>
+            <span style="float: right; font-size: 12px; color: var(--text-muted);">Clic para plegar ▼</span>
+          </td>
+        `;
+        tbody.appendChild(groupRow);
+
+        // Individual Item Rows
+        items.forEach(item => {
+          const row = document.createElement('tr');
+
+          const formattedDate = formatDateDisplay(item.fecha);
+          const isPrestado = item.situacion === 'En Préstamo';
+
+          row.innerHTML = `
+            <td style="padding-left: 24px; font-weight: 600;">${item.producto}</td>
+            <td><span class="badge badge-code">${item.codigo || '-'}</span></td>
+            <td>${item.categoria || '-'}</td>
+            <td>
+              <span class="badge ${item.estado === 'Operativo' ? 'badge-success' : 'badge-danger'}">
+                ${item.estado === 'Operativo' ? '🟢 Operativo' : '🔴 Averiado'}
+              </span>
+            </td>
+            <td>
+              ${isPrestado ? 
+                `<span class="badge badge-warning">🤝 ${item.prestatario || '(Sin nombre)'}</span>` : 
+                `<span class="badge badge-success">🟢 En Almacén</span>`
+              }
+            </td>
+            <td>
+              <span class="date-badge">${formattedDate}</span>
+            </td>
+            <td>-</td>
+            <td>
+              ${isPrestado ? 
+                `<button class="btn-action btn-devolver" onclick="devolverPrestamo(${item.id})">↩️ Devolver</button>` : 
+                `<button class="btn-action btn-prestar" onclick="prestarEquipo(${item.id})">🤝 Prestar</button>`
+              }
+              <button class="btn-icon-only" onclick="editarEquipo(${item.id})" title="Editar">✏️</button>
+              <button class="btn-icon-only" onclick="eliminarEquipo(${item.id})" title="Eliminar">🗑️</button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      });
+    }
+
+    // UPDATE METRICS
+    function updateMetrics() {
+      document.getElementById('metric-total').innerText = equipos.length;
+      document.getElementById('metric-almacen').innerText = equipos.filter(e => e.situacion === 'En Almacén').length;
+      document.getElementById('metric-prestamo').innerText = equipos.filter(e => e.situacion === 'En Préstamo').length;
+      document.getElementById('metric-alerta').innerText = 0;
+    }
+
+    // FIX #2: DEVOLVER PRÉSTAMO CORRECTAMENTE (No elimina el equipo, lo devuelve al almacén)
+    function devolverPrestamo(id) {
+      const equipo = equipos.find(e => e.id === id);
+      if (!equipo) return;
+
+      showCustomModal({
+        title: "Confirmar Devolución",
+        message: `¿Confirmas que el equipo "${equipo.producto}" (${equipo.codigo || 'Sin código'}) ha sido devuelto al almacén?`,
+        icon: '↩️',
+        iconClass: 'warning',
+        confirmText: 'Aceptar',
+        cancelText: 'Cancelar',
+        onConfirm: () => {
+          // Registrar en el historial de devoluciones
+          historialDevoluciones.unshift({
+            fechaDevolucion: formatDateDisplay(new Date().toISOString().split('T')[0]),
+            producto: equipo.producto,
+            codigo: equipo.codigo || '-',
+            prestatario: equipo.prestatario || 'No especificado',
+            fechaPrestamo: formatDateDisplay(equipo.fecha)
+          });
+
+          // CORRECCIÓN CLAVE: Cambiar situación a "En Almacén" y vaciar prestatario
+          equipo.situacion = 'En Almacén';
+          equipo.prestatario = '';
+          
+          renderTable();
+          renderHistoryTable();
+          updateMetrics();
+          showToast(`El equipo "${equipo.producto}" ha sido devuelto al almacén.`);
+        }
+      });
+    }
+
+    // PRESTAR EQUIPO
+    function prestarEquipo(id) {
+      const equipo = equipos.find(e => e.id === id);
+      if (!equipo) return;
+
+      const prestatarioNombre = prompt("Introduce el nombre del prestatario / aula:");
+      if (prestatarioNombre !== null && prestatarioNombre.trim() !== "") {
+        equipo.situacion = 'En Préstamo';
+        equipo.prestatario = prestatarioNombre.trim();
+        renderTable();
+        updateMetrics();
+        showToast(`Equipo prestado a: ${equipo.prestatario}`);
+      }
+    }
+
+    // FIX #1: ELIMINAR EQUIPO USANDO MODAL PERSONALIZADO
+    function eliminarEquipo(id) {
+      const equipo = equipos.find(e => e.id === id);
+      if (!equipo) return;
+
+      showCustomModal({
+        title: "Eliminar Registro",
+        message: `¿Estás seguro de que deseas eliminar permanentemente el registro "${equipo.producto}" (${equipo.codigo || 'Sin código'})?`,
+        icon: '🗑️',
+        iconClass: 'danger',
+        confirmText: 'Aceptar',
+        cancelText: 'Cancelar',
+        isDanger: true,
+        onConfirm: () => {
+          equipos = equipos.filter(e => e.id !== id);
+          renderTable();
+          updateMetrics();
+          showToast(`Registro eliminado con éxito.`);
+        }
+      });
+    }
+
+    // EDITAR EQUIPO
+    function editarEquipo(id) {
+      const equipo = equipos.find(e => e.id === id);
+      if (!equipo) return;
+
+      document.getElementById('edit-id').value = equipo.id;
+      document.getElementById('inp-producto').value = equipo.producto;
+      document.getElementById('inp-codigo').value = equipo.codigo;
+      document.getElementById('inp-categoria').value = equipo.categoria === '-' ? '' : equipo.categoria;
+      document.getElementById('inp-situacion').value = equipo.situacion;
+      document.getElementById('inp-prestatario').value = equipo.prestatario;
+      document.getElementById('inp-estado').value = equipo.estado;
+      document.getElementById('inp-notas').value = equipo.notas;
+      document.getElementById('inp-fecha').value = equipo.fecha;
+
+      document.getElementById('form-header-title').innerText = "Editar Equipo";
+    }
+
+    // GUARDAR / CREAR EQUIPO
+    document.getElementById('equipment-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const editId = document.getElementById('edit-id').value;
+      const producto = document.getElementById('inp-producto').value.trim();
+      const codigo = document.getElementById('inp-codigo').value.trim();
+      const categoria = document.getElementById('inp-categoria').value || '-';
+      const situacion = document.getElementById('inp-situacion').value;
+      const prestatario = document.getElementById('inp-prestatario').value.trim();
+      const estado = document.getElementById('inp-estado').value;
+      const notas = document.getElementById('inp-notas').value.trim();
+      const fecha = document.getElementById('inp-fecha').value;
+
+      if (editId) {
+        // Actualizar existente
+        const item = equipos.find(e => e.id == editId);
+        if (item) {
+          item.producto = producto;
+          item.codigo = codigo;
+          item.categoria = categoria;
+          item.situacion = situacion;
+          item.prestatario = prestatario;
+          item.estado = estado;
+          item.notas = notas;
+          item.fecha = fecha;
+        }
+        showToast("Equipo actualizado correctamente.");
+      } else {
+        // Crear nuevo
+        const newId = equipos.length ? Math.max(...equipos.map(e => e.id)) + 1 : 1;
+        equipos.push({
+          id: newId,
+          producto,
+          codigo,
+          categoria,
+          situacion,
+          prestatario,
+          estado,
+          notas,
+          fecha
+        });
+        showToast("Equipo registrado correctamente.");
+      }
+
+      // Reset Form
+      document.getElementById('equipment-form').reset();
+      document.getElementById('edit-id').value = '';
+      document.getElementById('form-header-title').innerText = "Registrar Equipo";
+      document.getElementById('inp-fecha').value = new Date().toISOString().split('T')[0];
+
+      renderTable();
+      updateMetrics();
+    });
+
+    // FILTER PILLS
+    function filterBy(filterName, el) {
+      activeFilter = filterName;
+      document.querySelectorAll('.pill-btn').forEach(btn => btn.classList.remove('active'));
+      el.classList.add('active');
+      renderTable();
+    }
+
+    // TAB SWITCHING
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      if (tabName === 'inventario') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('tab-inventario-content').style.display = 'block';
+        document.getElementById('tab-historial-content').style.display = 'none';
+      } else {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('tab-inventario-content').style.display = 'none';
+        document.getElementById('tab-historial-content').style.display = 'block';
+        renderHistoryTable();
+      }
+    }
+
+    function renderHistoryTable() {
+      const tbody = document.getElementById('history-table-body');
+      tbody.innerHTML = '';
+
+      if (historialDevoluciones.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">No hay historial de devoluciones aún.</td></tr>`;
+        return;
+      }
+
+      historialDevoluciones.forEach(h => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span class="date-badge">${h.fechaDevolucion}</span></td>
+          <td style="font-weight: 600;">${h.producto}</td>
+          <td><span class="badge badge-code">${h.codigo}</span></td>
+          <td>${h.prestatario}</td>
+          <td>${h.fechaPrestamo}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+  </script>
 </body>
 </html>
