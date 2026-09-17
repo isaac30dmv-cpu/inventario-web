@@ -1,15 +1,9 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Headers: Content-Type');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    exit(0);
-}
 
 $file = 'datos.json';
 
+// Si no existe el archivo JSON, lo creamos con estructura vacía
 if (!file_exists($file)) {
     $initialData = ['prestamos' => [], 'historial' => []];
     file_put_contents($file, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
@@ -17,22 +11,20 @@ if (!file_exists($file)) {
 
 $data = json_decode(file_get_contents($file), true) ?: ['prestamos' => [], 'historial' => []];
 $action = $_GET['action'] ?? '';
+
+// Leer cuerpo de la petición en JSON
 $input = json_decode(file_get_contents('php://input'), true);
 
 switch ($action) {
 
     case 'get_all':
-        echo json_encode([
-            'status' => 'success', 
-            'prestamos' => $data['prestamos'] ?? [], 
-            'historial' => $data['historial'] ?? []
-        ]);
+        echo json_encode(['status' => 'success', 'prestamos' => $data['prestamos'], 'historial' => $data['historial']]);
         break;
 
     case 'add_prestamo':
         if (!empty($input['producto'])) {
             $nuevoItem = [
-                'id' => (string)(time() . rand(100, 999)),
+                'id' => time() . rand(100, 999),
                 'producto' => trim($input['producto']),
                 'codigo' => trim($input['codigo'] ?? ''),
                 'categoria' => trim($input['categoria'] ?? ''),
@@ -43,7 +35,6 @@ switch ($action) {
                 'fecha' => $input['fecha'] ?? date('Y-m-d')
             ];
             
-            if (!isset($data['prestamos'])) $data['prestamos'] = [];
             array_unshift($data['prestamos'], $nuevoItem);
             file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
             echo json_encode(['status' => 'success', 'item' => $nuevoItem]);
@@ -64,7 +55,7 @@ switch ($action) {
                     $item['prestatario'] = trim($input['prestatario'] ?? '');
                     $item['estadoFisico'] = trim($input['estadoFisico'] ?? 'operativo');
                     $item['observaciones'] = trim($input['observaciones'] ?? '');
-                    $item['fecha'] = $input['fecha'] ?? date('Y-m-d');
+                    $item['fecha'] = $input['fecha'];
                     $encontrado = true;
                     break;
                 }
@@ -82,31 +73,16 @@ switch ($action) {
         if (!empty($input['id'])) {
             $idDevolver = $input['id'];
             $fechaDev = $input['fechaDevolucion'] ?? date('Y-m-d');
-            $nuevosPrestamos = [];
 
             foreach ($data['prestamos'] as $item) {
                 if ($item['id'] == $idDevolver) {
                     $itemHistorial = $item;
                     $itemHistorial['fechaDevolucion'] = $fechaDev;
-                    if (!isset($data['historial'])) $data['historial'] = [];
                     array_unshift($data['historial'], $itemHistorial);
-                } else {
-                    $nuevosPrestamos[] = $item;
+                    break;
                 }
             }
 
-            $data['prestamos'] = $nuevosPrestamos;
-            file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-            echo json_encode(['status' => 'success']);
-        }
-        break;
-
-    case 'delete_prestamo':
-        if (!empty($input['id'])) {
-            $idDelete = $input['id'];
-            $data['prestamos'] = array_values(array_filter($data['prestamos'], function($item) use ($idDelete) {
-                return $item['id'] != $idDelete;
-            }));
             file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
             echo json_encode(['status' => 'success']);
         }
