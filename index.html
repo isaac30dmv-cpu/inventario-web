@@ -3,731 +3,1240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Inventario y Préstamos 50/50</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Gestor de Inventario y Préstamos</title>
+    <style>
+        :root {
+            --bg-color: #f3f6f9;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --radius: 12px;
+        }
+
+        body.dark-theme {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 24px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Header */
+        header {
+            background: var(--card-bg);
+            padding: 16px 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-sync {
+            background: #dcfce7;
+            color: #15803d;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .theme-btn {
+            background: #fef3c7;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        /* Layout Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        /* Formulario Left */
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-section h3 {
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .btn-submit {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Backup Block */
+        .backup-block {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-secondary-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+        }
+
+        /* Stats Top */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+        }
+
+        .stat-info .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .stat-info .stat-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* Right Tabs and Table */
+        .tab-buttons {
+            display: flex;
+            gap: 12px;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 10px 16px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Filters Bar */
+        .filters-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .pill-btn {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: var(--text-color);
+
+        }
+
+        .pill-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .search-container {
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        /* Tables */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        th {
+            padding: 12px 10px;
+            color: var(--text-muted);
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .group-header-row {
+            background: rgba(79, 70, 229, 0.03);
+            font-weight: 600;
+        }
+
+        .group-header-cell {
+            padding: 12px 16px;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            display: inline-block;
+        }
+
+        .badge-disponible { background: #dcfce7; color: #166534; }
+        .badge-prestado { background: #fef3c7; color: #92400e; }
+        .badge-fisico-operativo { background: #dcfce7; color: #166534; }
+        .badge-fisico-desperfecto { background: #fef3c7; color: #92400e; }
+        .badge-fisico-averiado { background: #fee2e2; color: #991b1b; }
+        .badge-cat { background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-muted); }
+
+        .btn-prestar-quick {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 4px;
+        }
+
+        .actions-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Modal Interno (Sustituto de prompt/alert) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: var(--card-bg);
+            color: var(--text-color);
+            padding: 24px;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .modal-card h3 {
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .modal-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn-modal-cancel {
+            background: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-modal-confirm {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- Cabecera Superior -->
-        <header class="header-container">
-            <div class="brand-title">
-                <div class="brand-icon">📦</div>
-                <h1>Gestor de Inventario y Préstamos</h1>
-            </div>
-            <div class="header-actions">
-                <div class="live-indicator">
-                    <span class="live-dot"></span> Sincronizado
-                </div>
-                <button id="themeToggle" class="btn-theme" title="Cambiar tema">🌙</button>
-            </div>
-        </header>
+<div class="container">
+    <!-- Header -->
+    <header>
+        <div class="header-title">
+            📦 Gestor de Inventario y Préstamos
+        </div>
+        <div class="header-controls">
+            <span class="status-sync">● Sincronizado</span>
+            <button class="theme-btn" id="themeToggle">🌙</button>
+        </div>
+    </header>
 
-        <!-- Distribución Principal -->
-        <div class="app-grid">
+    <!-- Content Grid -->
+    <div class="main-grid">
+        <!-- Sidebar Left -->
+        <div class="sidebar">
+            <div class="card form-section">
+                <h3 id="formTitulo">➕ Registrar Equipo</h3>
+                <form id="formPrestamo">
+                    <div class="form-group">
+                        <label>PRODUCTO / EQUIPO *</label>
+                        <input type="text" id="producto" class="form-control" placeholder="Ej. Arduino Uno, Taladro, Monitor" required>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label>CÓDIGO / ETIQUETA</label>
+                        <input type="text" id="codigo" class="form-control" placeholder="Ej. MISE-AUQ-114">
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label>CATEGORÍA</label>
+                        <select id="categoria" class="form-control">
+                            <option value="">-- Sin Categoría --</option>
+                            <option value="Informática">Informática</option>
+                            <option value="Herramientas">Herramientas</option>
+                            <option value="Electrónica">Electrónica</option>
+                            <option value="Audiovisual">Audiovisual</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label>SITUACIÓN ACTUAL *</label>
+                        <select id="estadoDisponibilidad" class="form-control" onchange="togglePrestatario()" required>
+                            <option value="disponible">🟢 En Almacén (Disponible)</option>
+                            <option value="prestado">🤝 Prestado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="groupPrestatario" style="margin-top: 10px; display: none;">
+                        <label>PRESTATARIO / ASIGNADO A *</label>
+                        <input type="text" id="prestatario" class="form-control" placeholder="Ej. Juan Pérez / Aula 102">
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label>ESTADO FÍSICO DEL EQUIPO</label>
+                        <select id="estadoFisico" class="form-control">
+                            <option value="operativo">🟢 Operativo / Listo</option>
+                            <option value="desperfecto">🟡 Con Marcas / Uso</option>
+                            <option value="averiado">🔴 Averiado / Mantenimiento</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label>OBSERVACIONES / NOTAS</label>
+                        <textarea id="observaciones" class="form-control" placeholder="Notas sobre el estado, cables incluidos..."></textarea>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label>FECHA REGISTRO / PRÉSTAMO *</label>
+                        <input type="date" id="fecha" class="form-control" required>
+                    </div>
+
+                    <button type="submit" id="btnGuardar" class="btn-submit" style="width: 100%;">Guardar Equipo 💾</button>
+                    <button type="button" id="btnCancelar" class="btn-secondary-btn" style="display: none; margin-top: 8px;" onclick="cancelarEdicion()">Cancelar Edición</button>
+                </form>
+            </div>
+
+            <!-- Backup Card -->
+            <div class="card backup-block" style="margin-top: 20px;">
+                <h3 style="font-size: 1rem; font-weight:700;">💾 Copias de Seguridad</h3>
+                <button class="btn-secondary-btn" onclick="exportarJSON()">📦 Descargar Backup JSON</button>
+                <button class="btn-secondary-btn" onclick="document.getElementById('fileImport').click()">📥 Importar Backup JSON</button>
+                <input type="file" id="fileImport" style="display:none;" accept=".json" onchange="importarJSON(event)">
+                <button class="btn-secondary-btn" onclick="exportarCSV()">📊 Exportar a CSV</button>
+            </div>
+        </div>
+
+        <!-- Main Panel Right -->
+        <div class="main-content">
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="statTotalActivos">0</div>
+                        <div class="stat-label">Total Equipos</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🟢</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="statEnAlmacen">0</div>
+                        <div class="stat-label">En Almacén</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🤝</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="statEnPrestamo">0</div>
+                        <div class="stat-label">En Préstamo</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="statEnAlerta">0</div>
+                        <div class="stat-label">Préstamos en Alerta</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Content -->
+            <div class="card">
+                <div class="tab-buttons">
+                    <button id="btnTabActivos" class="tab-btn active" onclick="cambiarPestana('activos')">Inventario de Equipos 📋</button>
+                    <button id="btnTabHistorial" class="tab-btn" onclick="cambiarPestana('historial')">Historial de Devoluciones 📜</button>
+                </div>
+
+                <!-- Tab Inventario -->
+                <div id="tab-activos" class="tab-content active">
+                    <div class="filters-bar">
+                        <div class="pills">
+                            <button class="pill-btn active" onclick="filtrarPorEstado('todos', this)">Todos</button>
+                            <button class="pill-btn" onclick="filtrarPorEstado('disponible', this)">🟢 En Almacén</button>
+                            <button class="pill-btn" onclick="filtrarPorEstado('prestado', this)">🤝 En Préstamo</button>
+                            <button class="pill-btn" onclick="filtrarPorEstado('averiado', this)">🔴 Averiados</button>
+                            <button class="pill-btn" onclick="filtrarPorEstado('alerta', this)">⚠️ En Alerta</button>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Ordenar:</span>
+                            <select id="selectOrden" class="form-control" style="width: auto; display: inline-block;" onchange="cambiarOrden(this.value)">
+                                <option value="nombre-asc">Producto (A-Z)</option>
+                                <option value="fecha-desc">Fecha (Más reciente)</option>
+                                <option value="fecha-asc">Fecha (Más antigua)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="search-container">
+                        <input type="text" id="buscador" class="search-input" placeholder="🔍 Buscar por producto, código, prestatario, notas...">
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>PRODUCTO</th>
+                                    <th>CÓDIGO</th>
+                                    <th>CATEGORÍA</th>
+                                    <th>ESTADO FÍSICO</th>
+                                    <th>SITUACIÓN / PRESTATARIO</th>
+                                    <th>FECHA REG./PRÉSTAMO</th>
+                                    <th>ALERTA</th>
+                                    <th>ACCIÓN</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaCuerpo">
+                                <!-- Filas Dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab Historial -->
+                <div id="tab-historial" class="tab-content">
+                    <div style="display:flex; justify-content:flex-end; margin-bottom: 12px;">
+                        <button class="btn-secondary-btn" style="width:auto; color: var(--danger-color);" onclick="solicitarVaciarHistorial()">🗑️ Vaciar Historial</button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>PRODUCTO</th>
+                                    <th>CÓDIGO</th>
+                                    <th>CATEGORÍA</th>
+                                    <th>PRESTATARIO</th>
+                                    <th>NOTAS</th>
+                                    <th>FECHA PRÉSTAMO</th>
+                                    <th>FECHA DEVOLUCIÓN</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaHistorial">
+                                <!-- Historial -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Personalizado (Reemplazo completo de prompt() y alert()) -->
+<div id="modalOverlay" class="modal-overlay">
+    <div class="modal-card">
+        <h3 id="modalTitulo">Modal</h3>
+        <p id="modalMensaje">Mensaje aquí</p>
+        
+        <div id="modalInputContainer" style="display: none; margin-bottom: 12px;">
+            <input type="text" id="modalInputText" class="form-control" placeholder="">
+        </div>
+
+        <div class="modal-actions">
+            <button id="btnModalCancelar" class="btn-modal-cancel">Cancelar</button>
+            <button id="btnModalConfirmar" class="btn-modal-confirm">Aceptar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('formPrestamo');
+    const tabla = document.getElementById('tablaCuerpo');
+    const tablaHistorial = document.getElementById('tablaHistorial');
+    const buscador = document.getElementById('buscador');
+    const fechaInput = document.getElementById('fecha');
+    const formTitulo = document.getElementById('formTitulo');
+    const btnGuardar = document.getElementById('btnGuardar');
+    const btnCancelar = document.getElementById('btnCancelar');
+    const themeToggle = document.getElementById('themeToggle');
+
+    let prestamos = [];
+    let historial = [];
+    let idEdicion = null;
+    let estadoFiltroActual = 'todos';
+    let ordenActual = 'nombre-asc';
+    let gruposAbiertos = new Set();
+
+    // Sistema de Modal Interno para evitar popups nativos de Google Chrome
+    function mostrarModalAlerta(titulo, mensaje) {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById('modalOverlay');
+            document.getElementById('modalTitulo').innerText = titulo;
+            document.getElementById('modalMensaje').innerText = mensaje;
+            document.getElementById('modalInputContainer').style.display = 'none';
+            document.getElementById('btnModalCancelar').style.display = 'none';
+
+            const btnConfirmar = document.getElementById('btnModalConfirmar');
+            overlay.classList.add('active');
+
+            btnConfirmar.onclick = () => {
+                overlay.classList.remove('active');
+                resolve(true);
+            };
+        });
+    }
+
+    function mostrarModalConfirmacion(titulo, mensaje) {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById('modalOverlay');
+            document.getElementById('modalTitulo').innerText = titulo;
+            document.getElementById('modalMensaje').innerText = mensaje;
+            document.getElementById('modalInputContainer').style.display = 'none';
             
-            <!-- Columna Izquierda: Formulario y Herramientas -->
-            <aside class="sidebar-column">
-                
-                <!-- Formulario -->
-                <div class="card" id="cardFormulario">
-                    <h2 class="card-title" id="formTitulo">➕ Registrar Equipo</h2>
-                    <form id="formPrestamo">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="producto">Producto / Equipo *</label>
-                                <input type="text" id="producto" class="form-control" placeholder="Ej. Arduino Uno, Taladro, Monitor" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="codigo">Código / Etiqueta</label>
-                                <input type="text" id="codigo" class="form-control" placeholder="Ej. MISE-AUQ-114">
-                            </div>
-                            <div class="form-group">
-                                <label for="categoria">Categoría</label>
-                                <select id="categoria" class="form-control">
-                                    <option value="">-- Sin Categoría --</option>
-                                    <option value="Informática 💻">Informática 💻</option>
-                                    <option value="Audiovisual 📹">Audiovisual 📹</option>
-                                    <option value="Herramientas 🛠️">Herramientas 🛠️</option>
-                                    <option value="Mobiliario 🪑">Mobiliario 🪑</option>
-                                    <option value="Redes / Telecom 🌐">Redes / Telecom 🌐</option>
-                                    <option value="Otros 📦">Otros 📦</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="estadoDisponibilidad">Situación Actual *</label>
-                                <select id="estadoDisponibilidad" class="form-control" onchange="togglePrestatario()">
-                                    <option value="disponible">🟢 En Almacén (Disponible)</option>
-                                    <option value="prestado">🤝 En Préstamo</option>
-                                </select>
-                            </div>
-                            <div class="form-group" id="groupPrestatario" style="display:none;">
-                                <label for="prestatario">Prestatario / Asignado a</label>
-                                <input type="text" id="prestatario" class="form-control" placeholder="Nombre de la persona o aula">
-                            </div>
-                            <div class="form-group">
-                                <label for="estadoFisico">Estado Físico del Equipo</label>
-                                <select id="estadoFisico" class="form-control">
-                                    <option value="operativo">🟢 Operativo / Listo</option>
-                                    <option value="desperfecto">🟡 Con marcas / Falta accesorio</option>
-                                    <option value="averiado">🔴 Averiado / En reparación</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="observaciones">Observaciones / Notas</label>
-                                <textarea id="observaciones" class="form-control" placeholder="Notas sobre el estado, cables incluidos..."></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="fecha">Fecha Registro / Préstamo *</label>
-                                <input type="date" id="fecha" class="form-control" required>
-                            </div>
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" id="btnGuardar" class="btn-primary">Guardar Equipo 💾</button>
-                            <button type="button" id="btnCancelar" class="btn-secondary" style="display:none;" onclick="cancelarEdicion()">Cancelar</button>
-                        </div>
-                    </form>
-                </div>
+            const btnConfirmar = document.getElementById('btnModalConfirmar');
+            const btnCancelar = document.getElementById('btnModalCancelar');
+            btnCancelar.style.display = 'inline-block';
+            overlay.classList.add('active');
 
-                <!-- Herramientas de Seguridad -->
-                <div class="card security-bar">
-                    <h3 class="card-title" style="margin-bottom: 0;">💾 Copias de Seguridad</h3>
-                    <div class="security-buttons">
-                        <button class="btn-sec" onclick="exportarJSON()">📦 Descargar Backup JSON</button>
-                        <button class="btn-sec" onclick="document.getElementById('jsonFileInput').click()">📥 Restaurar Backup JSON</button>
-                        <button class="btn-sec" onclick="exportarCSV()">📄 Exportar a Excel (CSV)</button>
-                    </div>
-                    <input type="file" id="jsonFileInput" accept=".json" style="display:none;" onchange="importarJSON(event)">
-                </div>
+            const cerrar = (res) => {
+                overlay.classList.remove('active');
+                btnConfirmar.onclick = null;
+                btnCancelar.onclick = null;
+                resolve(res);
+            };
 
-            </aside>
+            btnConfirmar.onclick = () => cerrar(true);
+            btnCancelar.onclick = () => cerrar(false);
+        });
+    }
 
-            <!-- Columna Derecha: Métricas 50/50 y Tabla -->
-            <main class="main-column">
-                
-                <!-- Métricas Híbridas (Mejora 3) -->
-                <section class="dashboard-grid">
-                    <div class="stat-card activos">
-                        <div class="stat-icon">📦</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="statTotalActivos">0</span>
-                            <span class="stat-label">Total Equipos</span>
-                        </div>
-                    </div>
-                    <div class="stat-card disponibles">
-                        <div class="stat-icon">🟢</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="statEnAlmacen" style="color: #10b981;">0</span>
-                            <span class="stat-label">En Almacén</span>
-                        </div>
-                    </div>
-                    <div class="stat-card prestados">
-                        <div class="stat-icon">🤝</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="statEnPrestamo" style="color: #2563eb;">0</span>
-                            <span class="stat-label">En Préstamo</span>
-                        </div>
-                    </div>
-                    <div class="stat-card alertas">
-                        <div class="stat-icon">⚠️</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="statEnAlerta" style="color: #d97706;">0</span>
-                            <span class="stat-label">Préstamos en Alerta</span>
-                        </div>
-                    </div>
-                </section>
+    function pedirTextoModal(titulo, mensaje, placeholder = '') {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById('modalOverlay');
+            const titleEl = document.getElementById('modalTitulo');
+            const msgEl = document.getElementById('modalMensaje');
+            const inputContainer = document.getElementById('modalInputContainer');
+            const inputText = document.getElementById('modalInputText');
+            const btnConfirmar = document.getElementById('btnModalConfirmar');
+            const btnCancelar = document.getElementById('btnModalCancelar');
 
-                <!-- Panel Principal de Registros -->
-                <section class="tabs-container">
-                    <div class="tabs-header">
-                        <button class="tab-btn active" id="btnTabActivos" onclick="cambiarPestana('activos')">Inventario de Equipos 📋</button>
-                        <button class="tab-btn" id="btnTabHistorial" onclick="cambiarPestana('historial')">Historial de Devoluciones 📜</button>
-                    </div>
+            titleEl.innerText = titulo;
+            msgEl.innerText = mensaje;
+            inputText.value = '';
+            inputText.placeholder = placeholder;
 
-                    <!-- Pestaña Activos -->
-                    <div id="tab-activos" class="tab-content active">
-                        <!-- Filtros Rápidos (Mejora 4) -->
-                        <div class="controls-bar">
-                            <div class="pills-group">
-                                <button class="pill-btn active" onclick="filtrarPorEstado('todos', this)">Todos</button>
-                                <button class="pill-btn" onclick="filtrarPorEstado('disponible', this)">🟢 En Almacén</button>
-                                <button class="pill-btn" onclick="filtrarPorEstado('prestado', this)">🤝 En Préstamo</button>
-                                <button class="pill-btn" onclick="filtrarPorEstado('averiado', this)">🔴 Averiados</button>
-                                <button class="pill-btn" onclick="filtrarPorEstado('alerta', this)">⚠️ En Alerta</button>
-                            </div>
-                            <div class="sort-group">
-                                <label for="selectOrden">Ordenar:</label>
-                                <select id="selectOrden" class="form-control" style="width: auto; padding: 8px 12px;" onchange="cambiarOrden(this.value)">
-                                    <option value="nombre-asc">Producto (A-Z)</option>
-                                    <option value="fecha-desc">Más reciente</option>
-                                    <option value="fecha-asc">Más antigua</option>
-                                </select>
-                            </div>
-                        </div>
+            inputContainer.style.display = 'block';
+            btnCancelar.style.display = 'inline-block';
+            overlay.classList.add('active');
+            setTimeout(() => inputText.focus(), 50);
 
-                        <div class="search-container">
-                            <span class="search-icon">🔍</span>
-                            <input type="text" id="buscador" class="search-input" placeholder="Buscar por producto, código, prestatario, notas...">
-                        </div>
+            const cerrar = (val) => {
+                overlay.classList.remove('active');
+                inputContainer.style.display = 'none';
+                btnConfirmar.onclick = null;
+                btnCancelar.onclick = null;
+                resolve(val);
+            };
 
-                        <div class="table-responsive">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Producto</th>
-                                        <th>Código</th>
-                                        <th>Categoría</th>
-                                        <th>Estado Físico</th>
-                                        <th>Situación / Prestatario</th>
-                                        <th>Fecha Reg./Préstamo</th>
-                                        <th>Alerta</th>
-                                        <th>Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tablaCuerpo">
-                                    <!-- Dinámico -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+            btnConfirmar.onclick = () => cerrar(inputText.value.trim() || null);
+            btnCancelar.onclick = () => cerrar(null);
+        });
+    }
 
-                    <!-- Pestaña Historial -->
-                    <div id="tab-historial" class="tab-content">
-                        <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
-                            <button class="btn-sec" style="color: #ef4444; border-color: #fca5a5; padding: 8px 14px;" onclick="solicitarVaciarHistorial()">🗑️ Vaciar Historial</button>
-                        </div>
-                        <div class="table-responsive">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Producto</th>
-                                        <th>Código</th>
-                                        <th>Categoría</th>
-                                        <th>Último Prestatario</th>
-                                        <th>Observaciones</th>
-                                        <th>Fecha Préstamo</th>
-                                        <th>Devuelto El</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tablaHistorial">
-                                    <!-- Dinámico -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+    function togglePrestatario() {
+        const situacion = document.getElementById('estadoDisponibilidad').value;
+        const groupPrestatario = document.getElementById('groupPrestatario');
+        groupPrestatario.style.display = (situacion === 'prestado') ? 'block' : 'none';
+    }
 
-                </section>
+    function formatearFecha(fechaStr) {
+        if (!fechaStr) return '-';
+        if (fechaStr.includes('/')) return fechaStr;
+        const partes = fechaStr.split('-');
+        if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        return fechaStr;
+    }
 
-            </main>
-        </div>
-    </div>
+    function inicializarTema() {
+        const temaGuardado = localStorage.getItem('theme');
+        if (temaGuardado === 'dark') {
+            document.body.classList.add('dark-theme');
+            themeToggle.innerText = '☀️';
+        } else {
+            themeToggle.innerText = '🌙';
+        }
+    }
 
-    <!-- Modal Personalizada -->
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal-card">
-            <h3 class="modal-title" id="modalTitulo">Confirmación</h3>
-            <p class="modal-body" id="modalMensaje">¿Estás seguro de realizar esta acción?</p>
-            <div class="modal-actions">
-                <button class="btn-secondary" id="btnModalCancelar">Cancelar</button>
-                <button class="btn-primary" id="btnModalConfirmar">Confirmar</button>
-            </div>
-        </div>
-    </div>
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-theme');
+        const esOscuro = document.body.classList.contains('dark-theme');
+        localStorage.setItem('theme', esOscuro ? 'dark' : 'light');
+        themeToggle.innerText = esOscuro ? '☀️' : '🌙';
+    });
 
-    <script>
-        const form = document.getElementById('formPrestamo');
-        const tabla = document.getElementById('tablaCuerpo');
-        const tablaHistorial = document.getElementById('tablaHistorial');
-        const buscador = document.getElementById('buscador');
-        const fechaInput = document.getElementById('fecha');
-        const formTitulo = document.getElementById('formTitulo');
-        const btnGuardar = document.getElementById('btnGuardar');
-        const btnCancelar = document.getElementById('btnCancelar');
-        const themeToggle = document.getElementById('themeToggle');
+    function actualizarEstadisticas() {
+        const total = prestamos.length;
+        const enAlmacen = prestamos.filter(item => (item.estadoDisponibilidad || 'prestado') === 'disponible').length;
+        const enPrestamo = prestamos.filter(item => (item.estadoDisponibilidad || 'prestado') === 'prestado').length;
+        const enAlerta = prestamos.filter(item => (item.estadoDisponibilidad || 'prestado') === 'prestado' && calcularAlerta(item.fecha).estado === 'alerta').length;
 
-        let prestamos = [];
-        let historial = [];
-        let idEdicion = null;
-        let estadoFiltroActual = 'todos';
-        let ordenActual = 'nombre-asc';
-        let gruposAbiertos = new Set();
+        document.getElementById('statTotalActivos').innerText = total;
+        document.getElementById('statEnAlmacen').innerText = enAlmacen;
+        document.getElementById('statEnPrestamo').innerText = enPrestamo;
+        document.getElementById('statEnAlerta').innerText = enAlerta;
+    }
 
-        function togglePrestatario() {
-            const situacion = document.getElementById('estadoDisponibilidad').value;
-            const groupPrestatario = document.getElementById('groupPrestatario');
-            if (situacion === 'prestado') {
-                groupPrestatario.style.display = 'block';
-            } else {
-                groupPrestatario.style.display = 'none';
+    async function cargarDatosDesdeServidor(silencioso = false) {
+        try {
+            const response = await fetch('api.php?action=get_all');
+            const res = await response.json();
+            if (res.status === 'success') {
+                const nuevosPrestamos = res.prestamos || [];
+                const nuevoHistorial = res.historial || [];
+
+                if (JSON.stringify(prestamos) !== JSON.stringify(nuevosPrestamos) || JSON.stringify(historial) !== JSON.stringify(nuevoHistorial) || !silencioso) {
+                    prestamos = nuevosPrestamos;
+                    historial = nuevoHistorial;
+                    renderizarTabla(buscador.value);
+                    renderizarHistorial();
+                    actualizarEstadisticas();
+                }
             }
+        } catch (err) {
+            console.error('Error al sincronizar:', err);
         }
+    }
 
-        function formatearFecha(fechaStr) {
-            if (!fechaStr) return '-';
-            if (fechaStr.includes('/')) return fechaStr;
-            const partes = fechaStr.split('-');
-            if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
-            return fechaStr;
+    function iniciarAutoActualizacion() {
+        setInterval(() => {
+            if (idEdicion === null) cargarDatosDesdeServidor(true);
+        }, 5000);
+    }
+
+    async function exportarJSON() {
+        if (prestamos.length === 0 && historial.length === 0) {
+            await mostrarModalAlerta("Atención", "No hay datos para exportar.");
+            return;
         }
+        const backupData = { fechaBackup: new Date().toISOString(), prestamos, historial };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+        const anchor = document.createElement('a');
+        anchor.setAttribute("href", dataStr);
+        anchor.setAttribute("download", `backup_inventario_${new Date().toISOString().split('T')[0]}.json`);
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+    }
 
-        function inicializarTema() {
-            const temaGuardado = localStorage.getItem('theme');
-            if (temaGuardado === 'dark') {
-                document.body.classList.add('dark-theme');
-                themeToggle.innerText = '☀️';
-            } else {
-                themeToggle.innerText = '🌙';
+    function importarJSON(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async function(event) {
+            try {
+                const data = JSON.parse(event.target.result);
+                if (Array.isArray(data.prestamos) && Array.isArray(data.historial)) {
+                    if (await mostrarModalConfirmacion("Restaurar Copia", "¿Deseas reemplazar la base de datos con esta copia?")) {
+                        const response = await fetch('api.php?action=importar_backup', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        });
+                        const res = await response.json();
+                        if (res.status === 'success') {
+                            await cargarDatosDesdeServidor();
+                            await mostrarModalAlerta("Éxito", "Copia restaurada correctamente.");
+                        }
+                    }
+                }
+            } catch (err) { 
+                await mostrarModalAlerta("Error", "Error al procesar el archivo JSON."); 
             }
-        }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    }
 
-        themeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-theme');
-            const esOscuro = document.body.classList.contains('dark-theme');
-            localStorage.setItem('theme', esOscuro ? 'dark' : 'light');
-            themeToggle.innerText = esOscuro ? '☀️' : '🌙';
+    async function exportarCSV() {
+        if (prestamos.length === 0 && historial.length === 0) {
+            await mostrarModalAlerta("Atención", "No hay datos para exportar.");
+            return;
+        }
+        let csv = "\uFEFFEstado,Producto,Codigo,Categoria,Situacion,Prestatario,EstadoFisico,Observaciones,Fecha\n";
+        prestamos.forEach(i => {
+            csv += `"${i.estadoDisponibilidad || 'prestado'}","${i.producto}","${i.codigo||''}","${i.categoria||''}","${i.estadoDisponibilidad === 'disponible' ? 'En Almacén' : 'Prestado'}","${i.prestatario||''}","${i.estadoFisico||'operativo'}","${i.observaciones||''}","${formatearFecha(i.fecha)}"\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `inventario_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    }
+
+    function cambiarPestana(p) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        if (p === 'activos') {
+            document.getElementById('btnTabActivos').classList.add('active');
+            document.getElementById('tab-activos').classList.add('active');
+        } else {
+            document.getElementById('btnTabHistorial').classList.add('active');
+            document.getElementById('tab-historial').classList.add('active');
+        }
+    }
+
+    function establecerFechaHoy() {
+        fechaInput.value = new Date().toISOString().split('T')[0];
+    }
+
+    function calcularAlerta(fecha) {
+        if (!fecha) return { texto: '-', clase: 'normal', estado: 'ok' };
+        const hoy = new Date();
+        const inicio = new Date(fecha);
+        const meses = (hoy.getFullYear() - inicio.getFullYear()) * 12 + (hoy.getMonth() - inicio.getMonth());
+        if (meses >= 12) return { texto: '12+ Meses 🚨', clase: 'badge-fisico-averiado', estado: 'alerta' };
+        if (meses >= 6) return { texto: '6+ Meses ⚠️', clase: 'badge-fisico-desperfecto', estado: 'alerta' };
+        return { texto: '-', clase: 'normal', estado: 'ok' };
+    }
+
+    function filtrarPorEstado(estado, el) {
+        estadoFiltroActual = estado;
+        document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        renderizarTabla(buscador.value);
+    }
+
+    function cambiarOrden(criterio) {
+        ordenActual = criterio;
+        renderizarTabla(buscador.value);
+    }
+
+    function ordenarLista(lista) {
+        return lista.sort((a, b) => {
+            if (ordenActual === 'fecha-desc') return new Date(b.fecha) - new Date(a.fecha);
+            if (ordenActual === 'fecha-asc') return new Date(a.fecha) - new Date(b.fecha);
+            if (ordenActual === 'nombre-asc') return a.producto.localeCompare(b.producto);
+            return 0;
+        });
+    }
+
+    function toggleGrupo(clave) {
+        if (gruposAbiertos.has(clave)) gruposAbiertos.delete(clave);
+        else gruposAbiertos.add(clave);
+        renderizarTabla(buscador.value);
+    }
+
+    function renderizarTabla(filtroTexto = '') {
+        tabla.innerHTML = '';
+
+        let filtrados = prestamos.filter(item => {
+            const texto = filtroTexto.toLowerCase();
+            const disp = item.estadoDisponibilidad || 'prestado';
+            const fis = item.estadoFisico || 'operativo';
+
+            const coincideTexto = (item.producto && item.producto.toLowerCase().includes(texto)) ||
+                                 (item.codigo && item.codigo.toLowerCase().includes(texto)) ||
+                                 (item.prestatario && item.prestatario.toLowerCase().includes(texto)) ||
+                                 (item.observaciones && item.observaciones.toLowerCase().includes(texto));
+
+            let coincideEstado = true;
+            if (estadoFiltroActual === 'disponible') coincideEstado = (disp === 'disponible');
+            else if (estadoFiltroActual === 'prestado') coincideEstado = (disp === 'prestado');
+            else if (estadoFiltroActual === 'averiado') coincideEstado = (fis === 'averiado');
+            else if (estadoFiltroActual === 'alerta') coincideEstado = (disp === 'prestado' && calcularAlerta(item.fecha).estado === 'alerta');
+
+            return coincideTexto && coincideEstado;
         });
 
-        function actualizarEstadisticas() {
-            const total = prestamos.length;
-            const enAlmacen = prestamos.filter(item => (item.estadoDisponibilidad || 'prestado') === 'disponible').length;
-            const enPrestamo = prestamos.filter(item => (item.estadoDisponibilidad || 'prestado') === 'prestado').length;
-            const enAlerta = prestamos.filter(item => (item.estadoDisponibilidad || 'prestado') === 'prestado' && calcularAlerta(item.fecha).estado === 'alerta').length;
+        filtrados = ordenarLista(filtrados);
 
-            document.getElementById('statTotalActivos').innerText = total;
-            document.getElementById('statEnAlmacen').innerText = enAlmacen;
-            document.getElementById('statEnPrestamo').innerText = enPrestamo;
-            document.getElementById('statEnAlerta').innerText = enAlerta;
+        if (filtrados.length === 0) {
+            tabla.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--text-muted); padding: 24px;">No se encontraron registros.</td></tr>`;
+            return;
         }
 
-        function mostrarModal(titulo, mensaje) {
-            return new Promise((resolve) => {
-                const overlay = document.getElementById('modalOverlay');
-                document.getElementById('modalTitulo').innerText = titulo;
-                document.getElementById('modalMensaje').innerText = mensaje;
-                overlay.classList.add('active');
+        const grupos = {};
+        filtrados.forEach(item => {
+            const clave = item.producto.trim().toLowerCase();
+            if (!grupos[clave]) grupos[clave] = { nombre: item.producto, items: [] };
+            grupos[clave].items.push(item);
+        });
 
-                const cerrar = (res) => {
-                    overlay.classList.remove('active');
-                    document.getElementById('btnModalConfirmar').onclick = null;
-                    document.getElementById('btnModalCancelar').onclick = null;
-                    resolve(res);
+        Object.keys(grupos).forEach(clave => {
+            const grupo = grupos[clave];
+            let estaAbierto = !gruposAbiertos.has(clave);
+            const flecha = estaAbierto ? '🔽' : '▶️';
+            const cantidad = grupo.items.length;
+
+            const dispCount = grupo.items.filter(i => (i.estadoDisponibilidad || 'prestado') === 'disponible').length;
+            const prestCount = cantidad - dispCount;
+
+            const filaGrupo = document.createElement('tr');
+            filaGrupo.className = 'group-header-row';
+            filaGrupo.style.cursor = 'pointer';
+            filaGrupo.onclick = () => toggleGrupo(clave);
+            filaGrupo.innerHTML = `
+                <td colspan="8" class="group-header-cell">
+                    <span style="margin-right:8px;">${flecha}</span>
+                    <strong>${grupo.nombre}</strong>
+                    <span class="badge" style="background:#2563eb; color:#fff; font-size:0.75rem; margin-left:10px;">${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}</span>
+                    <span style="font-size:0.8rem; margin-left: 10px; color: var(--text-muted);">(${dispCount} en almacén 🟢 | ${prestCount} prestados 🤝)</span>
+                    <span style="float: right; font-size: 0.8rem; opacity: 0.7;">${estaAbierto ? 'Clic para plegar ▲' : 'Clic para desplegar unidades ▼'}</span>
+                </td>
+            `;
+            tabla.appendChild(filaGrupo);
+
+            if (estaAbierto) {
+                grupo.items.forEach(item => {
+                    const disp = item.estadoDisponibilidad || 'prestado';
+                    const fis = item.estadoFisico || 'operativo';
+                    const alerta = disp === 'prestado' ? calcularAlerta(item.fecha) : { texto: '-', clase: 'normal' };
+
+                    let badgeFisico = '<span class="badge badge-fisico-operativo">🟢 Operativo</span>';
+                    if (fis === 'desperfecto') badgeFisico = '<span class="badge badge-fisico-desperfecto">🟡 Con Marcas</span>';
+                    if (fis === 'averiado') badgeFisico = '<span class="badge badge-fisico-averiado">🔴 Averiado</span>';
+
+                    let situacionHTML = '';
+                    if (disp === 'disponible') {
+                        situacionHTML = `<span class="badge badge-disponible">🟢 En Almacén</span>`;
+                    } else {
+                        situacionHTML = `<span class="badge badge-prestado">🤝 Prestado</span>` + (item.prestatario ? `<br><small>👤 <strong>${item.prestatario}</strong></small>` : '');
+                    }
+
+                    let btnAccionRapida = '';
+                    if (disp === 'disponible') {
+                        btnAccionRapida = `<button class="btn-prestar-quick" title="Prestar este equipo" onclick="prestarRapido('${item.id}')">🤝 Prestar</button>`;
+                    } else {
+                        btnAccionRapida = `<button class="btn-icon" title="Devolver al Almacén" onclick="devolverPrestamo('${item.id}')">🔄</button>`;
+                    }
+
+                    const catHTML = item.categoria ? `<span class="badge badge-cat">${item.categoria}</span>` : '-';
+                    const fila = document.createElement('tr');
+
+                    fila.innerHTML = `
+                        <td style="padding-left: 28px;"><strong>${item.producto}</strong></td>
+                        <td><code>${item.codigo || '-'}</code></td>
+                        <td>${catHTML}</td>
+                        <td>${badgeFisico}</td>
+                        <td>${situacionHTML}</td>
+                        <td>${formatearFecha(item.fecha)}</td>
+                        <td><span class="badge ${alerta.clase}">${alerta.texto}</span></td>
+                        <td class="actions-cell">
+                            <div class="actions-wrapper">
+                                ${btnAccionRapida}
+                                <button class="btn-icon" title="Editar" onclick="editarPrestamo('${item.id}')">✏️</button>
+                            </div>
+                        </td>
+                    `;
+                    tabla.appendChild(fila);
+                });
+            }
+        });
+    }
+
+    function renderizarHistorial() {
+        tablaHistorial.innerHTML = '';
+        if (historial.length === 0) {
+            tablaHistorial.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 24px;">No hay devoluciones registradas.</td></tr>`;
+            return;
+        }
+        historial.forEach((item) => {
+            const fila = document.createElement('tr');
+            const catHTML = item.categoria ? `<span class="badge badge-cat">${item.categoria}</span>` : '-';
+            fila.innerHTML = `
+                <td><strong>${item.producto}</strong></td>
+                <td><code>${item.codigo || '-'}</code></td>
+                <td>${catHTML}</td>
+                <td>${item.prestatario || '-'}</td>
+                <td>${item.observaciones || '-'}</td>
+                <td>${formatearFecha(item.fecha)}</td>
+                <td><span class="badge badge-disponible">${formatearFecha(item.fechaDevolucion)}</span></td>
+            `;
+            tablaHistorial.appendChild(fila);
+        });
+    }
+
+    // Acción rápida Prestar reemplazando prompt nativo
+    async function prestarRapido(id) {
+        const item = prestamos.find(p => String(p.id) === String(id));
+        if (!item) return;
+
+        const persona = await pedirTextoModal(
+            `Prestar equipo: "${item.producto}"`,
+            'Indica la persona o aula asignada:',
+            'Ej. Juan Pérez / Aula 102'
+        );
+
+        if (!persona) return;
+
+        const datosActualizados = {
+            ...item,
+            estadoDisponibilidad: 'prestado',
+            prestatario: persona,
+            fecha: new Date().toISOString().split('T')[0]
+        };
+
+        await guardarEnServidor(datosActualizados, 'api.php?action=edit_prestamo');
+    }
+
+    async function devolverPrestamo(id) {
+        const hoy = new Date().toISOString().split('T')[0];
+        const item = prestamos.find(p => String(p.id) === String(id));
+
+        try {
+            await fetch('api.php?action=devolver_prestamo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, fechaDevolucion: hoy })
+            });
+
+            if (item) {
+                const datosDevuelto = {
+                    ...item,
+                    estadoDisponibilidad: 'disponible',
+                    prestatario: ''
                 };
-
-                document.getElementById('btnModalConfirmar').onclick = () => cerrar(true);
-                document.getElementById('btnModalCancelar').onclick = () => cerrar(false);
-            });
-        }
-
-        async function cargarDatosDesdeServidor(silencioso = false) {
-            try {
-                const response = await fetch('api.php?action=get_all');
-                const res = await response.json();
-                if (res.status === 'success') {
-                    const nuevosPrestamos = res.prestamos || [];
-                    const nuevoHistorial = res.historial || [];
-
-                    if (JSON.stringify(prestamos) !== JSON.stringify(nuevosPrestamos) || JSON.stringify(historial) !== JSON.stringify(nuevoHistorial) || !silencioso) {
-                        prestamos = nuevosPrestamos;
-                        historial = nuevoHistorial;
-                        renderizarTabla(buscador.value);
-                        renderizarHistorial();
-                        actualizarEstadisticas();
-                    }
-                }
-            } catch (err) {
-                console.error('Error al sincronizar con el servidor:', err);
-            }
-        }
-
-        function iniciarAutoActualizacion() {
-            setInterval(() => {
-                if (idEdicion === null) cargarDatosDesdeServidor(true);
-            }, 5000);
-        }
-
-        function exportarJSON() {
-            if (prestamos.length === 0 && historial.length === 0) {
-                alert("No hay datos para exportar.");
-                return;
-            }
-            const backupData = { fechaBackup: new Date().toISOString(), prestamos, historial };
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
-            const anchor = document.createElement('a');
-            anchor.setAttribute("href", dataStr);
-            anchor.setAttribute("download", `backup_inventario_${new Date().toISOString().split('T')[0]}.json`);
-            document.body.appendChild(anchor);
-            anchor.click();
-            anchor.remove();
-        }
-
-        function importarJSON(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async function(event) {
-                try {
-                    const data = JSON.parse(event.target.result);
-                    if (Array.isArray(data.prestamos) && Array.isArray(data.historial)) {
-                        if (await mostrarModal("Restaurar Copia", "¿Deseas reemplazar la base de datos con esta copia?")) {
-                            const response = await fetch('api.php?action=importar_backup', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(data)
-                            });
-                            const res = await response.json();
-                            if (res.status === 'success') {
-                                await cargarDatosDesdeServidor();
-                                alert("¡Copia restaurada con éxito! ✅");
-                            }
-                        }
-                    }
-                } catch (err) { alert("Error al procesar el JSON."); }
-            };
-            reader.readAsText(file);
-            e.target.value = '';
-        }
-
-        function exportarCSV() {
-            if (prestamos.length === 0 && historial.length === 0) return alert("Sin datos.");
-            let csv = "\uFEFFEstado,Producto,Codigo,Categoria,Situacion,Prestatario,EstadoFisico,Observaciones,Fecha\n";
-            prestamos.forEach(i => {
-                csv += `"${i.estadoDisponibilidad || 'prestado'}","${i.producto}","${i.codigo||''}","${i.categoria||''}","${i.estadoDisponibilidad === 'disponible' ? 'En Almacén' : 'Prestado'}","${i.prestatario||''}","${i.estadoFisico||'operativo'}","${i.observaciones||''}","${formatearFecha(i.fecha)}"\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `inventario_5050_${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-        }
-
-        function cambiarPestana(p) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            if (p === 'activos') {
-                document.getElementById('btnTabActivos').classList.add('active');
-                document.getElementById('tab-activos').classList.add('active');
+                await guardarEnServidor(datosDevuelto, 'api.php?action=edit_prestamo');
             } else {
-                document.getElementById('btnTabHistorial').classList.add('active');
-                document.getElementById('tab-historial').classList.add('active');
-            }
-        }
-
-        function establecerFechaHoy() {
-            fechaInput.value = new Date().toISOString().split('T')[0];
-        }
-
-        function calcularAlerta(fecha) {
-            if (!fecha) return { texto: '-', clase: 'normal', estado: 'ok' };
-            const hoy = new Date();
-            const inicio = new Date(fecha);
-            const meses = (hoy.getFullYear() - inicio.getFullYear()) * 12 + (hoy.getMonth() - inicio.getMonth());
-            if (meses >= 12) return { texto: '12+ Meses 🚨', clase: 'alerta-12', estado: 'alerta' };
-            if (meses >= 6) return { texto: '6+ Meses ⚠️', clase: 'alerta-6', estado: 'alerta' };
-            return { texto: 'En Regla ✅', clase: 'normal', estado: 'ok' };
-        }
-
-        function filtrarPorEstado(estado, el) {
-            estadoFiltroActual = estado;
-            document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
-            el.classList.add('active');
-            renderizarTabla(buscador.value);
-        }
-
-        function cambiarOrden(criterio) {
-            ordenActual = criterio;
-            renderizarTabla(buscador.value);
-        }
-
-        function ordenarLista(lista) {
-            return lista.sort((a, b) => {
-                if (ordenActual === 'fecha-desc') return new Date(b.fecha) - new Date(a.fecha);
-                if (ordenActual === 'fecha-asc') return new Date(a.fecha) - new Date(b.fecha);
-                if (ordenActual === 'nombre-asc') return a.producto.localeCompare(b.producto);
-                return 0;
-            });
-        }
-
-        function toggleGrupo(clave) {
-            if (gruposAbiertos.has(clave)) gruposAbiertos.delete(clave);
-            else gruposAbiertos.add(clave);
-            renderizarTabla(buscador.value);
-        }
-
-        function renderizarTabla(filtroTexto = '') {
-            tabla.innerHTML = '';
-
-            let filtrados = prestamos.filter(item => {
-                const texto = filtroTexto.toLowerCase();
-                const disp = item.estadoDisponibilidad || 'prestado';
-                const fis = item.estadoFisico || 'operativo';
-
-                const coincideTexto = item.producto.toLowerCase().includes(texto) ||
-                                     (item.codigo && item.codigo.toLowerCase().includes(texto)) ||
-                                     (item.prestatario && item.prestatario.toLowerCase().includes(texto)) ||
-                                     (item.observaciones && item.observaciones.toLowerCase().includes(texto));
-
-                let coincideEstado = true;
-                if (estadoFiltroActual === 'disponible') coincideEstado = (disp === 'disponible');
-                else if (estadoFiltroActual === 'prestado') coincideEstado = (disp === 'prestado');
-                else if (estadoFiltroActual === 'averiado') coincideEstado = (fis === 'averiado');
-                else if (estadoFiltroActual === 'alerta') coincideEstado = (disp === 'prestado' && calcularAlerta(item.fecha).estado === 'alerta');
-
-                return coincideTexto && coincideEstado;
-            });
-
-            filtrados = ordenarLista(filtrados);
-
-            if (filtrados.length === 0) {
-                tabla.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--text-muted); padding: 24px;">No se encontraron registros.</td></tr>`;
-                return;
-            }
-
-            // Agrupar por Producto
-            const grupos = {};
-            filtrados.forEach(item => {
-                const clave = item.producto.trim().toLowerCase();
-                if (!grupos[clave]) grupos[clave] = { nombre: item.producto, items: [] };
-                grupos[clave].items.push(item);
-            });
-
-            Object.keys(grupos).forEach(clave => {
-                const grupo = grupos[clave];
-                let estaAbierto = gruposAbiertos.has(clave) || filtroTexto.trim() !== '';
-                const flecha = estaAbierto ? '🔽' : '▶️';
-                const cantidad = grupo.items.length;
-
-                // Contar disponibilidad en el grupo
-                const dispCount = grupo.items.filter(i => (i.estadoDisponibilidad || 'prestado') === 'disponible').length;
-                const prestCount = cantidad - dispCount;
-
-                const filaGrupo = document.createElement('tr');
-                filaGrupo.className = 'group-header-row';
-                filaGrupo.style.cursor = 'pointer';
-                filaGrupo.onclick = () => toggleGrupo(clave);
-                filaGrupo.innerHTML = `
-                    <td colspan="8" class="group-header-cell" style="padding: 12px 16px;">
-                        <span class="group-arrow">${flecha}</span>
-                        <strong>${grupo.nombre}</strong>
-                        <span class="badge-count" style="background:#2563eb; color:#fff; font-size:0.75rem; padding:3px 9px; border-radius:12px; margin-left:10px; font-weight:700;">${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}</span>
-                        <span style="font-size:0.8rem; margin-left: 10px; color: var(--text-muted);">(${dispCount} en almacén 🟢 | ${prestCount} prestados 🤝)</span>
-                        <span class="group-hint" style="float: right; font-size: 0.8rem; opacity: 0.7;">${estaAbierto ? 'Clic para plegar ▲' : 'Clic para desplegar unidades ▼'}</span>
-                    </td>
-                `;
-                tabla.appendChild(filaGrupo);
-
-                if (estaAbierto) {
-                    grupo.items.forEach(item => {
-                        const disp = item.estadoDisponibilidad || 'prestado';
-                        const fis = item.estadoFisico || 'operativo';
-                        const alerta = disp === 'prestado' ? calcularAlerta(item.fecha) : { texto: '-', clase: 'normal' };
-
-                        // Badge Estado Físico
-                        let badgeFisico = '<span class="badge badge-fisico-operativo">🟢 Operativo</span>';
-                        if (fis === 'desperfecto') badgeFisico = '<span class="badge badge-fisico-desperfecto">🟡 Con Marcas</span>';
-                        if (fis === 'averiado') badgeFisico = '<span class="badge badge-fisico-averiado">🔴 Averiado</span>';
-
-                        // Columna Situación
-                        let situacionHTML = '';
-                        if (disp === 'disponible') {
-                            situacionHTML = `<span class="badge badge-disponible">🟢 En Almacén</span>`;
-                        } else {
-                            situacionHTML = `<span class="badge badge-prestado">🤝 Prestado</span>` + (item.prestatario ? `<br><small>👤 <strong>${item.prestatario}</strong></small>` : '');
-                        }
-
-                        // Botón de Acción Dinámico (Prestar vs Devolver)
-                        let btnAccionRapida = '';
-                        if (disp === 'disponible') {
-                            btnAccionRapida = `<button class="btn-prestar-quick" title="Prestar este equipo" onclick="prestarRapido(${item.id})">🤝 Prestar</button>`;
-                        } else {
-                            btnAccionRapida = `<button class="btn-icon" title="Devolver al Almacén" onclick="devolverPrestamo(${item.id})">🔄</button>`;
-                        }
-
-                        const catHTML = item.categoria ? `<span class="badge-cat">${item.categoria}</span>` : '-';
-                        const fila = document.createElement('tr');
-                        fila.className = 'child-row';
-
-                        fila.innerHTML = `
-                            <td style="padding-left: 28px;"><strong>${item.producto}</strong></td>
-                            <td><code>${item.codigo || '-'}</code></td>
-                            <td>${catHTML}</td>
-                            <td>${badgeFisico}</td>
-                            <td>${situacionHTML}</td>
-                            <td>${formatearFecha(item.fecha)}</td>
-                            <td><span class="badge ${alerta.clase}">${alerta.texto}</span></td>
-                            <td class="actions-cell">
-                                <div class="actions-wrapper">
-                                    ${btnAccionRapida}
-                                    <button class="btn-icon" title="Editar" onclick="editarPrestamo(${item.id})">✏️</button>
-                                </div>
-                            </td>
-                        `;
-                        tabla.appendChild(fila);
-                    });
-                }
-            });
-        }
-
-        function renderizarHistorial() {
-            tablaHistorial.innerHTML = '';
-            if (historial.length === 0) {
-                tablaHistorial.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 24px;">No hay devoluciones registradas.</td></tr>`;
-                return;
-            }
-            historial.forEach((item) => {
-                const fila = document.createElement('tr');
-                const catHTML = item.categoria ? `<span class="badge-cat">${item.categoria}</span>` : '-';
-                fila.innerHTML = `
-                    <td><strong>${item.producto}</strong></td>
-                    <td>${item.codigo || '-'}</td>
-                    <td>${catHTML}</td>
-                    <td>${item.prestatario || '-'}</td>
-                    <td>${item.observaciones || '-'}</td>
-                    <td>${formatearFecha(item.fecha)}</td>
-                    <td><span class="badge devuelto">${formatearFecha(item.fechaDevolucion)}</span></td>
-                `;
-                tablaHistorial.appendChild(fila);
-            });
-        }
-
-        async function prestarRapido(id) {
-            const persona = prompt("¿A quién se le presta este equipo? (Nombre de la persona o aula):");
-            if (!persona || persona.trim() === '') return;
-
-            const item = prestamos.find(p => Number(p.id) === Number(id));
-            if (!item) return;
-
-            const datosActualizados = {
-                ...item,
-                estadoDisponibilidad: 'prestado',
-                prestatario: persona.trim(),
-                fecha: new Date().toISOString().split('T')[0]
-            };
-
-            await guardarEnServidor(datosActualizados, 'api.php?action=edit_prestamo');
-        }
-
-        async function devolverPrestamo(id) {
-            const hoy = new Date().toISOString().split('T')[0];
-            const item = prestamos.find(p => Number(p.id) === Number(id));
-
-            try {
-                // Registrar en historial de devoluciones
-                await fetch('api.php?action=devolver_prestamo', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: id, fechaDevolucion: hoy })
-                });
-
-                // Cambiar el producto de nuevo a "disponible" en almacén
-                if (item) {
-                    const datosDevuelto = {
-                        ...item,
-                        estadoDisponibilidad: 'disponible',
-                        prestatario: ''
-                    };
-                    await guardarEnServidor(datosDevuelto, 'api.php?action=edit_prestamo');
-                } else {
-                    await cargarDatosDesdeServidor();
-                }
-            } catch (err) {
-                console.error('Error al realizar devolución:', err);
-            }
-        }
-
-        function editarPrestamo(id) {
-            const item = prestamos.find(p => Number(p.id) === Number(id));
-            if (!item) return;
-
-            document.getElementById('producto').value = item.producto;
-            document.getElementById('codigo').value = item.codigo || '';
-            document.getElementById('categoria').value = item.categoria || '';
-            document.getElementById('estadoDisponibilidad').value = item.estadoDisponibilidad || 'prestado';
-            document.getElementById('prestatario').value = item.prestatario || '';
-            document.getElementById('estadoFisico').value = item.estadoFisico || 'operativo';
-            document.getElementById('observaciones').value = item.observaciones || '';
-            document.getElementById('fecha').value = item.fecha;
-
-            togglePrestatario();
-
-            idEdicion = id;
-            formTitulo.innerText = "✏️ Editar Equipo";
-            btnGuardar.innerText = "Guardar Cambios 💾";
-            btnCancelar.style.display = "block";
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function cancelarEdicion() {
-            idEdicion = null;
-            form.reset();
-            document.getElementById('categoria').value = '';
-            document.getElementById('estadoDisponibilidad').value = 'disponible';
-            document.getElementById('estadoFisico').value = 'operativo';
-            togglePrestatario();
-            establecerFechaHoy();
-            formTitulo.innerText = "➕ Registrar Equipo";
-            btnGuardar.innerText = "Guardar Equipo 💾";
-            btnCancelar.style.display = "none";
-        }
-
-        async function guardarEnServidor(datos, url) {
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(datos)
-                });
-                const res = await response.json();
-                if (res.status === 'success') {
-                    if (idEdicion !== null) cancelarEdicion();
-                    await cargarDatosDesdeServidor();
-                } else {
-                    alert('Error al guardar: ' + res.message);
-                }
-            } catch (err) {
-                console.error('Error al conectar con la API:', err);
-            }
-        }
-
-        async function solicitarVaciarHistorial() {
-            if (historial.length === 0) return;
-            if (await mostrarModal('Vaciar Historial', '¿Eliminar permanentemente todo el historial?')) {
-                await fetch('api.php?action=vaciar_historial', { method: 'POST' });
                 await cargarDatosDesdeServidor();
             }
+        } catch (err) {
+            console.error('Error en devolución:', err);
         }
+    }
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const datosGuardar = {
-                producto: document.getElementById('producto').value,
-                codigo: document.getElementById('codigo').value,
-                categoria: document.getElementById('categoria').value,
-                estadoDisponibilidad: document.getElementById('estadoDisponibilidad').value,
-                prestatario: document.getElementById('prestatario').value,
-                estadoFisico: document.getElementById('estadoFisico').value,
-                observaciones: document.getElementById('observaciones').value,
-                fecha: document.getElementById('fecha').value
-            };
+    function editarPrestamo(id) {
+        const item = prestamos.find(p => String(p.id) === String(id));
+        if (!item) return;
 
-            let url = 'api.php?action=add_prestamo';
-            if (idEdicion !== null) {
-                url = 'api.php?action=edit_prestamo';
-                datosGuardar.id = idEdicion;
-            }
+        document.getElementById('producto').value = item.producto;
+        document.getElementById('codigo').value = item.codigo || '';
+        document.getElementById('categoria').value = item.categoria || '';
+        document.getElementById('estadoDisponibilidad').value = item.estadoDisponibilidad || 'prestado';
+        document.getElementById('prestatario').value = item.prestatario || '';
+        document.getElementById('estadoFisico').value = item.estadoFisico || 'operativo';
+        document.getElementById('observaciones').value = item.observaciones || '';
+        document.getElementById('fecha').value = item.fecha;
 
-            await guardarEnServidor(datosGuardar, url);
-        });
+        togglePrestatario();
 
-        buscador.addEventListener('input', (e) => renderizarTabla(e.target.value));
+        idEdicion = id;
+        formTitulo.innerText = "✏️ Editar Equipo";
+        btnGuardar.innerText = "Guardar Cambios 💾";
+        btnCancelar.style.display = "block";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-        // Inicializar
-        inicializarTema();
+    function cancelarEdicion() {
+        idEdicion = null;
+        form.reset();
+        document.getElementById('categoria').value = '';
+        document.getElementById('estadoDisponibilidad').value = 'disponible';
+        document.getElementById('estadoFisico').value = 'operativo';
         togglePrestatario();
         establecerFechaHoy();
-        cargarDatosDesdeServidor();
-        iniciarAutoActualizacion();
-    </script>
+        formTitulo.innerText = "➕ Registrar Equipo";
+        btnGuardar.innerText = "Guardar Equipo 💾";
+        btnCancelar.style.display = "none";
+    }
+
+    async function guardarEnServidor(datos, url) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            });
+            const res = await response.json();
+            if (res.status === 'success') {
+                if (idEdicion !== null) cancelarEdicion();
+                await cargarDatosDesdeServidor();
+            } else {
+                await mostrarModalAlerta('Error', res.message || 'No se pudo guardar');
+            }
+        } catch (err) {
+            console.error('Error al conectar:', err);
+        }
+    }
+
+    async function solicitarVaciarHistorial() {
+        if (historial.length === 0) return;
+        if (await mostrarModalConfirmacion('Vaciar Historial', '¿Eliminar permanentemente todo el historial de devoluciones?')) {
+            await fetch('api.php?action=vaciar_historial', { method: 'POST' });
+            await cargarDatosDesdeServidor();
+        }
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const datosGuardar = {
+            producto: document.getElementById('producto').value,
+            codigo: document.getElementById('codigo').value,
+            categoria: document.getElementById('categoria').value,
+            estadoDisponibilidad: document.getElementById('estadoDisponibilidad').value,
+            prestatario: document.getElementById('prestatario').value,
+            estadoFisico: document.getElementById('estadoFisico').value,
+            observaciones: document.getElementById('observaciones').value,
+            fecha: document.getElementById('fecha').value
+        };
+
+        let url = 'api.php?action=add_prestamo';
+        if (idEdicion !== null) {
+            url = 'api.php?action=edit_prestamo';
+            datosGuardar.id = idEdicion;
+        }
+
+        await guardarEnServidor(datosGuardar, url);
+    });
+
+    buscador.addEventListener('input', (e) => renderizarTabla(e.target.value));
+
+    // Inicialización
+    inicializarTema();
+    togglePrestatario();
+    establecerFechaHoy();
+    cargarDatosDesdeServidor();
+    iniciarAutoActualizacion();
+</script>
 </body>
 </html>
