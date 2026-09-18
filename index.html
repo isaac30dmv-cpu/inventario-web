@@ -6,540 +6,647 @@
     <title>Gestor de Inventario y Préstamos</title>
     <style>
         :root {
-            --bg-body: #f4f5f8;
+            --bg-color: #f8fafc;
             --card-bg: #ffffff;
-            --text-main: #1e293b;
+            --text-color: #0f172a;
             --text-muted: #64748b;
             --border-color: #e2e8f0;
-            --primary: #5b46f6;
-            --primary-hover: #4c38ed;
-            --success-bg: #d1fae5;
-            --success-text: #065f46;
-            --warning-bg: #fef3c7;
-            --warning-text: #92400e;
-            --danger-bg: #fee2e2;
-            --danger-text: #991b1b;
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --danger-hover: #dc2626;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
         }
 
-        body.dark-mode {
-            --bg-body: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f8fafc;
+        body.dark-theme {
+            --bg-color: #090d16;
+            --card-bg: #131c2e;
+            --text-color: #f8fafc;
             --text-muted: #94a3b8;
-            --border-color: #334155;
-            --success-bg: #064e3b;
-            --success-text: #a7f3d0;
-            --warning-bg: #78350f;
-            --warning-text: #fde68a;
-            --danger-bg: #7f1d1d;
-            --danger-text: #fca5a5;
+            --border-color: #1e293b;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
         }
 
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
 
         body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            transition: background 0.2s, color 0.2s;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 28px 20px;
+            transition: background-color 0.25s ease, color 0.25s ease;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1440px;
             margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
         }
 
-        /* Header Top */
-        .top-header {
+        /* Header UI */
+        header {
+            background: var(--card-bg);
+            padding: 18px 28px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--card-bg);
-            padding: 16px 24px;
-            border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            border: 1px solid var(--border-color);
-            margin-bottom: 20px;
         }
 
-        .top-header h1 {
-            font-size: 1.2rem;
-            margin: 0;
+        .header-title {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            font-size: 1.35rem;
             font-weight: 800;
+            letter-spacing: -0.3px;
         }
 
-        .header-actions {
+        .header-controls {
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
-        .badge-sync {
-            background: #d1fae5;
-            color: #047857;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
+        .status-sync {
+            background: rgba(16, 185, 129, 0.12);
+            color: #059669;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 700;
             display: flex;
             align-items: center;
             gap: 6px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
-        .theme-toggle {
-            background: var(--bg-body);
+        body.dark-theme .status-sync {
+            color: #34d399;
+        }
+
+        .theme-btn {
+            background: var(--bg-color);
             border: 1px solid var(--border-color);
-            color: var(--text-main);
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
+            color: var(--text-color);
+            padding: 8px 14px;
+            border-radius: 30px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
+            font-size: 1rem;
+            transition: transform 0.15s ease;
         }
 
-        /* Metrics Row */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 18px 20px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-        }
-
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            background: #f1f5f9;
-        }
-
-        .stat-val {
-            font-size: 1.6rem;
-            font-weight: 800;
-            line-height: 1;
-        }
-
-        .stat-lbl {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-weight: 700;
-            margin-top: 5px;
-            letter-spacing: 0.5px;
+        .theme-btn:hover {
+            transform: scale(1.05);
         }
 
         /* Layout Grid */
-        .layout-grid {
+        .main-grid {
             display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 20px;
+            grid-template-columns: 360px 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 1080px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .card {
             background: var(--card-bg);
-            border-radius: 16px;
-            padding: 22px;
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: var(--shadow-md);
             border: 1px solid var(--border-color);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-            margin-bottom: 20px;
         }
 
-        .card-title {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-top: 0;
-            margin-bottom: 18px;
+        /* Formulario */
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .form-section h3 {
+            font-size: 1.2rem;
+            font-weight: 800;
             display: flex;
             align-items: center;
             gap: 8px;
+            letter-spacing: -0.2px;
+            margin-bottom: 6px;
         }
 
-        /* Form Controls */
         .form-group {
-            margin-bottom: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .form-group label {
-            display: block;
-            font-size: 0.72rem;
-            font-weight: 700;
-            text-transform: uppercase;
+            font-size: 0.74rem;
+            font-weight: 800;
             color: var(--text-muted);
-            margin-bottom: 6px;
-            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-left: 2px;
         }
 
         .form-control {
             width: 100%;
-            padding: 10px 12px;
-            background: var(--bg-body);
+            padding: 13px 16px;
             border: 1px solid var(--border-color);
-            color: var(--text-main);
-            border-radius: 8px;
-            font-size: 0.88rem;
+            border-radius: var(--radius-md);
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 0.92rem;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
 
         .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
         }
 
         textarea.form-control {
             resize: vertical;
-            min-height: 75px;
+            min-height: 85px;
+            line-height: 1.4;
         }
 
         .btn-submit {
-            width: 100%;
-            background: var(--primary);
+            background: var(--primary-color);
             color: white;
             border: none;
-            padding: 12px;
-            border-radius: 10px;
+            padding: 14px;
+            border-radius: var(--radius-md);
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 5px;
+            transition: background-color 0.15s ease, transform 0.1s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
         }
 
         .btn-submit:hover {
             background: var(--primary-hover);
         }
 
-        .btn-secondary {
-            background: var(--bg-body);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.82rem;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 8px;
+        .btn-submit:active {
+            transform: scale(0.98);
         }
 
-        /* Tabs */
-        .tabs-header {
+        .btn-secondary-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 11px 14px;
+            border-radius: var(--radius-md);
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-weight: 600;
             display: flex;
-            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+
+        .btn-secondary-btn:hover {
+            background: var(--bg-color);
+            border-color: var(--text-muted);
+        }
+
+        /* Stats Top Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            font-size: 2.2rem;
+            padding: 10px;
+            background: var(--bg-color);
+            border-radius: var(--radius-md);
+            line-height: 1;
+        }
+
+        .stat-info .stat-value {
+            font-size: 1.7rem;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-info .stat-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Tabs y Tablas */
+        .tab-buttons {
+            display: flex;
+            gap: 12px;
             border-bottom: 2px solid var(--border-color);
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         .tab-btn {
             background: none;
             border: none;
-            color: var(--text-muted);
-            padding: 10px 4px;
-            font-size: 0.95rem;
+            padding: 12px 18px;
             font-weight: 700;
+            color: var(--text-muted);
             cursor: pointer;
-            position: relative;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            font-size: 0.95rem;
+            transition: color 0.15s ease, border-color 0.15s ease;
         }
 
         .tab-btn.active {
-            color: var(--primary);
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
         }
 
-        .tab-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--primary);
-            border-radius: 3px;
+        .tab-content {
+            display: none;
         }
 
-        /* Filters Bar */
+        .tab-content.active {
+            display: block;
+        }
+
         .filters-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 16px;
+            gap: 14px;
+            margin-bottom: 18px;
         }
 
-        .filter-pills {
+        .pills {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
         }
 
-        .pill {
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            border: 1px solid var(--border-color);
+        .pill-btn {
             background: var(--card-bg);
-            color: var(--text-muted);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .pill.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .sort-select {
-            padding: 6px 10px;
-            border-radius: 8px;
             border: 1px solid var(--border-color);
-            background: var(--card-bg);
-            color: var(--text-main);
+            padding: 7px 16px;
+            border-radius: 30px;
             font-size: 0.82rem;
-            font-weight: 600;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.15s ease;
         }
 
-        /* Search Box */
-        .search-box {
+        .pill-btn:hover {
+            border-color: var(--primary-color);
+        }
+
+        .pill-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .search-container {
+            width: 100%;
             margin-bottom: 18px;
         }
 
         .search-input {
             width: 100%;
-            padding: 11px 16px;
-            border-radius: 10px;
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
             border: 1px solid var(--border-color);
-            background: var(--bg-body);
-            color: var(--text-main);
-            font-size: 0.88rem;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 0.92rem;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
 
-        /* Table */
-        .table-responsive {
+        .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+        }
+
+        /* Tabla */
+        .table-wrapper {
             overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            font-size: 0.85rem;
+            font-size: 0.88rem;
         }
 
         th {
-            background: var(--bg-body);
-            padding: 12px 14px;
-            font-size: 0.7rem;
-            text-transform: uppercase;
+            background: var(--bg-color);
+            padding: 14px 12px;
             color: var(--text-muted);
             font-weight: 800;
-            letter-spacing: 0.5px;
             border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.6px;
         }
 
         td {
-            padding: 12px 14px;
+            padding: 14px 12px;
             border-bottom: 1px solid var(--border-color);
             vertical-align: middle;
         }
 
-        /* Group Row Accordion */
-        .group-row {
-            background: var(--bg-body);
-            cursor: pointer;
-            font-weight: 700;
+        tr:last-child td {
+            border-bottom: none;
         }
 
-        .group-row td {
-            padding: 10px 14px;
-        }
-
-        .group-header-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-        }
-
-        .group-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .badge-count {
-            background: var(--primary);
-            color: white;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
-
-        .group-summary {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .group-toggle-btn {
-            font-size: 0.8rem;
-            color: var(--text-muted);
+        .group-header-row {
+            background: rgba(79, 70, 229, 0.04);
             font-weight: 600;
+            transition: background 0.15s ease;
         }
 
-        /* Cell elements */
-        .obs-note {
-            color: var(--text-muted);
-            font-size: 0.78rem;
-            font-style: italic;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            margin-top: 3px;
+        .group-header-row:hover {
+            background: rgba(79, 70, 229, 0.08);
         }
 
-        .code-pill {
-            font-family: monospace;
-            background: var(--bg-body);
-            border: 1px solid var(--border-color);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.8rem;
+        .group-header-cell {
+            padding: 12px 16px;
         }
 
-        .badge-status {
+        /* Badges */
+        .badge {
             padding: 4px 10px;
             border-radius: 20px;
-            font-size: 0.75rem;
             font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
+            font-size: 0.75rem;
+            display: inline-block;
         }
 
-        .badge-operativo { background: var(--success-bg); color: var(--success-text); }
-        .badge-prestado { background: var(--warning-bg); color: var(--warning-text); }
-        .badge-averiado { background: var(--danger-bg); color: var(--danger-text); }
+        .badge-disponible { background: #dcfce7; color: #15803d; }
+        .badge-prestado { background: #fef3c7; color: #b45309; }
+        .badge-fisico-operativo { background: #dcfce7; color: #15803d; }
+        .badge-fisico-desperfecto { background: #fef3c7; color: #b45309; }
+        .badge-fisico-averiado { background: #fee2e2; color: #b91c1c; }
 
-        /* Action Buttons */
-        .actions-cell {
+        body.dark-theme .badge-disponible { background: rgba(22, 101, 52, 0.3); color: #4ade80; }
+        body.dark-theme .badge-prestado { background: rgba(146, 64, 14, 0.3); color: #fbbf24; }
+        body.dark-theme .badge-fisico-operativo { background: rgba(22, 101, 52, 0.3); color: #4ade80; }
+        body.dark-theme .badge-fisico-desperfecto { background: rgba(146, 64, 14, 0.3); color: #fbbf24; }
+        body.dark-theme .badge-fisico-averiado { background: rgba(153, 27, 27, 0.3); color: #f87171; }
+
+        /* Botones de acción */
+        .actions-wrapper {
             display: flex;
             align-items: center;
             gap: 6px;
+            flex-wrap: nowrap;
         }
 
-        .btn-devolver {
-            background: #e6fffa;
-            color: #047857;
-            border: 1px solid #a7f3d0;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.78rem;
+        .btn-prestar-quick, .btn-devolver-quick {
+            height: 32px;
+            padding: 0 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
             font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .btn-devolver:hover { background: #d1fae5; }
-
-        .btn-icon {
-            width: 30px;
-            height: 30px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background: var(--card-bg);
-            cursor: pointer;
-            display: flex;
+            font-size: 0.8rem;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.85rem;
+            gap: 6px;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+            box-sizing: border-box;
         }
 
-        .btn-edit { background: #fefce8; border-color: #fef08a; }
-        .btn-delete { background: #fef2f2; border-color: #fecaca; }
+        .btn-prestar-quick {
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary-color);
+            border: 1px solid rgba(79, 70, 229, 0.2);
+        }
 
-        .btn-icon:hover { opacity: 0.8; }
+        .btn-prestar-quick:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-devolver-quick {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .btn-devolver-quick:hover {
+            background: #10b981;
+            color: white;
+        }
+
+        body.dark-theme .btn-devolver-quick {
+            color: #34d399;
+        }
+
+        .btn-icon {
+            height: 32px;
+            padding: 0 9px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.88rem;
+            color: var(--text-color);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+            box-sizing: border-box;
+            white-space: nowrap;
+        }
+
+        .btn-icon:hover {
+            background: var(--bg-color);
+            border-color: var(--text-muted);
+        }
+
+        .btn-icon-danger {
+            color: var(--danger-color);
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .btn-icon-danger:hover {
+            background: var(--danger-color);
+            color: white;
+            border-color: var(--danger-color);
+        }
+
+        code {
+            background: var(--bg-color);
+            padding: 3px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+
+        /* Modal custom UI */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: var(--card-bg);
+            color: var(--text-color);
+            padding: 26px;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-card h3 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .modal-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+            line-height: 1.4;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-modal-cancel {
+            background: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 9px 18px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.88rem;
+        }
+
+        .btn-modal-confirm {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 9px 20px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+
+        .btn-modal-danger {
+            background: var(--danger-color);
+        }
+
+        .btn-modal-danger:hover {
+            background: var(--danger-hover);
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- Top Header -->
-    <div class="top-header">
-        <h1>📦 Gestor de Inventario y Préstamos</h1>
-        <div class="header-actions">
-            <span class="badge-sync">● Sincronizado</span>
-            <button class="theme-toggle" onclick="toggleDarkMode()" title="Cambiar tema">🌙</button>
+    <!-- Header -->
+    <header>
+        <div class="header-title">
+            📦 Gestor de Inventario y Préstamos
         </div>
-    </div>
+        <div class="header-controls">
+            <span class="status-sync">🟢 Sincronizado</span>
+            <button class="theme-btn" id="themeToggle">🌙</button>
+        </div>
+    </header>
 
-    <!-- Top Metrics -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon" style="background:#f0edf0;">📦</div>
-            <div>
-                <div class="stat-val" id="stat-total">0</div>
-                <div class="stat-lbl">TOTAL EQUIPOS</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background:#d1fae5;">🟢</div>
-            <div>
-                <div class="stat-val" id="stat-almacen">0</div>
-                <div class="stat-lbl">EN ALMACÉN</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background:#fef3c7;">🤝</div>
-            <div>
-                <div class="stat-val" id="stat-prestamo">0</div>
-                <div class="stat-lbl">EN PRÉSTAMO</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background:#fee2e2;">⚠️</div>
-            <div>
-                <div class="stat-val" id="stat-alerta">0</div>
-                <div class="stat-lbl">EN ALERTA</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Layout Grid -->
-    <div class="layout-grid">
-        <!-- Sidebar -->
-        <div>
-            <!-- Form Card -->
+    <!-- Content Grid -->
+    <div class="main-grid">
+        <!-- Sidebar Formulario -->
+        <div class="sidebar">
             <div class="card">
-                <h2 class="card-title">➕ Registrar Equipo</h2>
-                <form id="form-equipo">
-                    <input type="hidden" id="equipo-id">
+                <form id="formPrestamo" class="form-section">
+                    <h3 id="formTitulo">➕ Registrar Equipo</h3>
 
                     <div class="form-group">
                         <label>PRODUCTO / EQUIPO *</label>
@@ -553,22 +660,23 @@
 
                     <div class="form-group">
                         <label>SITUACIÓN ACTUAL *</label>
-                        <select id="estadoDisponibilidad" class="form-control" required>
-                            <option value="disponible">En Almacén (Disponible)</option>
-                            <option value="prestado">En Préstamo</option>
+                        <select id="estadoDisponibilidad" class="form-control" onchange="togglePrestatario()" required>
+                            <option value="disponible">🟢 En Almacén (Disponible)</option>
+                            <option value="prestado">🤝 Prestado</option>
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label>PRESTATARIO / RESPONSABLE</label>
-                        <input type="text" id="prestatario" class="form-control" placeholder="Nombre de quien lo tiene">
+                    <div class="form-group" id="groupPrestatario" style="display: none;">
+                        <label>PRESTATARIO / ASIGNADO A (OPCIONAL)</label>
+                        <input type="text" id="prestatario" class="form-control" placeholder="Ej. Juan Pérez / Aula 102 (opcional)">
                     </div>
 
                     <div class="form-group">
                         <label>ESTADO FÍSICO DEL EQUIPO</label>
                         <select id="estadoFisico" class="form-control">
-                            <option value="operativo">Operativo / Listo</option>
-                            <option value="averiado">Averiado / En reparación</option>
+                            <option value="operativo">🟢 Operativo / Listo</option>
+                            <option value="desperfecto">🟡 Con Marcas / Uso</option>
+                            <option value="averiado">🔴 Averiado / Mantenimiento</option>
                         </select>
                     </div>
 
@@ -582,315 +690,703 @@
                         <input type="date" id="fecha" class="form-control" required>
                     </div>
 
-                    <button type="submit" class="btn-submit" id="btn-guardar">Guardar Equipo 💾</button>
+                    <button type="submit" id="btnGuardar" class="btn-submit">Guardar Equipo 💾</button>
+                    <button type="button" id="btnCancelar" class="btn-secondary-btn" style="display: none;" onclick="cancelarEdicion()">Cancelar Edición</button>
                 </form>
             </div>
 
             <!-- Backup Card -->
-            <div class="card">
-                <h2 class="card-title">💾 Copias de Seguridad</h2>
-                <button class="btn-secondary" onclick="exportarBackup()">Descargar Copia 📥</button>
-                <button class="btn-secondary" onclick="document.getElementById('import-file').click()">Restaurar Copia 📤</button>
-                <input type="file" id="import-file" accept=".json" style="display:none" onchange="importarBackup(event)">
+            <div class="card backup-block" style="margin-top: 20px;">
+                <h3 style="font-size: 0.95rem; font-weight:800; margin-bottom: 14px;">💾 Copias de Seguridad</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn-secondary-btn" onclick="exportarJSON()">📦 Descargar Backup JSON</button>
+                    <button class="btn-secondary-btn" onclick="document.getElementById('fileImport').click()">📥 Importar Backup JSON</button>
+                    <input type="file" id="fileImport" style="display:none;" accept=".json" onchange="importarJSON(event)">
+                    <button class="btn-secondary-btn" onclick="exportarCSV()">📊 Exportar a CSV</button>
+                </div>
             </div>
         </div>
 
-        <!-- Right Main Content Panel -->
-        <div class="card">
-            <!-- Tabs -->
-            <div class="tabs-header">
-                <button class="tab-btn active" id="tab-inv" onclick="switchTab('inventario')">Inventario de Equipos 📋</button>
-                <button class="tab-btn" id="tab-hist" onclick="switchTab('historial')">Historial de Devoluciones 📜</button>
-            </div>
-
-            <!-- View: Inventario -->
-            <div id="view-inventario">
-                <!-- Filter Pills & Sorting -->
-                <div class="filters-bar">
-                    <div class="filter-pills">
-                        <button class="pill active" onclick="setFilter('todos', this)">Todos</button>
-                        <button class="pill" onclick="setFilter('almacen', this)">🟢 En Almacén</button>
-                        <button class="pill" onclick="setFilter('prestamo', this)">🤝 En Préstamo</button>
-                        <button class="pill" onclick="setFilter('averiados', this)">🔴 Averiados</button>
-                        <button class="pill" onclick="setFilter('alerta', this)">⚠️ En Alerta</button>
-                    </div>
-
-                    <div>
-                        <span style="font-size:0.8rem; font-weight:700; color:var(--text-muted);">Ordenar:</span>
-                        <select class="sort-select" id="sort-order" onchange="renderTabla()">
-                            <option value="producto-asc">Producto (A-Z)</option>
-                            <option value="producto-desc">Producto (Z-A)</option>
-                            <option value="fecha-desc">Fecha (Más reciente)</option>
-                            <option value="fecha-asc">Fecha (Más antigua)</option>
-                        </select>
+        <!-- Main Panel Right -->
+        <div class="main-content">
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="statTotalActivos">0</div>
+                        <div class="stat-label">Total Equipos</div>
                     </div>
                 </div>
-
-                <!-- Search Box -->
-                <div class="search-box">
-                    <input type="text" id="search-input" class="search-input" placeholder="🔍 Buscar por producto, código, prestatario, notas..." oninput="renderTabla()">
+                <div class="stat-card">
+                    <div class="stat-icon">🟢</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="statEnAlmacen">0</div>
+                        <div class="stat-label">En Almacén</div>
+                    </div>
                 </div>
-
-                <!-- Table -->
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>PRODUCTO</th>
-                                <th>CÓDIGO</th>
-                                <th>ESTADO FÍSICO</th>
-                                <th>SITUACIÓN / PRESTATARIO</th>
-                                <th>FECHA REG./PRÉSTAMO</th>
-                                <th>ALERTA</th>
-                                <th>ACCIONES</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-body">
-                            <!-- Filas dinámicas -->
-                        </tbody>
-                    </table>
+                <div class="stat-card">
+                    <div class="stat-icon">🤝</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="statEnPrestamo">0</div>
+                        <div class="stat-label">En Préstamo</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="statEnAlerta">0</div>
+                        <div class="stat-label">En Alerta</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- View: Historial -->
-            <div id="view-historial" style="display:none;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <h3 style="margin:0; font-size:0.95rem;">Registro de Devoluciones</h3>
-                    <button class="btn-secondary" style="width:auto;" onclick="vaciarHistorial()">Vaciar Historial 🗑️</button>
+            <!-- Panel Content -->
+            <div class="card">
+                <div class="tab-buttons">
+                    <button id="btnTabActivos" class="tab-btn active" onclick="cambiarPestana('activos')">Inventario de Equipos 📋</button>
+                    <button id="btnTabHistorial" class="tab-btn" onclick="cambiarPestana('historial')">Historial de Devoluciones 📜</button>
                 </div>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>PRODUCTO</th>
-                                <th>CÓDIGO</th>
-                                <th>PRESTATARIO</th>
-                                <th>FECHA PRÉSTAMO</th>
-                                <th>FECHA DEVOLUCIÓN</th>
-                                <th>OBSERVACIONES</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-historial-body">
-                            <!-- Historial dinámico -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
 
+                <!-- Tab Inventario -->
+                <div id="tab-activos" class="tab-content active">
+                    <div class="filters-bar">
+                        <div class="pills">
+                            <button class="pill-btn active" onclick="filtrarPorEstado('todos', this)">Todos</button>
+                            <button class="pill-btn" onclick="filtrarPorEstado('disponible', this)">🟢 En Almacén</button>
+                            <button class="pill-btn" onclick="filtrarPorEstado('prestado', this)">🤝 En Préstamo</button>
+                            <button class="pill-btn" onclick="filtrarPorEstado('averiado', this)">🔴 Averiados</button>
+                            <button class="pill-btn" onclick="filtrarPorEstado('alerta', this)">⚠️ En Alerta</button>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-right: 6px;">Ordenar:</span>
+                            <select id="selectOrden" class="form-control" style="width: auto; display: inline-block; padding: 6px 12px;" onchange="cambiarOrden(this.value)">
+                                <option value="nombre-asc">Producto (A-Z)</option>
+                                <option value="fecha-desc">Fecha (Más reciente)</option>
+                                <option value="fecha-asc">Fecha (Más antigua)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="search-container">
+                        <input type="text" id="buscador" class="search-input" placeholder="🔍 Buscar por producto, código, prestatario, notas...">
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>PRODUCTO</th>
+                                    <th>CÓDIGO</th>
+                                    <th>ESTADO FÍSICO</th>
+                                    <th>SITUACIÓN / PRESTATARIO</th>
+                                    <th>FECHA REG./PRÉSTAMO</th>
+                                    <th>ALERTA</th>
+                                    <th>ACCIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaCuerpo">
+                                <!-- Filas Dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab Historial -->
+                <div id="tab-historial" class="tab-content">
+                    <div style="display:flex; justify-content:flex-end; margin-bottom: 14px;">
+                        <button class="btn-secondary-btn" style="width:auto; color: var(--danger-color); border-color: rgba(239, 68, 68, 0.3);" onclick="solicitarVaciarHistorial()">🗑️ Vaciar Historial</button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>PRODUCTO</th>
+                                    <th>CÓDIGO</th>
+                                    <th>PRESTATARIO</th>
+                                    <th>NOTAS</th>
+                                    <th>FECHA PRÉSTAMO</th>
+                                    <th>FECHA DEVOLUCIÓN</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaHistorial">
+                                <!-- Historial -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Personalizado Integrado -->
+<div id="modalOverlay" class="modal-overlay">
+    <div class="modal-card">
+        <h3 id="modalTitulo">Modal</h3>
+        <p id="modalMensaje">Mensaje aquí</p>
+        
+        <div id="modalInputContainer" style="display: none; margin-bottom: 14px;">
+            <input type="text" id="modalInputText" class="form-control" placeholder="">
+        </div>
+
+        <div class="modal-actions">
+            <button id="btnModalCancelar" class="btn-modal-cancel">Cancelar</button>
+            <button id="btnModalConfirmar" class="btn-modal-confirm">Aceptar</button>
         </div>
     </div>
 </div>
 
 <script>
-    let prestamosData = [];
-    let historialData = [];
-    let activeFilter = 'todos';
-    let collapsedGroups = {};
-    let activeTab = 'inventario';
+    const form = document.getElementById('formPrestamo');
+    const tabla = document.getElementById('tablaCuerpo');
+    const tablaHistorial = document.getElementById('tablaHistorial');
+    const buscador = document.getElementById('buscador');
+    const fechaInput = document.getElementById('fecha');
+    const formTitulo = document.getElementById('formTitulo');
+    const btnGuardar = document.getElementById('btnGuardar');
+    const btnCancelar = document.getElementById('btnCancelar');
+    const themeToggle = document.getElementById('themeToggle');
 
-    document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('fecha').valueAsDate = new Date();
-        cargarDatos();
+    let prestamos = [];
+    let historial = [];
+    let idEdicion = null;
+    let estadoFiltroActual = 'todos';
+    let ordenActual = 'nombre-asc';
+    let gruposAbiertos = new Set();
 
-        document.getElementById('form-equipo').addEventListener('submit', guardarEquipo);
+    function mostrarModalAlerta(titulo, mensaje) {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById('modalOverlay');
+            document.getElementById('modalTitulo').innerText = titulo;
+            document.getElementById('modalMensaje').innerText = mensaje;
+            document.getElementById('modalInputContainer').style.display = 'none';
+            document.getElementById('btnModalCancelar').style.display = 'none';
 
-        // Recordar tema cargado
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.classList.add('dark-mode');
+            const btnConfirmar = document.getElementById('btnModalConfirmar');
+            btnConfirmar.className = 'btn-modal-confirm';
+            overlay.classList.add('active');
+
+            btnConfirmar.onclick = () => {
+                overlay.classList.remove('active');
+                resolve(true);
+            };
+        });
+    }
+
+    function mostrarModalConfirmacion(titulo, mensaje, esPeligro = false) {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById('modalOverlay');
+            document.getElementById('modalTitulo').innerText = titulo;
+            document.getElementById('modalMensaje').innerText = mensaje;
+            document.getElementById('modalInputContainer').style.display = 'none';
+            
+            const btnConfirmar = document.getElementById('btnModalConfirmar');
+            const btnCancelar = document.getElementById('btnModalCancelar');
+            
+            btnConfirmar.className = esPeligro ? 'btn-modal-confirm btn-modal-danger' : 'btn-modal-confirm';
+            btnCancelar.style.display = 'inline-block';
+            overlay.classList.add('active');
+
+            const cerrar = (res) => {
+                overlay.classList.remove('active');
+                btnConfirmar.onclick = null;
+                btnCancelar.onclick = null;
+                resolve(res);
+            };
+
+            btnConfirmar.onclick = () => cerrar(true);
+            btnCancelar.onclick = () => cerrar(false);
+        });
+    }
+
+    function pedirTextoModal(titulo, mensaje, placeholder = '') {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById('modalOverlay');
+            const titleEl = document.getElementById('modalTitulo');
+            const msgEl = document.getElementById('modalMensaje');
+            const inputContainer = document.getElementById('modalInputContainer');
+            const inputText = document.getElementById('modalInputText');
+            const btnConfirmar = document.getElementById('btnModalConfirmar');
+            const btnCancelar = document.getElementById('btnModalCancelar');
+
+            btnConfirmar.className = 'btn-modal-confirm';
+            titleEl.innerText = titulo;
+            msgEl.innerText = mensaje;
+            inputText.value = '';
+            inputText.placeholder = placeholder;
+
+            inputContainer.style.display = 'block';
+            btnCancelar.style.display = 'inline-block';
+            overlay.classList.add('active');
+            setTimeout(() => inputText.focus(), 50);
+
+            const cerrar = (ok) => {
+                overlay.classList.remove('active');
+                inputContainer.style.display = 'none';
+                btnConfirmar.onclick = null;
+                btnCancelar.onclick = null;
+                resolve({ ok, value: inputText.value.trim() });
+            };
+
+            btnConfirmar.onclick = () => cerrar(true);
+            btnCancelar.onclick = () => cerrar(false);
+        });
+    }
+
+    function togglePrestatario() {
+        const situacion = document.getElementById('estadoDisponibilidad').value;
+        const groupPrestatario = document.getElementById('groupPrestatario');
+        groupPrestatario.style.display = (situacion === 'prestado') ? 'flex' : 'none';
+    }
+
+    function formatearFecha(fechaStr) {
+        if (!fechaStr) return '-';
+        if (fechaStr.includes('/')) return fechaStr;
+        const partes = fechaStr.split('-');
+        if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        return fechaStr;
+    }
+
+    function inicializarTema() {
+        const temaGuardado = localStorage.getItem('theme');
+        if (temaGuardado === 'dark') {
+            document.body.classList.add('dark-theme');
+            themeToggle.innerText = '☀️';
+        } else {
+            themeToggle.innerText = '🌙';
         }
+    }
+
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-theme');
+        const esOscuro = document.body.classList.contains('dark-theme');
+        localStorage.setItem('theme', esOscuro ? 'dark' : 'light');
+        themeToggle.innerText = esOscuro ? '☀️' : '🌙';
     });
 
-    function toggleDarkMode() {
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    function actualizarEstadisticas() {
+        const total = prestamos.length;
+        const enAlmacen = prestamos.filter(item => (item.estadoDisponibilidad || 'prestado') === 'disponible').length;
+        const enPrestamo = prestamos.filter(item => (item.estadoDisponibilidad || 'prestado') === 'prestado').length;
+        const enAlerta = prestamos.filter(item => (item.estadoDisponibilidad || 'prestado') === 'prestado' && calcularAlerta(item.fecha).estado === 'alerta').length;
+
+        document.getElementById('statTotalActivos').innerText = total;
+        document.getElementById('statEnAlmacen').innerText = enAlmacen;
+        document.getElementById('statEnPrestamo').innerText = enPrestamo;
+        document.getElementById('statEnAlerta').innerText = enAlerta;
     }
 
-    async function cargarDatos() {
+    async function cargarDatosDesdeServidor(silencioso = false) {
         try {
-            const res = await fetch('api.php?action=get_all');
-            const data = await res.json();
-            if (data.status === 'success') {
-                prestamosData = data.prestamos || [];
-                historialData = data.historial || [];
-                renderTabla();
-                renderHistorial();
-                actualizarContadores();
+            const response = await fetch('api.php?action=get_all');
+            const res = await response.json();
+            if (res.status === 'success') {
+                const nuevosPrestamos = res.prestamos || [];
+                const nuevoHistorial = res.historial || [];
+
+                if (JSON.stringify(prestamos) !== JSON.stringify(nuevosPrestamos) || JSON.stringify(historial) !== JSON.stringify(nuevoHistorial) || !silencioso) {
+                    prestamos = nuevosPrestamos;
+                    historial = nuevoHistorial;
+                    renderizarTabla(buscador.value);
+                    renderizarHistorial();
+                    actualizarEstadisticas();
+                }
             }
-        } catch (e) {
-            console.error("Error al cargar datos:", e);
+        } catch (err) {
+            console.error('Error al sincronizar:', err);
         }
     }
 
-    function switchTab(tab) {
-        activeTab = tab;
-        document.getElementById('tab-inv').classList.toggle('active', tab === 'inventario');
-        document.getElementById('tab-hist').classList.toggle('active', tab === 'historial');
-        document.getElementById('view-inventario').style.display = tab === 'inventario' ? 'block' : 'none';
-        document.getElementById('view-historial').style.display = tab === 'historial' ? 'block' : 'none';
+    function iniciarAutoActualizacion() {
+        setInterval(() => {
+            if (idEdicion === null) cargarDatosDesdeServidor(true);
+        }, 5000);
     }
 
-    function setFilter(filter, el) {
-        activeFilter = filter;
-        document.querySelectorAll('.filter-pills .pill').forEach(p => p.classList.remove('active'));
+    async function exportarJSON() {
+        if (prestamos.length === 0 && historial.length === 0) {
+            await mostrarModalAlerta("Atención", "No hay datos para exportar.");
+            return;
+        }
+        const backupData = { fechaBackup: new Date().toISOString(), prestamos, historial };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+        const anchor = document.createElement('a');
+        anchor.setAttribute("href", dataStr);
+        anchor.setAttribute("download", `backup_inventario_${new Date().toISOString().split('T')[0]}.json`);
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+    }
+
+    function importarJSON(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async function(event) {
+            try {
+                const data = JSON.parse(event.target.result);
+                if (Array.isArray(data.prestamos) && Array.isArray(data.historial)) {
+                    if (await mostrarModalConfirmacion("Restaurar Copia", "¿Deseas reemplazar la base de datos con esta copia?")) {
+                        const response = await fetch('api.php?action=importar_backup', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        });
+                        const res = await response.json();
+                        if (res.status === 'success') {
+                            await cargarDatosDesdeServidor();
+                            await mostrarModalAlerta("Éxito", "Copia restaurada correctamente.");
+                        }
+                    }
+                }
+            } catch (err) { 
+                await mostrarModalAlerta("Error", "Error al procesar el archivo JSON."); 
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    }
+
+    async function exportarCSV() {
+        if (prestamos.length === 0 && historial.length === 0) {
+            await mostrarModalAlerta("Atención", "No hay datos para exportar.");
+            return;
+        }
+        let csv = "\uFEFFEstado,Producto,Codigo,Situacion,Prestatario,EstadoFisico,Observaciones,Fecha\n";
+        prestamos.forEach(i => {
+            csv += `"${i.estadoDisponibilidad || 'prestado'}","${i.producto}","${i.codigo||''}","${i.estadoDisponibilidad === 'disponible' ? 'En Almacén' : 'Prestado'}","${i.prestatario||''}","${i.estadoFisico||'operativo'}","${i.observaciones||''}","${formatearFecha(i.fecha)}"\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `inventario_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    }
+
+    function cambiarPestana(p) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        if (p === 'activos') {
+            document.getElementById('btnTabActivos').classList.add('active');
+            document.getElementById('tab-activos').classList.add('active');
+        } else {
+            document.getElementById('btnTabHistorial').classList.add('active');
+            document.getElementById('tab-historial').classList.add('active');
+        }
+    }
+
+    function establecerFechaHoy() {
+        fechaInput.value = new Date().toISOString().split('T')[0];
+    }
+
+    function calcularAlerta(fecha) {
+        if (!fecha) return { texto: '-', clase: 'normal', estado: 'ok' };
+        const hoy = new Date();
+        const inicio = new Date(fecha);
+        const meses = (hoy.getFullYear() - inicio.getFullYear()) * 12 + (hoy.getMonth() - inicio.getMonth());
+        if (meses >= 12) return { texto: '12+ Meses 🚨', clase: 'badge-fisico-averiado', estado: 'alerta' };
+        if (meses >= 6) return { texto: '6+ Meses ⚠️', clase: 'badge-fisico-desperfecto', estado: 'alerta' };
+        return { texto: '-', clase: 'normal', estado: 'ok' };
+    }
+
+    function filtrarPorEstado(estado, el) {
+        estadoFiltroActual = estado;
+        document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
         el.classList.add('active');
-        renderTabla();
+        renderizarTabla(buscador.value);
     }
 
-    function toggleGroup(nombreProducto) {
-        collapsedGroups[nombreProducto] = !collapsedGroups[nombreProducto];
-        renderTabla();
+    function cambiarOrden(criterio) {
+        ordenActual = criterio;
+        renderizarTabla(buscador.value);
     }
 
-    function renderTabla() {
-        const tbody = document.getElementById('tabla-body');
-        tbody.innerHTML = '';
+    function ordenarLista(lista) {
+        return lista.sort((a, b) => {
+            if (ordenActual === 'fecha-desc') return new Date(b.fecha) - new Date(a.fecha);
+            if (ordenActual === 'fecha-asc') return new Date(a.fecha) - new Date(b.fecha);
+            if (ordenActual === 'nombre-asc') return a.producto.localeCompare(b.producto);
+            return 0;
+        });
+    }
 
-        const query = document.getElementById('search-input').value.toLowerCase().trim();
-        const sort = document.getElementById('sort-order').value;
+    function toggleGrupo(clave) {
+        if (gruposAbiertos.has(clave)) gruposAbiertos.delete(clave);
+        else gruposAbiertos.add(clave);
+        renderizarTabla(buscador.value);
+    }
 
-        // 1. Filtrar
-        let filtrados = prestamosData.filter(item => {
-            // Buscador
-            const matchQuery = !query || 
-                (item.producto || '').toLowerCase().includes(query) ||
-                (item.codigo || '').toLowerCase().includes(query) ||
-                (item.prestatario || '').toLowerCase().includes(query) ||
-                (item.observaciones || '').toLowerCase().includes(query);
+    function renderizarTabla(filtroTexto = '') {
+        tabla.innerHTML = '';
 
-            if (!matchQuery) return false;
+        let filtrados = prestamos.filter(item => {
+            const texto = filtroTexto.toLowerCase();
+            const disp = item.estadoDisponibilidad || 'prestado';
+            const fis = item.estadoFisico || 'operativo';
 
-            // Filtros de píldoras
-            if (activeFilter === 'almacen') return item.estadoDisponibilidad === 'disponible';
-            if (activeFilter === 'prestamo') return item.estadoDisponibilidad === 'prestado';
-            if (activeFilter === 'averiados') return item.estadoFisico === 'averiado';
-            if (activeFilter === 'alerta') return item.estadoFisico === 'averiado';
+            const coincideTexto = (item.producto && item.producto.toLowerCase().includes(texto)) ||
+                                 (item.codigo && item.codigo.toLowerCase().includes(texto)) ||
+                                 (item.prestatario && item.prestatario.toLowerCase().includes(texto)) ||
+                                 (item.observaciones && item.observaciones.toLowerCase().includes(texto));
 
-            return true;
+            let coincideEstado = true;
+            if (estadoFiltroActual === 'disponible') coincideEstado = (disp === 'disponible');
+            else if (estadoFiltroActual === 'prestado') coincideEstado = (disp === 'prestado');
+            else if (estadoFiltroActual === 'averiado') coincideEstado = (fis === 'averiado');
+            else if (estadoFiltroActual === 'alerta') coincideEstado = (disp === 'prestado' && calcularAlerta(item.fecha).estado === 'alerta');
+
+            return coincideTexto && coincideEstado;
         });
 
+        filtrados = ordenarLista(filtrados);
+
         if (filtrados.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:30px;">No se encontraron equipos.</td></tr>`;
+            tabla.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 28px;">No se encontraron registros.</td></tr>`;
             return;
         }
 
-        // 2. Ordenar
-        filtrados.sort((a, b) => {
-            if (sort === 'producto-asc') return (a.producto || '').localeCompare(b.producto || '');
-            if (sort === 'producto-desc') return (b.producto || '').localeCompare(a.producto || '');
-            if (sort === 'fecha-desc') return (b.fecha || '').localeCompare(a.fecha || '');
-            if (sort === 'fecha-asc') return (a.fecha || '').localeCompare(b.fecha || '');
-            return 0;
-        });
-
-        // 3. Agrupar por Producto
         const grupos = {};
         filtrados.forEach(item => {
-            const key = item.producto.trim();
-            if (!grupos[key]) grupos[key] = [];
-            grupos[key].push(item);
+            const clave = item.producto.trim().toLowerCase();
+            if (!grupos[clave]) grupos[clave] = { nombre: item.producto, items: [] };
+            grupos[clave].items.push(item);
         });
 
-        // 4. Renderizar Acordeón
-        Object.keys(grupos).forEach(nombreGrupo => {
-            const items = grupos[nombreGrupo];
-            const enAlmacen = items.filter(i => i.estadoDisponibilidad === 'disponible').length;
-            const enPrestamo = items.filter(i => i.estadoDisponibilidad === 'prestado').length;
-            const isCollapsed = collapsedGroups[nombreGrupo] || false;
+        Object.keys(grupos).forEach(clave => {
+            const grupo = grupos[clave];
+            let estaAbierto = !gruposAbiertos.has(clave);
+            const flecha = estaAbierto ? '🔽' : '▶️';
+            const cantidad = grupo.items.length;
 
-            // Fila de Cabecera del Grupo
-            const trGroup = document.createElement('tr');
-            trGroup.className = 'group-row';
-            trGroup.onclick = () => toggleGroup(nombreGrupo);
-            trGroup.innerHTML = `
-                <td colspan="7">
-                    <div class="group-header-content">
-                        <div class="group-info">
-                            <span>📙</span>
-                            <strong>${escapeHTML(nombreGrupo)}</strong>
-                            <span class="badge-count">${items.length} unidades</span>
-                            <span class="group-summary">(${enAlmacen} en almacén 🟢 | ${enPrestamo} prestados 🤝)</span>
-                        </div>
-                        <div class="group-toggle-btn">${isCollapsed ? 'Clic para desplegar ▼' : 'Clic para plegar ▲'}</div>
-                    </div>
+            const dispCount = grupo.items.filter(i => (i.estadoDisponibilidad || 'prestado') === 'disponible').length;
+            const prestCount = cantidad - dispCount;
+
+            const filaGrupo = document.createElement('tr');
+            filaGrupo.className = 'group-header-row';
+            filaGrupo.style.cursor = 'pointer';
+            filaGrupo.onclick = () => toggleGrupo(clave);
+            filaGrupo.innerHTML = `
+                <td colspan="7" class="group-header-cell">
+                    <span style="margin-right:8px;">${flecha}</span>
+                    <strong>${grupo.nombre}</strong>
+                    <span class="badge" style="background:var(--primary-color); color:#fff; font-size:0.75rem; margin-left:10px;">${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}</span>
+                    <span style="font-size:0.8rem; margin-left: 10px; color: var(--text-muted);">(${dispCount} en almacén 🟢 | ${prestCount} prestados 🤝)</span>
+                    <span style="float: right; font-size: 0.8rem; opacity: 0.7;">${estaAbierto ? 'Clic para plegar ▲' : 'Clic para desplegar unidades ▼'}</span>
                 </td>
             `;
-            tbody.appendChild(trGroup);
+            tabla.appendChild(filaGrupo);
 
-            // Filas de Equipos si no está plegado
-            if (!isCollapsed) {
-                items.forEach(item => {
-                    const tr = document.createElement('tr');
+            if (estaAbierto) {
+                grupo.items.forEach(item => {
+                    const disp = item.estadoDisponibilidad || 'prestado';
+                    const fis = item.estadoFisico || 'operativo';
+                    const alerta = disp === 'prestado' ? calcularAlerta(item.fecha) : { texto: '-', clase: 'normal' };
 
-                    const isPrestado = item.estadoDisponibilidad === 'prestado';
-                    const estadoBadge = isPrestado
-                        ? `<span class="badge-status badge-prestado">🤝 Prestado ${item.prestatario ? `(${escapeHTML(item.prestatario)})` : ''}</span>`
-                        : `<span class="badge-status badge-operativo">🟢 En Almacén</span>`;
+                    let badgeFisico = '<span class="badge badge-fisico-operativo">🟢 Operativo</span>';
+                    if (fis === 'desperfecto') badgeFisico = '<span class="badge badge-fisico-desperfecto">🟡 Con Marcas</span>';
+                    if (fis === 'averiado') badgeFisico = '<span class="badge badge-fisico-averiado">🔴 Averiado</span>';
 
-                    const fisicoBadge = item.estadoFisico === 'averiado'
-                        ? `<span class="badge-status badge-averiado">🔴 Averiado</span>`
-                        : `<span class="badge-status badge-operativo">🟢 Operativo</span>`;
+                    let situacionHTML = '';
+                    if (disp === 'disponible') {
+                        situacionHTML = `<span class="badge badge-disponible">🟢 En Almacén</span>`;
+                    } else {
+                        situacionHTML = `<span class="badge badge-prestado">🤝 Prestado</span>` + (item.prestatario ? `<br><small style="font-size:0.75rem; margin-top:3px; display:inline-block;">👤 <strong>${item.prestatario}</strong></small>` : '');
+                    }
 
-                    tr.innerHTML = `
-                        <td>
-                            <strong>${escapeHTML(item.producto)}</strong>
-                            ${item.observaciones ? `<div class="obs-note">📝 ${escapeHTML(item.observaciones)}</div>` : ''}
-                        </td>
-                        <td><span class="code-pill">${escapeHTML(item.codigo || '-')}</span></td>
-                        <td>${fisicoBadge}</td>
-                        <td>${estadoBadge}</td>
-                        <td>${item.fecha || '-'}</td>
-                        <td>${item.estadoFisico === 'averiado' ? '⚠️ Revisar' : '-'}</td>
-                        <td>
-                            <div class="actions-cell">
-                                ${isPrestado ? `<button class="btn-devolver" onclick="devolverEquipo('${item.id}')">🔄 Devolver</button>` : ''}
-                                <button class="btn-icon btn-edit" onclick="editarEquipo('${item.id}')" title="Editar">✏️</button>
-                                <button class="btn-icon btn-delete" onclick="eliminarEquipo('${item.id}')" title="Eliminar">🗑️</button>
+                    let btnAccionRapida = '';
+                    if (disp === 'disponible') {
+                        btnAccionRapida = `<button class="btn-prestar-quick" title="Prestar este equipo" onclick="prestarRapido('${item.id}')">🤝 Prestar</button>`;
+                    } else {
+                        btnAccionRapida = `<button class="btn-devolver-quick" title="Devolver al Almacén" onclick="devolverPrestamo('${item.id}')">🔄 Devolver</button>`;
+                    }
+
+                    const fila = document.createElement('tr');
+
+                    fila.innerHTML = `
+                        <td style="padding-left: 28px;"><strong>${item.producto}</strong></td>
+                        <td><code>${item.codigo || '-'}</code></td>
+                        <td>${badgeFisico}</td>
+                        <td>${situacionHTML}</td>
+                        <td>${formatearFecha(item.fecha)}</td>
+                        <td><span class="badge ${alerta.clase}">${alerta.texto}</span></td>
+                        <td class="actions-cell">
+                            <div class="actions-wrapper">
+                                ${btnAccionRapida}
+                                <button class="btn-icon" title="Editar" onclick="editarPrestamo('${item.id}')">✏️</button>
+                                <button class="btn-icon btn-icon-danger" title="Eliminar del inventario/almacén" onclick="eliminarPrestamo('${item.id}')">🗑️</button>
                             </div>
                         </td>
                     `;
-                    tbody.appendChild(tr);
+                    tabla.appendChild(fila);
                 });
             }
         });
     }
 
-    function renderHistorial() {
-        const tbody = document.getElementById('tabla-historial-body');
-        tbody.innerHTML = '';
-
-        if (historialData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:20px;">No hay devoluciones registradas.</td></tr>`;
+    function renderizarHistorial() {
+        tablaHistorial.innerHTML = '';
+        if (historial.length === 0) {
+            tablaHistorial.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 28px;">No hay devoluciones registradas.</td></tr>`;
             return;
         }
-
-        historialData.forEach(h => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><strong>${escapeHTML(h.producto)}</strong></td>
-                <td><span class="code-pill">${escapeHTML(h.codigo || '-')}</span></td>
-                <td>${escapeHTML(h.prestatario || '-')}</td>
-                <td>${h.fecha || '-'}</td>
-                <td>${h.fechaDevolucion || '-'}</td>
-                <td>${escapeHTML(h.observaciones || '-')}</td>
+        historial.forEach((item) => {
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+                <td><strong>${item.producto}</strong></td>
+                <td><code>${item.codigo || '-'}</code></td>
+                <td>${item.prestatario || '-'}</td>
+                <td>${item.observaciones || '-'}</td>
+                <td>${formatearFecha(item.fecha)}</td>
+                <td><span class="badge badge-disponible">${formatearFecha(item.fechaDevolucion)}</span></td>
             `;
-            tbody.appendChild(tr);
+            tablaHistorial.appendChild(fila);
         });
     }
 
-    function actualizarContadores() {
-        document.getElementById('stat-total').innerText = prestamosData.length;
-        document.getElementById('stat-almacen').innerText = prestamosData.filter(i => i.estadoDisponibilidad === 'disponible').length;
-        document.getElementById('stat-prestamo').innerText = prestamosData.filter(i => i.estadoDisponibilidad === 'prestado').length;
-        document.getElementById('stat-alerta').innerText = prestamosData.filter(i => i.estadoFisico === 'averiado').length;
+    async function prestarRapido(id) {
+        const item = prestamos.find(p => String(p.id) === String(id));
+        if (!item) return;
+
+        const res = await pedirTextoModal(
+            `Prestar equipo: "${item.producto}"`,
+            'Indica la persona o aula asignada (opcional):',
+            'Ej. Juan Pérez / Aula 102 (opcional)'
+        );
+
+        if (!res.ok) return;
+
+        const datosActualizados = {
+            ...item,
+            estadoDisponibilidad: 'prestado',
+            prestatario: res.value,
+            fecha: new Date().toISOString().split('T')[0]
+        };
+
+        await guardarEnServidor(datosActualizados, 'api.php?action=edit_prestamo');
     }
 
-    async function guardarEquipo(e) {
-        e.preventDefault();
-        const id = document.getElementById('equipo-id').value;
-        const action = id ? 'edit_prestamo' : 'add_prestamo';
+    async function eliminarPrestamo(id) {
+        const item = prestamos.find(p => String(p.id) === String(id));
+        if (!item) return;
 
-        const payload = {
-            id: id || undefined,
+        const confirmado = await mostrarModalConfirmacion(
+            'Eliminar Equipo',
+            `¿Estás seguro de que deseas eliminar permanentemente "${item.producto}" (${item.codigo || 'sin código'}) del almacén/inventario?`,
+            true
+        );
+
+        if (confirmado) {
+            try {
+                const response = await fetch('api.php?action=delete_prestamo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id })
+                });
+                const res = await response.json();
+                if (res.status === 'success') {
+                    await cargarDatosDesdeServidor();
+                } else {
+                    await mostrarModalAlerta('Error', res.message || 'No se pudo eliminar el equipo.');
+                }
+            } catch (err) {
+                console.error('Error al eliminar:', err);
+            }
+        }
+    }
+
+    async function devolverPrestamo(id) {
+        const hoy = new Date().toISOString().split('T')[0];
+        const item = prestamos.find(p => String(p.id) === String(id));
+
+        try {
+            await fetch('api.php?action=devolver_prestamo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, fechaDevolucion: hoy })
+            });
+
+            if (item) {
+                const datosDevuelto = {
+                    ...item,
+                    estadoDisponibilidad: 'disponible',
+                    prestatario: ''
+                };
+                await guardarEnServidor(datosDevuelto, 'api.php?action=edit_prestamo');
+            } else {
+                await cargarDatosDesdeServidor();
+            }
+        } catch (err) {
+            console.error('Error en devolución:', err);
+        }
+    }
+
+    function editarPrestamo(id) {
+        const item = prestamos.find(p => String(p.id) === String(id));
+        if (!item) return;
+
+        document.getElementById('producto').value = item.producto;
+        document.getElementById('codigo').value = item.codigo || '';
+        document.getElementById('estadoDisponibilidad').value = item.estadoDisponibilidad || 'prestado';
+        document.getElementById('prestatario').value = item.prestatario || '';
+        document.getElementById('estadoFisico').value = item.estadoFisico || 'operativo';
+        document.getElementById('observaciones').value = item.observaciones || '';
+        document.getElementById('fecha').value = item.fecha;
+
+        togglePrestatario();
+
+        idEdicion = id;
+        formTitulo.innerText = "✏️ Editar Equipo";
+        btnGuardar.innerText = "Guardar Cambios 💾";
+        btnCancelar.style.display = "block";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelarEdicion() {
+        idEdicion = null;
+        form.reset();
+        document.getElementById('estadoDisponibilidad').value = 'disponible';
+        document.getElementById('estadoFisico').value = 'operativo';
+        togglePrestatario();
+        establecerFechaHoy();
+        formTitulo.innerText = "➕ Registrar Equipo";
+        btnGuardar.innerText = "Guardar Equipo 💾";
+        btnCancelar.style.display = "none";
+    }
+
+    async function guardarEnServidor(datos, url) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            });
+            const res = await response.json();
+            if (res.status === 'success') {
+                if (idEdicion !== null) cancelarEdicion();
+                await cargarDatosDesdeServidor();
+            } else {
+                await mostrarModalAlerta('Error', res.message || 'No se pudo guardar');
+            }
+        } catch (err) {
+            console.error('Error al conectar:', err);
+        }
+    }
+
+    async function solicitarVaciarHistorial() {
+        if (historial.length === 0) return;
+        if (await mostrarModalConfirmacion('Vaciar Historial', '¿Eliminar permanentemente todo el historial de devoluciones?', true)) {
+            await fetch('api.php?action=vaciar_historial', { method: 'POST' });
+            await cargarDatosDesdeServidor();
+        }
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const datosGuardar = {
             producto: document.getElementById('producto').value,
             codigo: document.getElementById('codigo').value,
             estadoDisponibilidad: document.getElementById('estadoDisponibilidad').value,
@@ -900,136 +1396,23 @@
             fecha: document.getElementById('fecha').value
         };
 
-        try {
-            const res = await fetch(`api.php?action=${action}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-
-            if (data.status === 'success') {
-                limpiarFormulario();
-                cargarDatos();
-            } else {
-                alert(data.message || 'Error al guardar el equipo');
-            }
-        } catch (err) {
-            console.error("Error guardando:", err);
+        let url = 'api.php?action=add_prestamo';
+        if (idEdicion !== null) {
+            url = 'api.php?action=edit_prestamo';
+            datosGuardar.id = idEdicion;
         }
-    }
 
-    async function eliminarEquipo(id) {
-        if (!confirm('¿Deseas eliminar este registro del inventario?')) return;
+        await guardarEnServidor(datosGuardar, url);
+    });
 
-        try {
-            const res = await fetch('api.php?action=delete_prestamo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: id })
-            });
-            const data = await res.json();
+    buscador.addEventListener('input', (e) => renderizarTabla(e.target.value));
 
-            if (data.status === 'success') {
-                cargarDatos();
-            } else {
-                alert(data.message || 'Error al eliminar');
-            }
-        } catch (err) {
-            console.error("Error eliminando:", err);
-        }
-    }
-
-    async function devolverEquipo(id) {
-        try {
-            const res = await fetch('api.php?action=devolver_prestamo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: id, fechaDevolucion: new Date().toISOString().split('T')[0] })
-            });
-            const data = await res.json();
-            if (data.status === 'success') {
-                cargarDatos();
-            }
-        } catch (err) {
-            console.error("Error devolviendo:", err);
-        }
-    }
-
-    async function vaciarHistorial() {
-        if (!confirm('¿Seguro que deseas vaciar todo el historial de devoluciones?')) return;
-        try {
-            const res = await fetch('api.php?action=vaciar_historial', { method: 'POST' });
-            const data = await res.json();
-            if (data.status === 'success') cargarDatos();
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    function editarEquipo(id) {
-        const item = prestamosData.find(i => String(i.id) === String(id));
-        if (!item) return;
-
-        document.getElementById('equipo-id').value = item.id;
-        document.getElementById('producto').value = item.producto || '';
-        document.getElementById('codigo').value = item.codigo || '';
-        document.getElementById('estadoDisponibilidad').value = item.estadoDisponibilidad || 'disponible';
-        document.getElementById('prestatario').value = item.prestatario || '';
-        document.getElementById('estadoFisico').value = item.estadoFisico || 'operativo';
-        document.getElementById('observaciones').value = item.observaciones || '';
-        document.getElementById('fecha').value = item.fecha || '';
-
-        document.getElementById('btn-guardar').innerText = 'Actualizar Equipo 💾';
-    }
-
-    function limpiarFormulario() {
-        document.getElementById('equipo-id').value = '';
-        document.getElementById('form-equipo').reset();
-        document.getElementById('fecha').valueAsDate = new Date();
-        document.getElementById('btn-guardar').innerText = 'Guardar Equipo 💾';
-    }
-
-    function exportarBackup() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ prestamos: prestamosData, historial: historialData }, null, 2));
-        const anchor = document.createElement('a');
-        anchor.setAttribute("href", dataStr);
-        anchor.setAttribute("download", `backup_inventario_${new Date().toISOString().split('T')[0]}.json`);
-        document.body.appendChild(anchor);
-        anchor.click();
-        anchor.remove();
-    }
-
-    function importarBackup(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-            try {
-                const json = JSON.parse(event.target.result);
-                const res = await fetch('api.php?action=importar_backup', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(json)
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    alert('Copia de seguridad restaurada correctamente.');
-                    cargarDatos();
-                } else {
-                    alert('Archivo de copia no válido');
-                }
-            } catch (err) {
-                alert('Error al leer el archivo JSON');
-            }
-        };
-        reader.readAsText(file);
-    }
-
-    function escapeHTML(str) {
-        return String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
-    }
+    // Inicialización
+    inicializarTema();
+    togglePrestatario();
+    establecerFechaHoy();
+    cargarDatosDesdeServidor();
+    iniciarAutoActualizacion();
 </script>
 </body>
 </html>
