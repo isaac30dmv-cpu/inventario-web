@@ -6,24 +6,44 @@
     <title>Gestor de Inventario y Préstamos</title>
     <style>
         :root {
-            --bg-color: #f3f4f6;
+            --bg-body: #f4f5f8;
             --card-bg: #ffffff;
-            --text-main: #1f2937;
-            --text-muted: #6b7280;
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --border-color: #e5e7eb;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --primary: #5b46f6;
+            --primary-hover: #4c38ed;
+            --success-bg: #d1fae5;
+            --success-text: #065f46;
+            --warning-bg: #fef3c7;
+            --warning-text: #92400e;
+            --danger-bg: #fee2e2;
+            --danger-text: #991b1b;
         }
 
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --success-bg: #064e3b;
+            --success-text: #a7f3d0;
+            --warning-bg: #78350f;
+            --warning-text: #fde68a;
+            --danger-bg: #7f1d1d;
+            --danger-text: #fca5a5;
+        }
+
+        * { box-sizing: border-box; }
+
         body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: var(--bg-color);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-body);
             color: var(--text-main);
             margin: 0;
             padding: 20px;
+            transition: background 0.2s, color 0.2s;
         }
 
         .container {
@@ -31,81 +51,154 @@
             margin: 0 auto;
         }
 
-        /* Header */
-        .header {
+        /* Header Top */
+        .top-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: var(--card-bg);
-            padding: 15px 25px;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 16px 24px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border: 1px solid var(--border-color);
             margin-bottom: 20px;
         }
 
-        .header h1 {
-            font-size: 1.25rem;
+        .top-header h1 {
+            font-size: 1.2rem;
             margin: 0;
             display: flex;
             align-items: center;
             gap: 10px;
+            font-weight: 800;
         }
 
-        .status-badge {
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .badge-sync {
             background: #d1fae5;
-            color: #065f46;
-            padding: 4px 12px;
+            color: #047857;
+            padding: 6px 14px;
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .theme-toggle {
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        /* Metrics Row */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            background: #f1f5f9;
+        }
+
+        .stat-val {
+            font-size: 1.6rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .stat-lbl {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-top: 5px;
+            letter-spacing: 0.5px;
         }
 
         /* Layout Grid */
-        .main-grid {
+        .layout-grid {
             display: grid;
             grid-template-columns: 320px 1fr;
             gap: 20px;
         }
 
-        /* Cards */
         .card {
             background: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            padding: 22px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
             margin-bottom: 20px;
         }
 
-        .card h2 {
+        .card-title {
             font-size: 1rem;
+            font-weight: 700;
             margin-top: 0;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        /* Forms */
+        /* Form Controls */
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 14px;
         }
 
         .form-group label {
             display: block;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 700;
             text-transform: uppercase;
             color: var(--text-muted);
-            margin-bottom: 5px;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
         }
 
         .form-control {
             width: 100%;
-            padding: 10px;
+            padding: 10px 12px;
+            background: var(--bg-body);
             border: 1px solid var(--border-color);
+            color: var(--text-main);
             border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
         }
 
         .form-control:focus {
@@ -115,70 +208,137 @@
 
         textarea.form-control {
             resize: vertical;
-            min-height: 80px;
+            min-height: 75px;
         }
 
-        .btn-primary {
+        .btn-submit {
             width: 100%;
             background: var(--primary);
             color: white;
             border: none;
             padding: 12px;
-            border-radius: 8px;
-            font-weight: 600;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: background 0.2s;
+            margin-top: 5px;
         }
 
-        .btn-primary:hover {
+        .btn-submit:hover {
             background: var(--primary-hover);
         }
 
-        /* Stat Counters Header */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .stat-icon {
-            width: 45px;
-            height: 45px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            background: #eef2ff;
-        }
-
-        .stat-number {
-            font-size: 1.5rem;
-            font-weight: 700;
-            line-height: 1;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
+        .btn-secondary {
+            background: var(--bg-body);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
+            border-radius: 8px;
             font-weight: 600;
-            margin-top: 4px;
+            font-size: 0.82rem;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 8px;
         }
 
-        /* Table Design */
-        .table-container {
+        /* Tabs */
+        .tabs-header {
+            display: flex;
+            gap: 20px;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 4px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        /* Filters Bar */
+        .filters-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .filter-pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .pill {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pill.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .sort-select {
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-main);
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        /* Search Box */
+        .search-box {
+            margin-bottom: 18px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 11px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-body);
+            color: var(--text-main);
+            font-size: 0.88rem;
+        }
+
+        /* Table */
+        .table-responsive {
             overflow-x: auto;
         }
 
@@ -186,126 +346,213 @@
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            font-size: 0.875rem;
+            font-size: 0.85rem;
         }
 
         th {
-            background: #f9fafb;
-            padding: 12px;
-            font-size: 0.75rem;
+            background: var(--bg-body);
+            padding: 12px 14px;
+            font-size: 0.7rem;
             text-transform: uppercase;
             color: var(--text-muted);
+            font-weight: 800;
+            letter-spacing: 0.5px;
             border-bottom: 1px solid var(--border-color);
         }
 
         td {
-            padding: 12px;
+            padding: 12px 14px;
             border-bottom: 1px solid var(--border-color);
             vertical-align: middle;
         }
 
-        .obs-text {
-            color: #6b7280;
-            font-size: 0.8rem;
-            font-style: italic;
-            display: block;
-            margin-top: 2px;
+        /* Group Row Accordion */
+        .group-row {
+            background: var(--bg-body);
+            cursor: pointer;
+            font-weight: 700;
         }
 
-        /* Badges */
-        .badge {
-            padding: 4px 8px;
-            border-radius: 6px;
+        .group-row td {
+            padding: 10px 14px;
+        }
+
+        .group-header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .group-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-count {
+            background: var(--primary);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
             font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-block;
+            font-weight: 700;
         }
 
-        .badge-success { background: #d1fae5; color: #065f46; }
-        .badge-warning { background: #fef3c7; color: #92400e; }
-        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .group-summary {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
 
-        .btn-action {
-            padding: 6px 10px;
+        .group-toggle-btn {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Cell elements */
+        .obs-note {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 3px;
+        }
+
+        .code-pill {
+            font-family: monospace;
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .badge-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .badge-operativo { background: var(--success-bg); color: var(--success-text); }
+        .badge-prestado { background: var(--warning-bg); color: var(--warning-text); }
+        .badge-averiado { background: var(--danger-bg); color: var(--danger-text); }
+
+        /* Action Buttons */
+        .actions-cell {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-devolver {
+            background: #e6fffa;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-devolver:hover { background: #d1fae5; }
+
+        .btn-icon {
+            width: 30px;
+            height: 30px;
             border-radius: 6px;
             border: 1px solid var(--border-color);
-            background: white;
+            background: var(--card-bg);
             cursor: pointer;
-            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
         }
 
-        .btn-action:hover {
-            background: #f3f4f6;
-        }
+        .btn-edit { background: #fefce8; border-color: #fef08a; }
+        .btn-delete { background: #fef2f2; border-color: #fecaca; }
 
-        .group-header {
-            background: #f8fafc;
-            font-weight: bold;
-        }
+        .btn-icon:hover { opacity: 0.8; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- Header -->
-    <div class="header">
+    <!-- Top Header -->
+    <div class="top-header">
         <h1>📦 Gestor de Inventario y Préstamos</h1>
-        <span class="status-badge">● Sincronizado</span>
+        <div class="header-actions">
+            <span class="badge-sync">● Sincronizado</span>
+            <button class="theme-toggle" onclick="toggleDarkMode()" title="Cambiar tema">🌙</button>
+        </div>
     </div>
 
-    <!-- Stats Top Grid -->
+    <!-- Top Metrics -->
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon">📦</div>
+            <div class="stat-icon" style="background:#f0edf0;">📦</div>
             <div>
-                <div class="stat-number" id="stat-total">0</div>
-                <div class="stat-label">Total Equipos</div>
+                <div class="stat-val" id="stat-total">0</div>
+                <div class="stat-lbl">TOTAL EQUIPOS</div>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon" style="background:#d1fae5;">🟢</div>
             <div>
-                <div class="stat-number" id="stat-almacen">0</div>
-                <div class="stat-label">En Almacén</div>
+                <div class="stat-val" id="stat-almacen">0</div>
+                <div class="stat-lbl">EN ALMACÉN</div>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon" style="background:#fef3c7;">🤝</div>
             <div>
-                <div class="stat-number" id="stat-prestamo">0</div>
-                <div class="stat-label">En Préstamo</div>
+                <div class="stat-val" id="stat-prestamo">0</div>
+                <div class="stat-lbl">EN PRÉSTAMO</div>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon" style="background:#fee2e2;">⚠️</div>
             <div>
-                <div class="stat-number" id="stat-alerta">0</div>
-                <div class="stat-label">En Alerta</div>
+                <div class="stat-val" id="stat-alerta">0</div>
+                <div class="stat-lbl">EN ALERTA</div>
             </div>
         </div>
     </div>
 
-    <!-- Main Grid -->
-    <div class="main-grid">
-        <!-- Sidebar Form -->
+    <!-- Main Layout Grid -->
+    <div class="layout-grid">
+        <!-- Sidebar -->
         <div>
+            <!-- Form Card -->
             <div class="card">
-                <h2>➕ Registrar Equipo</h2>
+                <h2 class="card-title">➕ Registrar Equipo</h2>
                 <form id="form-equipo">
                     <input type="hidden" id="equipo-id">
-                    
+
                     <div class="form-group">
-                        <label>Producto / Equipo *</label>
-                        <input type="text" id="producto" class="form-control" placeholder="Ej. Arduino Uno, Taladro" required>
+                        <label>PRODUCTO / EQUIPO *</label>
+                        <input type="text" id="producto" class="form-control" placeholder="Ej. Arduino Uno, Taladro, Monitor" required>
                     </div>
 
                     <div class="form-group">
-                        <label>Código / Etiqueta</label>
+                        <label>CÓDIGO / ETIQUETA</label>
                         <input type="text" id="codigo" class="form-control" placeholder="Ej. MISE-AUQ-114">
                     </div>
 
                     <div class="form-group">
-                        <label>Situación Actual *</label>
+                        <label>SITUACIÓN ACTUAL *</label>
                         <select id="estadoDisponibilidad" class="form-control" required>
                             <option value="disponible">En Almacén (Disponible)</option>
                             <option value="prestado">En Préstamo</option>
@@ -313,12 +560,12 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Prestatario / Responsable</label>
+                        <label>PRESTATARIO / RESPONSABLE</label>
                         <input type="text" id="prestatario" class="form-control" placeholder="Nombre de quien lo tiene">
                     </div>
 
                     <div class="form-group">
-                        <label>Estado Físico del Equipo</label>
+                        <label>ESTADO FÍSICO DEL EQUIPO</label>
                         <select id="estadoFisico" class="form-control">
                             <option value="operativo">Operativo / Listo</option>
                             <option value="averiado">Averiado / En reparación</option>
@@ -326,63 +573,147 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Observaciones / Notas</label>
+                        <label>OBSERVACIONES / NOTAS</label>
                         <textarea id="observaciones" class="form-control" placeholder="Notas sobre el estado, cables incluidos..."></textarea>
                     </div>
 
                     <div class="form-group">
-                        <label>Fecha Registro / Préstamo *</label>
+                        <label>FECHA REGISTRO / PRÉSTAMO *</label>
                         <input type="date" id="fecha" class="form-control" required>
                     </div>
 
-                    <button type="submit" class="btn-primary" id="btn-guardar">Guardar Equipo 💾</button>
+                    <button type="submit" class="btn-submit" id="btn-guardar">Guardar Equipo 💾</button>
                 </form>
+            </div>
+
+            <!-- Backup Card -->
+            <div class="card">
+                <h2 class="card-title">💾 Copias de Seguridad</h2>
+                <button class="btn-secondary" onclick="exportarBackup()">Descargar Copia 📥</button>
+                <button class="btn-secondary" onclick="document.getElementById('import-file').click()">Restaurar Copia 📤</button>
+                <input type="file" id="import-file" accept=".json" style="display:none" onchange="importarBackup(event)">
             </div>
         </div>
 
-        <!-- Right Content Table -->
+        <!-- Right Main Content Panel -->
         <div class="card">
-            <h2>Inventario de Equipos 📋</h2>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Producto</th>
-                            <th>Código</th>
-                            <th>Estado Físico</th>
-                            <th>Situación / Prestatario</th>
-                            <th>Fecha Reg./Préstamo</th>
-                            <th>Alerta</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-body">
-                        <!-- Carga dinámica -->
-                    </tbody>
-                </table>
+            <!-- Tabs -->
+            <div class="tabs-header">
+                <button class="tab-btn active" id="tab-inv" onclick="switchTab('inventario')">Inventario de Equipos 📋</button>
+                <button class="tab-btn" id="tab-hist" onclick="switchTab('historial')">Historial de Devoluciones 📜</button>
             </div>
+
+            <!-- View: Inventario -->
+            <div id="view-inventario">
+                <!-- Filter Pills & Sorting -->
+                <div class="filters-bar">
+                    <div class="filter-pills">
+                        <button class="pill active" onclick="setFilter('todos', this)">Todos</button>
+                        <button class="pill" onclick="setFilter('almacen', this)">🟢 En Almacén</button>
+                        <button class="pill" onclick="setFilter('prestamo', this)">🤝 En Préstamo</button>
+                        <button class="pill" onclick="setFilter('averiados', this)">🔴 Averiados</button>
+                        <button class="pill" onclick="setFilter('alerta', this)">⚠️ En Alerta</button>
+                    </div>
+
+                    <div>
+                        <span style="font-size:0.8rem; font-weight:700; color:var(--text-muted);">Ordenar:</span>
+                        <select class="sort-select" id="sort-order" onchange="renderTabla()">
+                            <option value="producto-asc">Producto (A-Z)</option>
+                            <option value="producto-desc">Producto (Z-A)</option>
+                            <option value="fecha-desc">Fecha (Más reciente)</option>
+                            <option value="fecha-asc">Fecha (Más antigua)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Search Box -->
+                <div class="search-box">
+                    <input type="text" id="search-input" class="search-input" placeholder="🔍 Buscar por producto, código, prestatario, notas..." oninput="renderTabla()">
+                </div>
+
+                <!-- Table -->
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>PRODUCTO</th>
+                                <th>CÓDIGO</th>
+                                <th>ESTADO FÍSICO</th>
+                                <th>SITUACIÓN / PRESTATARIO</th>
+                                <th>FECHA REG./PRÉSTAMO</th>
+                                <th>ALERTA</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-body">
+                            <!-- Filas dinámicas -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- View: Historial -->
+            <div id="view-historial" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="margin:0; font-size:0.95rem;">Registro de Devoluciones</h3>
+                    <button class="btn-secondary" style="width:auto;" onclick="vaciarHistorial()">Vaciar Historial 🗑️</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>PRODUCTO</th>
+                                <th>CÓDIGO</th>
+                                <th>PRESTATARIO</th>
+                                <th>FECHA PRÉSTAMO</th>
+                                <th>FECHA DEVOLUCIÓN</th>
+                                <th>OBSERVACIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-historial-body">
+                            <!-- Historial dinámico -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
 
 <script>
-    let inventarioData = [];
+    let prestamosData = [];
+    let historialData = [];
+    let activeFilter = 'todos';
+    let collapsedGroups = {};
+    let activeTab = 'inventario';
 
-    // Inicializar la app
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('fecha').valueAsDate = new Date();
         cargarDatos();
 
         document.getElementById('form-equipo').addEventListener('submit', guardarEquipo);
+
+        // Recordar tema cargado
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
     });
+
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
 
     async function cargarDatos() {
         try {
             const res = await fetch('api.php?action=get_all');
             const data = await res.json();
             if (data.status === 'success') {
-                inventarioData = data.prestamos || [];
-                renderizarTabla();
+                prestamosData = data.prestamos || [];
+                historialData = data.historial || [];
+                renderTabla();
+                renderHistorial();
                 actualizarContadores();
             }
         } catch (e) {
@@ -390,57 +721,167 @@
         }
     }
 
-    function renderizarTabla() {
+    function switchTab(tab) {
+        activeTab = tab;
+        document.getElementById('tab-inv').classList.toggle('active', tab === 'inventario');
+        document.getElementById('tab-hist').classList.toggle('active', tab === 'historial');
+        document.getElementById('view-inventario').style.display = tab === 'inventario' ? 'block' : 'none';
+        document.getElementById('view-historial').style.display = tab === 'historial' ? 'block' : 'none';
+    }
+
+    function setFilter(filter, el) {
+        activeFilter = filter;
+        document.querySelectorAll('.filter-pills .pill').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+        renderTabla();
+    }
+
+    function toggleGroup(nombreProducto) {
+        collapsedGroups[nombreProducto] = !collapsedGroups[nombreProducto];
+        renderTabla();
+    }
+
+    function renderTabla() {
         const tbody = document.getElementById('tabla-body');
         tbody.innerHTML = '';
 
-        if (inventarioData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#9ca3af; padding:20px;">No hay equipos registrados.</td></tr>`;
+        const query = document.getElementById('search-input').value.toLowerCase().trim();
+        const sort = document.getElementById('sort-order').value;
+
+        // 1. Filtrar
+        let filtrados = prestamosData.filter(item => {
+            // Buscador
+            const matchQuery = !query || 
+                (item.producto || '').toLowerCase().includes(query) ||
+                (item.codigo || '').toLowerCase().includes(query) ||
+                (item.prestatario || '').toLowerCase().includes(query) ||
+                (item.observaciones || '').toLowerCase().includes(query);
+
+            if (!matchQuery) return false;
+
+            // Filtros de píldoras
+            if (activeFilter === 'almacen') return item.estadoDisponibilidad === 'disponible';
+            if (activeFilter === 'prestamo') return item.estadoDisponibilidad === 'prestado';
+            if (activeFilter === 'averiados') return item.estadoFisico === 'averiado';
+            if (activeFilter === 'alerta') return item.estadoFisico === 'averiado';
+
+            return true;
+        });
+
+        if (filtrados.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:30px;">No se encontraron equipos.</td></tr>`;
             return;
         }
 
-        inventarioData.forEach((item) => {
+        // 2. Ordenar
+        filtrados.sort((a, b) => {
+            if (sort === 'producto-asc') return (a.producto || '').localeCompare(b.producto || '');
+            if (sort === 'producto-desc') return (b.producto || '').localeCompare(a.producto || '');
+            if (sort === 'fecha-desc') return (b.fecha || '').localeCompare(a.fecha || '');
+            if (sort === 'fecha-asc') return (a.fecha || '').localeCompare(b.fecha || '');
+            return 0;
+        });
+
+        // 3. Agrupar por Producto
+        const grupos = {};
+        filtrados.forEach(item => {
+            const key = item.producto.trim();
+            if (!grupos[key]) grupos[key] = [];
+            grupos[key].push(item);
+        });
+
+        // 4. Renderizar Acordeón
+        Object.keys(grupos).forEach(nombreGrupo => {
+            const items = grupos[nombreGrupo];
+            const enAlmacen = items.filter(i => i.estadoDisponibilidad === 'disponible').length;
+            const enPrestamo = items.filter(i => i.estadoDisponibilidad === 'prestado').length;
+            const isCollapsed = collapsedGroups[nombreGrupo] || false;
+
+            // Fila de Cabecera del Grupo
+            const trGroup = document.createElement('tr');
+            trGroup.className = 'group-row';
+            trGroup.onclick = () => toggleGroup(nombreGrupo);
+            trGroup.innerHTML = `
+                <td colspan="7">
+                    <div class="group-header-content">
+                        <div class="group-info">
+                            <span>📙</span>
+                            <strong>${escapeHTML(nombreGrupo)}</strong>
+                            <span class="badge-count">${items.length} unidades</span>
+                            <span class="group-summary">(${enAlmacen} en almacén 🟢 | ${enPrestamo} prestados 🤝)</span>
+                        </div>
+                        <div class="group-toggle-btn">${isCollapsed ? 'Clic para desplegar ▼' : 'Clic para plegar ▲'}</div>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(trGroup);
+
+            // Filas de Equipos si no está plegado
+            if (!isCollapsed) {
+                items.forEach(item => {
+                    const tr = document.createElement('tr');
+
+                    const isPrestado = item.estadoDisponibilidad === 'prestado';
+                    const estadoBadge = isPrestado
+                        ? `<span class="badge-status badge-prestado">🤝 Prestado ${item.prestatario ? `(${escapeHTML(item.prestatario)})` : ''}</span>`
+                        : `<span class="badge-status badge-operativo">🟢 En Almacén</span>`;
+
+                    const fisicoBadge = item.estadoFisico === 'averiado'
+                        ? `<span class="badge-status badge-averiado">🔴 Averiado</span>`
+                        : `<span class="badge-status badge-operativo">🟢 Operativo</span>`;
+
+                    tr.innerHTML = `
+                        <td>
+                            <strong>${escapeHTML(item.producto)}</strong>
+                            ${item.observaciones ? `<div class="obs-note">📝 ${escapeHTML(item.observaciones)}</div>` : ''}
+                        </td>
+                        <td><span class="code-pill">${escapeHTML(item.codigo || '-')}</span></td>
+                        <td>${fisicoBadge}</td>
+                        <td>${estadoBadge}</td>
+                        <td>${item.fecha || '-'}</td>
+                        <td>${item.estadoFisico === 'averiado' ? '⚠️ Revisar' : '-'}</td>
+                        <td>
+                            <div class="actions-cell">
+                                ${isPrestado ? `<button class="btn-devolver" onclick="devolverEquipo('${item.id}')">🔄 Devolver</button>` : ''}
+                                <button class="btn-icon btn-edit" onclick="editarEquipo('${item.id}')" title="Editar">✏️</button>
+                                <button class="btn-icon btn-delete" onclick="eliminarEquipo('${item.id}')" title="Eliminar">🗑️</button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        });
+    }
+
+    function renderHistorial() {
+        const tbody = document.getElementById('tabla-historial-body');
+        tbody.innerHTML = '';
+
+        if (historialData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:20px;">No hay devoluciones registradas.</td></tr>`;
+            return;
+        }
+
+        historialData.forEach(h => {
             const tr = document.createElement('tr');
-            
-            const isPrestado = item.estadoDisponibilidad === 'prestado';
-            const estadoBadge = isPrestado 
-                ? `<span class="badge badge-warning">🤝 Prestado ${item.prestatario ? `(${item.prestatario})` : ''}</span>`
-                : `<span class="badge badge-success">🟢 En Almacén</span>`;
-
-            const fisicoBadge = item.estadoFisico === 'averiado'
-                ? `<span class="badge badge-danger">🔴 Averiado</span>`
-                : `<span class="badge badge-success">🟢 Operativo</span>`;
-
             tr.innerHTML = `
-                <td>
-                    <strong>${escapeHTML(item.producto)}</strong>
-                    ${item.observaciones ? `<span class="obs-text">📝 ${escapeHTML(item.observaciones)}</span>` : ''}
-                </td>
-                <td><code>${escapeHTML(item.codigo || '-')}</code></td>
-                <td>${fisicoBadge}</td>
-                <td>${estadoBadge}</td>
-                <td>${item.fecha || '-'}</td>
-                <td>-</td>
-                <td>
-                    ${isPrestado ? `<button class="btn-action" onclick="devolverEquipo('${item.id}')">🔄 Devolver</button>` : ''}
-                    <button class="btn-action" onclick="editarEquipo('${item.id}')">✏️</button>
-                    <button class="btn-action" onclick="eliminarEquipo('${item.id}')">🗑️</button>
-                </td>
+                <td><strong>${escapeHTML(h.producto)}</strong></td>
+                <td><span class="code-pill">${escapeHTML(h.codigo || '-')}</span></td>
+                <td>${escapeHTML(h.prestatario || '-')}</td>
+                <td>${h.fecha || '-'}</td>
+                <td>${h.fechaDevolucion || '-'}</td>
+                <td>${escapeHTML(h.observaciones || '-')}</td>
             `;
             tbody.appendChild(tr);
         });
     }
 
     function actualizarContadores() {
-        const total = inventarioData.length;
-        const almacen = inventarioData.filter(i => i.estadoDisponibilidad === 'disponible').length;
-        const prestamo = inventarioData.filter(i => i.estadoDisponibilidad === 'prestado').length;
-        const alerta = inventarioData.filter(i => i.estadoFisico === 'averiado').length;
-
-        document.getElementById('stat-total').innerText = total;
-        document.getElementById('stat-almacen').innerText = almacen;
-        document.getElementById('stat-prestamo').innerText = prestamo;
-        document.getElementById('stat-alerta').innerText = alerta;
+        document.getElementById('stat-total').innerText = prestamosData.length;
+        document.getElementById('stat-almacen').innerText = prestamosData.filter(i => i.estadoDisponibilidad === 'disponible').length;
+        document.getElementById('stat-prestamo').innerText = prestamosData.filter(i => i.estadoDisponibilidad === 'prestado').length;
+        document.getElementById('stat-alerta').innerText = prestamosData.filter(i => i.estadoFisico === 'averiado').length;
     }
 
     async function guardarEquipo(e) {
@@ -471,15 +912,15 @@
                 limpiarFormulario();
                 cargarDatos();
             } else {
-                alert(data.message || 'Error al guardar');
+                alert(data.message || 'Error al guardar el equipo');
             }
-        } catch (e) {
-            console.error("Error al guardar:", e);
+        } catch (err) {
+            console.error("Error guardando:", err);
         }
     }
 
     async function eliminarEquipo(id) {
-        if (!confirm('¿Seguro que deseas eliminar este registro?')) return;
+        if (!confirm('¿Deseas eliminar este registro del inventario?')) return;
 
         try {
             const res = await fetch('api.php?action=delete_prestamo', {
@@ -492,10 +933,10 @@
             if (data.status === 'success') {
                 cargarDatos();
             } else {
-                alert(data.message || 'No se pudo eliminar el equipo');
+                alert(data.message || 'Error al eliminar');
             }
-        } catch (e) {
-            console.error("Error al eliminar:", e);
+        } catch (err) {
+            console.error("Error eliminando:", err);
         }
     }
 
@@ -510,13 +951,24 @@
             if (data.status === 'success') {
                 cargarDatos();
             }
+        } catch (err) {
+            console.error("Error devolviendo:", err);
+        }
+    }
+
+    async function vaciarHistorial() {
+        if (!confirm('¿Seguro que deseas vaciar todo el historial de devoluciones?')) return;
+        try {
+            const res = await fetch('api.php?action=vaciar_historial', { method: 'POST' });
+            const data = await res.json();
+            if (data.status === 'success') cargarDatos();
         } catch (e) {
-            console.error("Error al devolver:", e);
+            console.error(e);
         }
     }
 
     function editarEquipo(id) {
-        const item = inventarioData.find(i => String(i.id) === String(id));
+        const item = prestamosData.find(i => String(i.id) === String(id));
         if (!item) return;
 
         document.getElementById('equipo-id').value = item.id;
@@ -538,10 +990,45 @@
         document.getElementById('btn-guardar').innerText = 'Guardar Equipo 💾';
     }
 
+    function exportarBackup() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ prestamos: prestamosData, historial: historialData }, null, 2));
+        const anchor = document.createElement('a');
+        anchor.setAttribute("href", dataStr);
+        anchor.setAttribute("download", `backup_inventario_${new Date().toISOString().split('T')[0]}.json`);
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+    }
+
+    function importarBackup(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            try {
+                const json = JSON.parse(event.target.result);
+                const res = await fetch('api.php?action=importar_backup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(json)
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert('Copia de seguridad restaurada correctamente.');
+                    cargarDatos();
+                } else {
+                    alert('Archivo de copia no válido');
+                }
+            } catch (err) {
+                alert('Error al leer el archivo JSON');
+            }
+        };
+        reader.readAsText(file);
+    }
+
     function escapeHTML(str) {
-        return String(str || '').replace(/[&<>"']/g, function(m) {
-            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
-        });
+        return String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
     }
 </script>
 </body>
