@@ -1,112 +1,132 @@
 <?php
-header('Content-Type: application/json; charset=utf-8');
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
 
-$file = 'datos.json';
+$archivoDatos = 'datos.json';
 
-// Si no existe el archivo JSON, lo creamos con estructura vacía
-if (!file_exists($file)) {
-    $initialData = ['prestamos' => [], 'historial' => []];
-    file_put_contents($file, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+// Inicializar archivo de datos si no existe
+if (!file_exists($archivoDatos)) {
+    $dataInicial = ['prestamos' => [], 'historial' => []];
+    file_put_contents($archivoDatos, json_encode($dataInicial, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }
 
-$data = json_decode(file_get_contents($file), true) ?: ['prestamos' => [], 'historial' => []];
-$action = $_GET['action'] ?? '';
+$contenido = file_get_contents($archivoDatos);
+$data = json_decode($contenido, true) ?: ['prestamos' => [], 'historial' => []];
 
-// Leer cuerpo de la petición en JSON
-$input = json_decode(file_get_contents('php://input'), true);
+$action = $_GET['action'] ?? '';
+$input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+
+function guardarDatos($file, $data) {
+    return file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+}
 
 switch ($action) {
-
     case 'get_all':
-        echo json_encode(['status' => 'success', 'prestamos' => $data['prestamos'], 'historial' => $data['historial']]);
+        echo json_encode([
+            'status' => 'success', 
+            'prestamos' => $data['prestamos'] ?? [], 
+            'historial' => $data['historial'] ?? []
+        ]);
         break;
 
     case 'add_prestamo':
-        if (!empty($input['producto'])) {
-            $nuevoItem = [
-                'id' => time() . rand(100, 999),
-                'producto' => trim($input['producto']),
-                'codigo' => trim($input['codigo'] ?? ''),
-                'categoria' => trim($input['categoria'] ?? ''),
-                'estadoDisponibilidad' => trim($input['estadoDisponibilidad'] ?? 'disponible'),
-                'prestatario' => trim($input['prestatario'] ?? ''),
-                'estadoFisico' => trim($input['estadoFisico'] ?? 'operativo'),
-                'observaciones' => trim($input['observaciones'] ?? ''),
-                'fecha' => $input['fecha'] ?? date('Y-m-d')
-            ];
-            
-            array_unshift($data['prestamos'], $nuevoItem);
-            file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-            echo json_encode(['status' => 'success', 'item' => $nuevoItem]);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'El nombre del producto es obligatorio.']);
-        }
+        $nuevo = [
+            'id' => uniqid(),
+            'producto' => $input['producto'] ?? '',
+            'codigo' => $input['codigo'] ?? '',
+            'estadoDisponibilidad' => $input['estadoDisponibilidad'] ?? 'disponible',
+            'prestatario' => $input['prestatario'] ?? '',
+            'estadoFisico' => $input['estadoFisico'] ?? 'operativo',
+            'observaciones' => $input['observaciones'] ?? '',
+            'fecha' => $input['fecha'] ?? date('Y-m-d')
+        ];
+        $data['prestamos'][] = $nuevo;
+        guardarDatos($archivoDatos, $data);
+        echo json_encode(['status' => 'success', 'item' => $nuevo]);
         break;
 
     case 'edit_prestamo':
-        if (!empty($input['id'])) {
-            $encontrado = false;
-            foreach ($data['prestamos'] as &$item) {
-                if ($item['id'] == $input['id']) {
-                    $item['producto'] = trim($input['producto']);
-                    $item['codigo'] = trim($input['codigo'] ?? '');
-                    $item['categoria'] = trim($input['categoria'] ?? '');
-                    $item['estadoDisponibilidad'] = trim($input['estadoDisponibilidad'] ?? 'disponible');
-                    $item['prestatario'] = trim($input['prestatario'] ?? '');
-                    $item['estadoFisico'] = trim($input['estadoFisico'] ?? 'operativo');
-                    $item['observaciones'] = trim($input['observaciones'] ?? '');
-                    $item['fecha'] = $input['fecha'];
-                    $encontrado = true;
-                    break;
-                }
+        $id = $input['id'] ?? null;
+        $encontrado = false;
+        foreach ($data['prestamos'] as &$p) {
+            if ((string)$p['id'] === (string)$id) {
+                $p['producto'] = $input['producto'] ?? $p['producto'];
+                $p['codigo'] = $input['codigo'] ?? $p['codigo'];
+                $p['estadoDisponibilidad'] = $input['estadoDisponibilidad'] ?? $p['estadoDisponibilidad'];
+                $p['prestatario'] = $input['prestatario'] ?? $p['prestatario'];
+                $p['estadoFisico'] = $input['estadoFisico'] ?? $p['estadoFisico'];
+                $p['observaciones'] = $input['observaciones'] ?? $p['observaciones'];
+                $p['fecha'] = $input['fecha'] ?? $p['fecha'];
+                $encontrado = true;
+                break;
             }
-            if ($encontrado) {
-                file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-                echo json_encode(['status' => 'success']);
-            } else {
-                echo json_encode(['status' => 'error', 'message' => 'Equipo no encontrado.']);
-            }
+        }
+        if ($encontrado) {
+            guardarDatos($archivoDatos, $data);
+            echo json_encode(['status' => 'success']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Equipo no encontrado']);
+        }
+        break;
+
+    case 'delete_prestamo':
+        $id = $input['id'] ?? null;
+        $conteoInicial = count($data['prestamos']);
+        
+        $data['prestamos'] = array_values(array_filter($data['prestamos'], function($item) use ($id) {
+            return (string)$item['id'] !== (string)$id;
+        }));
+
+        if (count($data['prestamos']) < $conteoInicial) {
+            guardarDatos($archivoDatos, $data);
+            echo json_encode(['status' => 'success']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'No se encontró el equipo para eliminar.']);
         }
         break;
 
     case 'devolver_prestamo':
-        if (!empty($input['id'])) {
-            $idDevolver = $input['id'];
-            $fechaDev = $input['fechaDevolucion'] ?? date('Y-m-d');
-
-            foreach ($data['prestamos'] as $item) {
-                if ($item['id'] == $idDevolver) {
-                    $itemHistorial = $item;
-                    $itemHistorial['fechaDevolucion'] = $fechaDev;
-                    array_unshift($data['historial'], $itemHistorial);
-                    break;
-                }
+        $id = $input['id'] ?? null;
+        $fechaDev = $input['fechaDevolucion'] ?? date('Y-m-d');
+        
+        foreach ($data['prestamos'] as $p) {
+            if ((string)$p['id'] === (string)$id) {
+                $registroHistorial = [
+                    'producto' => $p['producto'],
+                    'codigo' => $p['codigo'],
+                    'prestatario' => $p['prestatario'],
+                    'observaciones' => $p['observaciones'],
+                    'fecha' => $p['fecha'],
+                    'fechaDevolucion' => $fechaDev
+                ];
+                $data['historial'][] = $registroHistorial;
+                break;
             }
-
-            file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-            echo json_encode(['status' => 'success']);
         }
+        guardarDatos($archivoDatos, $data);
+        echo json_encode(['status' => 'success']);
+        break;
+
+    case 'vaciar_historial':
+        $data['historial'] = [];
+        guardarDatos($archivoDatos, $data);
+        echo json_encode(['status' => 'success']);
         break;
 
     case 'importar_backup':
         if (isset($input['prestamos']) && isset($input['historial'])) {
             $data['prestamos'] = $input['prestamos'];
             $data['historial'] = $input['historial'];
-            file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            guardarDatos($archivoDatos, $data);
             echo json_encode(['status' => 'success']);
         } else {
-            echo json_encode(['status' => 'error', 'message' => 'Estructura de copia no válida.']);
+            echo json_encode(['status' => 'error', 'message' => 'Estructura de copia de seguridad no válida']);
         }
-        break;
-
-    case 'vaciar_historial':
-        $data['historial'] = [];
-        file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        echo json_encode(['status' => 'success']);
         break;
 
     default:
         echo json_encode(['status' => 'error', 'message' => 'Acción no válida.']);
         break;
 }
-?>
